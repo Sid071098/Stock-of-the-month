@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cotton Globe Daily</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Global Commodity Intelligence</p>
+          <h1>Cotton rates from major producing and trading regions in one daily brief.</h1>
+          <p class="hero-text">
+            Track spot prices, day-on-day movement, and market spread across the
+            United States, India, China, Brazil, Pakistan, and more.
+          </p>
+        </div>
+
+        <div class="hero-card">
+          <p class="card-label">Today's spread</p>
+          <p id="spread-value" class="spread-value">--</p>
+          <p id="spread-text" class="card-subtext">Waiting for rate data...</p>
+        </div>
+      </section>
+
+      <section class="dashboard">
+        <div class="topbar">
+          <div>
+            <p class="section-label">Daily snapshot</p>
+            <h2 id="headline-date">Cotton market overview</h2>
+          </div>
+
+          <div class="toolbar">
+            <label class="field">
+              <span>Region</span>
+              <select id="region-filter"></select>
+            </label>
+
+            <button id="refresh-button" type="button">Refresh snapshot</button>
+          </div>
+        </div>
+
+        <section class="metrics" aria-label="Market metrics">
+          <article class="metric">
+            <p class="section-label">Average rate</p>
+            <p id="average-rate" class="metric-value">--</p>
+            <p id="average-caption" class="metric-copy">Loading daily average...</p>
+          </article>
+
+          <article class="metric">
+            <p class="section-label">Strongest market</p>
+            <p id="top-market" class="metric-value">--</p>
+            <p id="top-caption" class="metric-copy">Loading best performer...</p>
+          </article>
+
+          <article class="metric">
+            <p class="section-label">Weakest market</p>
+            <p id="bottom-market" class="metric-value">--</p>
+            <p id="bottom-caption" class="metric-copy">Loading softest market...</p>
+          </article>
+
+          <article class="metric accent">
+            <p class="section-label">Daily bias</p>
+            <p id="trend-bias" class="metric-value">--</p>
+            <p id="trend-caption" class="metric-copy">Scanning movement across markets...</p>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel summary-panel">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">Auto summary</p>
+                <h3>Daily cotton note</h3>
+              </div>
+              <p id="source-count" class="pill">0 sources</p>
+            </div>
+            <div id="summary-output" class="summary-output" aria-live="polite"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">Market table</p>
+                <h3>Rates by exchange and region</h3>
+              </div>
+              <p class="panel-hint">USD per candy / bale equivalent</p>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Market</th>
+                    <th>Region</th>
+                    <th>Rate</th>
+                    <th>Change</th>
+                    <th>Updated</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody id="rates-table"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="source-panel panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Pipeline</p>
+              <h3>Feed coverage</h3>
+            </div>
+            <p class="panel-hint">Prepared for daily ingestion</p>
+          </div>
+          <div id="source-grid" class="source-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
