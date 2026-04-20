@@ -1,13 +1,13 @@
 function formatMoney(value) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
+    currency: "INR",
+    maximumFractionDigits: 0,
   }).format(value);
 }
 
 function formatSigned(value) {
-  const formatted = Math.abs(value).toFixed(2);
+  const formatted = Math.abs(value).toLocaleString("en-IN");
   if (value > 0) {
     return `+${formatted}`;
   }
@@ -19,7 +19,7 @@ function formatSigned(value) {
   return formatted;
 }
 
-export function summarizeRates(rates, region = "All regions") {
+export function summarizeRates(rates, region = "All states") {
   if (!rates.length) {
     return {
       averageRate: "--",
@@ -27,9 +27,9 @@ export function summarizeRates(rates, region = "All regions") {
       topMarket: "No data",
       bottomMarket: "No data",
       trendLabel: "Insufficient data",
-      headline: "No cotton rates available for the current selection.",
+      headline: "No Indian cotton mandi rates are available for the current selection.",
       bullets: [
-        "Connect a source feed or broaden the region filter to generate the daily summary.",
+        "Connect a mandi source feed or broaden the state filter to generate the daily market note.",
       ],
     };
   }
@@ -46,24 +46,24 @@ export function summarizeRates(rates, region = "All regions") {
   const declining = rates.filter((entry) => entry.change < 0).length;
   const spread = highest.rate - lowest.rate;
 
-  let trendLabel = "Balanced";
+  let trendLabel = "Stable";
   if (advancing > declining) {
-    trendLabel = "Bullish";
+    trendLabel = "Firm";
   } else if (declining > advancing) {
-    trendLabel = "Softening";
+    trendLabel = "Weak";
   }
 
-  const regionLabel = region === "All regions" ? "global" : region.toLowerCase();
+  const scopeLabel = region === "All states" ? "Indian" : `${region}`;
   const headline =
-    `${region} cotton markets averaged ${formatMoney(average)} today, ` +
-    `with ${highest.market} leading and ${lowest.market} offering the lowest quote.`;
+    `${scopeLabel} cotton markets averaged ${formatMoney(average)} per quintal today, ` +
+    `with ${highest.market} trading strongest and ${lowest.market} quoting the lowest level.`;
 
   const bullets = [
-    `${highest.market}, ${highest.country} is the priciest monitored market at ${formatMoney(highest.rate)}, ` +
-      `creating a ${formatMoney(spread)} spread versus ${lowest.market}.`,
-    `${strongestMove.market} posted the strongest daily move at ${formatSigned(strongestMove.change)}, ` +
-      `while ${weakestMove.market} was the softest at ${formatSigned(weakestMove.change)}.`,
-    `${advancing} of ${rates.length} tracked markets improved today, which gives the ${regionLabel} tape a ${trendLabel.toLowerCase()} bias.`,
+    `${highest.market} in ${highest.region} is the highest tracked mandi at ${formatMoney(highest.rate)} per quintal, ` +
+      `leaving a spread of ${formatMoney(spread)} against ${lowest.market}.`,
+    `${strongestMove.market} showed the best day-on-day move at ${formatSigned(strongestMove.change)}, ` +
+      `while ${weakestMove.market} saw the softest move at ${formatSigned(weakestMove.change)}.`,
+    `${advancing} of ${rates.length} tracked mandis moved up today, which keeps the ${scopeLabel.toLowerCase()} cotton tone ${trendLabel.toLowerCase()}.`,
   ];
 
   return {

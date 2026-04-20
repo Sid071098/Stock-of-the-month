@@ -21,7 +21,7 @@ const sourceGrid = document.querySelector("#source-grid");
 
 let rates = buildDailySnapshot();
 
-renderRegionOptions();
+renderStateOptions();
 renderSources();
 renderDashboard();
 
@@ -31,11 +31,11 @@ refreshButton.addEventListener("click", () => {
   renderDashboard();
 });
 
-function renderRegionOptions() {
-  const uniqueRegions = ["All regions", ...new Set(rates.map((entry) => entry.region))];
+function renderStateOptions() {
+  const uniqueStates = ["All states", ...new Set(rates.map((entry) => entry.region))];
 
   regionFilter.replaceChildren(
-    ...uniqueRegions.map((region) => {
+    ...uniqueStates.map((region) => {
       const option = document.createElement("option");
       option.value = region;
       option.textContent = region;
@@ -45,39 +45,40 @@ function renderRegionOptions() {
 }
 
 function renderDashboard() {
-  const selectedRegion = regionFilter.value || "All regions";
+  const selectedRegion = regionFilter.value || "All states";
   const visibleRates =
-    selectedRegion === "All regions"
+    selectedRegion === "All states"
       ? rates
       : rates.filter((entry) => entry.region === selectedRegion);
   const summary = summarizeRates(visibleRates, selectedRegion);
 
-  headlineDate.textContent = `Cotton market overview for ${new Intl.DateTimeFormat("en-US", {
+  headlineDate.textContent = `Indian cotton mandi overview for ${new Intl.DateTimeFormat("en-IN", {
     dateStyle: "full",
+    timeZone: "Asia/Kolkata",
   }).format(new Date())}`;
 
   spreadValue.textContent = summary.spread;
   spreadText.textContent =
     visibleRates.length > 0
-      ? `${summary.topMarket} to ${summary.bottomMarket} across ${visibleRates.length} tracked markets`
-      : "No spread available for this selection";
+      ? `${summary.topMarket} to ${summary.bottomMarket} across ${visibleRates.length} tracked mandis`
+      : "No spread available for this state selection";
 
   averageRate.textContent = summary.averageRate;
-  averageCaption.textContent = `${selectedRegion} daily average based on the latest source readings.`;
+  averageCaption.textContent = `${selectedRegion} daily average based on the latest mandi readings.`;
 
   topMarket.textContent = summary.topMarket;
   topCaption.textContent = visibleRates.length
-    ? `${summary.topMarket} is leading the monitored markets today.`
-    : "No top market available.";
+    ? `${summary.topMarket} is trading at the top end of the monitored market today.`
+    : "No top mandi available.";
 
   bottomMarket.textContent = summary.bottomMarket;
   bottomCaption.textContent = visibleRates.length
-    ? `${summary.bottomMarket} is the lowest quoted market in this slice.`
-    : "No bottom market available.";
+    ? `${summary.bottomMarket} is quoting the lowest level in this state slice.`
+    : "No lower mandi available.";
 
   trendBias.textContent = summary.trendLabel;
   trendCaption.textContent = summary.headline;
-  sourceCount.textContent = `${visibleRates.length} sources`;
+  sourceCount.textContent = `${visibleRates.length} mandis`;
 
   renderSummary(summary);
   renderTable(visibleRates);
@@ -113,7 +114,7 @@ function renderTable(visibleRates) {
       row.innerHTML = `
         <td>
           <strong>${entry.market}</strong>
-          <span class="subcell">${entry.country}</span>
+          <span class="subcell">${entry.district}</span>
         </td>
         <td>${entry.region}</td>
         <td>${formatRate(entry.rate, entry.unit)}</td>
@@ -137,7 +138,7 @@ function renderSources() {
           <p class="source-name">${source.name}</p>
           <span class="status ${source.status}">${source.status}</span>
         </div>
-        <p class="source-region">${source.region}</p>
+        <p class="source-region">${source.state}</p>
         <p class="source-note">${source.note}</p>
       `;
       return article;
@@ -146,10 +147,12 @@ function renderSources() {
 }
 
 function formatUpdatedAt(value) {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-IN", {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
   }).format(new Date(value));
 }

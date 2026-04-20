@@ -3,25 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cotton Globe Daily</title>
+    <title>Indian Cotton Mandi Daily</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="shell">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Global Commodity Intelligence</p>
-          <h1>Cotton rates from major producing and trading regions in one daily brief.</h1>
+          <p class="eyebrow">India Cotton Market Watch</p>
+          <h1>Daily cotton mandi and mill rates across key Indian states.</h1>
           <p class="hero-text">
-            Track spot prices, day-on-day movement, and market spread across the
-            United States, India, China, Brazil, Pakistan, and more.
+            Follow state-wise rates, day-on-day movement, and mandi spread across
+            Gujarat, Maharashtra, Telangana, Punjab, Rajasthan, and Haryana.
           </p>
         </div>
 
         <div class="hero-card">
-          <p class="card-label">Today's spread</p>
+          <p class="card-label">Today's mandi spread</p>
           <p id="spread-value" class="spread-value">--</p>
-          <p id="spread-text" class="card-subtext">Waiting for rate data...</p>
+          <p id="spread-text" class="card-subtext">Waiting for mandi data...</p>
         </div>
       </section>
 
@@ -29,42 +29,42 @@
         <div class="topbar">
           <div>
             <p class="section-label">Daily snapshot</p>
-            <h2 id="headline-date">Cotton market overview</h2>
+            <h2 id="headline-date">Indian cotton market overview</h2>
           </div>
 
           <div class="toolbar">
             <label class="field">
-              <span>Region</span>
+              <span>State</span>
               <select id="region-filter"></select>
             </label>
 
-            <button id="refresh-button" type="button">Refresh snapshot</button>
+            <button id="refresh-button" type="button">Refresh mandi snapshot</button>
           </div>
         </div>
 
         <section class="metrics" aria-label="Market metrics">
           <article class="metric">
-            <p class="section-label">Average rate</p>
+            <p class="section-label">Average kapas rate</p>
             <p id="average-rate" class="metric-value">--</p>
             <p id="average-caption" class="metric-copy">Loading daily average...</p>
           </article>
 
           <article class="metric">
-            <p class="section-label">Strongest market</p>
+            <p class="section-label">Highest mandi</p>
             <p id="top-market" class="metric-value">--</p>
-            <p id="top-caption" class="metric-copy">Loading best performer...</p>
+            <p id="top-caption" class="metric-copy">Loading strongest mandi...</p>
           </article>
 
           <article class="metric">
-            <p class="section-label">Weakest market</p>
+            <p class="section-label">Lowest mandi</p>
             <p id="bottom-market" class="metric-value">--</p>
-            <p id="bottom-caption" class="metric-copy">Loading softest market...</p>
+            <p id="bottom-caption" class="metric-copy">Loading softest mandi...</p>
           </article>
 
           <article class="metric accent">
-            <p class="section-label">Daily bias</p>
+            <p class="section-label">Daily tone</p>
             <p id="trend-bias" class="metric-value">--</p>
-            <p id="trend-caption" class="metric-copy">Scanning movement across markets...</p>
+            <p id="trend-caption" class="metric-copy">Scanning mandi movement...</p>
           </article>
         </section>
 
@@ -73,9 +73,9 @@
             <div class="panel-head">
               <div>
                 <p class="section-label">Auto summary</p>
-                <h3>Daily cotton note</h3>
+                <h3>Indian cotton note</h3>
               </div>
-              <p id="source-count" class="pill">0 sources</p>
+              <p id="source-count" class="pill">0 mandis</p>
             </div>
             <div id="summary-output" class="summary-output" aria-live="polite"></div>
           </article>
@@ -84,17 +84,17 @@
             <div class="panel-head">
               <div>
                 <p class="section-label">Market table</p>
-                <h3>Rates by exchange and region</h3>
+                <h3>Rates by mandi and state</h3>
               </div>
-              <p class="panel-hint">USD per candy / bale equivalent</p>
+              <p class="panel-hint">INR per quintal</p>
             </div>
 
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Market</th>
-                    <th>Region</th>
+                    <th>Mandi</th>
+                    <th>State</th>
                     <th>Rate</th>
                     <th>Change</th>
                     <th>Updated</th>
@@ -113,7 +113,7 @@
               <p class="section-label">Pipeline</p>
               <h3>Feed coverage</h3>
             </div>
-            <p class="panel-hint">Prepared for daily ingestion</p>
+            <p class="panel-hint">Prepared for daily India-market ingestion</p>
           </div>
           <div id="source-grid" class="source-grid"></div>
         </section>
