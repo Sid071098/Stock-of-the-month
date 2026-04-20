@@ -1,4 +1,5 @@
 import { buildDailySnapshot, getDistrictsForState, sourceCatalog } from "./data.js";
+import { fetchCottonRatesForState } from "./live-rates.js";
 import { formatChange, formatRate, summarizeRates } from "./summary.js";
 
 const stateFilter = document.querySelector("#state-filter");
@@ -20,23 +21,24 @@ const sourceCount = document.querySelector("#source-count");
 const ratesTable = document.querySelector("#rates-table");
 const sourceGrid = document.querySelector("#source-grid");
 
-let rates = buildDailySnapshot();
+const fallbackRates = buildDailySnapshot();
+let rates = fallbackRates;
+const liveRatesByState = new Map();
+let isLoading = false;
 
 renderStateOptions();
 renderDistrictOptions();
 renderSources();
-renderDashboard();
+loadRatesForSelection();
 
 stateFilter.addEventListener("change", () => {
   renderDistrictOptions();
-  renderDashboard();
+  loadRatesForSelection();
 });
 districtFilter.addEventListener("change", renderDashboard);
 refreshButton.addEventListener("click", () => {
-  rates = buildDailySnapshot();
-  renderStateOptions();
-  renderDistrictOptions();
-  renderDashboard();
+  liveRatesByState.clear();
+  loadRatesForSelection();
 });
 
 function renderStateOptions() {
@@ -107,7 +109,9 @@ function renderDashboard() {
     : "No lower district available.";
 
   trendBias.textContent = summary.trendLabel;
-  trendCaption.textContent = summary.headline;
+  trendCaption.textContent = isLoading
+    ? "Fetching live cotton prices from data.gov.in / AGMARKNET..."
+    : summary.headline;
   sourceCount.textContent = `${ratedDistricts.length}/${districtRows.length} districts`;
 
   renderSummary(summary);
@@ -299,4 +303,63 @@ function buildDistrictRow(state, district, matches) {
     marketCount: matches.length,
     coverageLabel: latestEntry.source?.name ?? "Mandi feed",
   };
+}
+
+async function loadRatesForSelection() {
+  const selectedState = stateFilter.value || "All states";
+  isLoading = true;
+  renderDashboard();
+
+  try {
+    if (selectedState === "All states") {
+      const states = stateFilterOptions();
+      await Promise.all(states.map((state) => ensureStateRates(state)));
+    } else {
+      await ensureStateRates(selectedState);
+    }
+
+    rates = buildVisibleRatePool(selectedState);
+  } catch (error) {
+    console.error(error);
+    rates = buildVisibleRatePool(selectedState);
+  } finally {
+    isLoading = false;
+    renderDistrictOptions();
+    renderDashboard();
+  }
+}
+
+async function ensureStateRates(state) {
+  if (liveRatesByState.has(state)) {
+    return;
+  }
+
+  try {
+    const liveStateRates = await fetchCottonRatesForState(state);
+    if (liveStateRates.length > 0) {
+      liveRatesByState.set(state, liveStateRates);
+      return;
+    }
+  } catch (error) {
+    console.warn(`Falling back to local sample data for ${state}`, error);
+  }
+
+  liveRatesByState.set(
+    state,
+    fallbackRates.filter((entry) => entry.state === state),
+  );
+}
+
+function buildVisibleRatePool(selectedState) {
+  if (selectedState === "All states") {
+    return stateFilterOptions().flatMap((state) => liveRatesByState.get(state) ?? []);
+  }
+
+  return liveRatesByState.get(selectedState) ?? fallbackRates.filter((entry) => entry.state === selectedState);
+}
+
+function stateFilterOptions() {
+  return [...stateFilter.options]
+    .map((option) => option.value)
+    .filter((value) => value !== "All states");
 }
