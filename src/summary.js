@@ -27,9 +27,9 @@ export function summarizeRates(rates, scopeLabel = "Indian") {
       topMarket: "No data",
       bottomMarket: "No data",
       trendLabel: "Insufficient data",
-      headline: "No Indian cotton mandi rates are available for the current selection.",
+      headline: "No Indian cotton district rates are available for the current selection.",
       bullets: [
-        "Connect a mandi source feed or broaden the state filter to generate the daily market note.",
+        "Connect a mandi source feed or broaden the state or district filter to generate the daily market note.",
       ],
     };
   }
@@ -58,11 +58,11 @@ export function summarizeRates(rates, scopeLabel = "Indian") {
     `with ${highest.market} trading strongest and ${lowest.market} quoting the lowest level.`;
 
   const bullets = [
-    `${highest.market} in ${highest.state} is the highest tracked mandi at ${formatMoney(highest.rate)} per quintal, ` +
+    `${highest.market} district in ${highest.state} is the highest tracked district at ${formatMoney(highest.rate)} per quintal, ` +
       `leaving a spread of ${formatMoney(spread)} against ${lowest.market}.`,
-    `${strongestMove.market} showed the best day-on-day move at ${formatSigned(strongestMove.change)}, ` +
-      `while ${weakestMove.market} saw the softest move at ${formatSigned(weakestMove.change)}.`,
-    `${advancing} of ${rates.length} tracked mandis moved up today, which keeps the ${scopeLabel.toLowerCase()} cotton tone ${trendLabel.toLowerCase()}.`,
+    `${strongestMove.market} district showed the best day-on-day move at ${formatSigned(strongestMove.change)}, ` +
+      `while ${weakestMove.market} district saw the softest move at ${formatSigned(weakestMove.change)}.`,
+    `${advancing} of ${rates.length} tracked districts moved up today, which keeps the ${scopeLabel.toLowerCase()} cotton tone ${trendLabel.toLowerCase()}.`,
   ];
 
   return {

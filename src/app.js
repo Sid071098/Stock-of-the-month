@@ -1,4 +1,4 @@
-import { buildDailySnapshot, sourceCatalog } from "./data.js";
+import { buildDailySnapshot, getDistrictsForState, sourceCatalog } from "./data.js";
 import { formatChange, formatRate, summarizeRates } from "./summary.js";
 
 const stateFilter = document.querySelector("#state-filter");
@@ -57,11 +57,10 @@ function renderStateOptions() {
 
 function renderDistrictOptions() {
   const selectedState = stateFilter.value || "All states";
-  const districtScope =
+  const uniqueDistricts =
     selectedState === "All states"
-      ? rates
-      : rates.filter((entry) => entry.state === selectedState);
-  const uniqueDistricts = ["All districts", ...new Set(districtScope.map((entry) => entry.district))];
+      ? ["All districts"]
+      : ["All districts", ...getDistrictsForState(selectedState)];
   const currentValue = districtFilter.value;
 
   districtFilter.replaceChildren(
@@ -79,12 +78,9 @@ function renderDistrictOptions() {
 function renderDashboard() {
   const selectedState = stateFilter.value || "All states";
   const selectedDistrict = districtFilter.value || "All districts";
-  const visibleRates = rates.filter((entry) => {
-    const matchesState = selectedState === "All states" || entry.state === selectedState;
-    const matchesDistrict = selectedDistrict === "All districts" || entry.district === selectedDistrict;
-    return matchesState && matchesDistrict;
-  });
-  const summary = summarizeRates(visibleRates, buildScopeLabel(selectedState, selectedDistrict));
+  const districtRows = buildDistrictRows(selectedState, selectedDistrict);
+  const ratedDistricts = districtRows.filter((entry) => entry.rate !== null);
+  const summary = summarizeRates(ratedDistricts, buildScopeLabel(selectedState, selectedDistrict));
 
   headlineDate.textContent = `Indian cotton mandi overview for ${new Intl.DateTimeFormat("en-IN", {
     dateStyle: "full",
@@ -93,29 +89,29 @@ function renderDashboard() {
 
   spreadValue.textContent = summary.spread;
   spreadText.textContent =
-    visibleRates.length > 0
-      ? `${summary.topMarket} to ${summary.bottomMarket} across ${visibleRates.length} tracked mandis`
+    ratedDistricts.length > 0
+      ? `${summary.topMarket} to ${summary.bottomMarket} across ${ratedDistricts.length} rated districts`
       : "No spread available for this location selection";
 
   averageRate.textContent = summary.averageRate;
   averageCaption.textContent = `${buildCaptionLabel(selectedState, selectedDistrict)} daily average based on the latest mandi readings.`;
 
   topMarket.textContent = summary.topMarket;
-  topCaption.textContent = visibleRates.length
-    ? `${summary.topMarket} is trading at the top end of the monitored market today.`
-    : "No top mandi available.";
+  topCaption.textContent = ratedDistricts.length
+    ? `${summary.topMarket} is trading at the top end of the monitored district view today.`
+    : "No top district available.";
 
   bottomMarket.textContent = summary.bottomMarket;
-  bottomCaption.textContent = visibleRates.length
-    ? `${summary.bottomMarket} is quoting the lowest level in this state slice.`
-    : "No lower mandi available.";
+  bottomCaption.textContent = ratedDistricts.length
+    ? `${summary.bottomMarket} is quoting the lowest level in this district slice.`
+    : "No lower district available.";
 
   trendBias.textContent = summary.trendLabel;
   trendCaption.textContent = summary.headline;
-  sourceCount.textContent = `${visibleRates.length} mandis`;
+  sourceCount.textContent = `${ratedDistricts.length}/${districtRows.length} districts`;
 
   renderSummary(summary);
-  renderTable(visibleRates);
+  renderTable(districtRows);
 }
 
 function renderSummary(summary) {
@@ -138,25 +134,34 @@ function renderSummary(summary) {
   summaryOutput.replaceChildren(fragment);
 }
 
-function renderTable(visibleRates) {
+function renderTable(districtRows) {
   ratesTable.replaceChildren(
-    ...visibleRates.map((entry) => {
+    ...districtRows.map((entry) => {
       const row = document.createElement("tr");
       const moveClass = entry.change > 0 ? "up" : entry.change < 0 ? "down" : "flat";
-      const sourceName = entry.source?.name ?? "Pending source";
       row.className = "table-row";
+
+      const rateCell =
+        entry.rate === null ? '<span class="empty-copy">No mandi rate yet</span>' : formatRate(entry.rate, entry.unit);
+      const changeCell =
+        entry.change === null
+          ? '<span class="move flat">--</span>'
+          : `<span class="move ${moveClass}">${formatChange(entry.change)}</span>`;
+      const updatedCell = entry.updatedAt ? formatUpdatedAt(entry.updatedAt) : "--";
+      const coverage = entry.marketCount > 0 ? `${entry.marketCount} mandi${entry.marketCount > 1 ? "s" : ""}` : "Awaiting feed";
 
       row.innerHTML = `
         <td>
           <strong class="market-name">${entry.market}</strong>
-          <span class="subcell">${entry.district}</span>
+          <span class="subcell">${entry.marketCount > 0 ? "District rate available" : "No reported cotton mandi today"}</span>
         </td>
         <td><span class="state-chip">${entry.state}</span></td>
         <td><span class="district-chip">${entry.district}</span></td>
-        <td>${formatRate(entry.rate, entry.unit)}</td>
-        <td><span class="move ${moveClass}">${formatChange(entry.change)}</span></td>
-        <td>${formatUpdatedAt(entry.updatedAt)}</td>
-        <td>${sourceName}</td>
+        <td>${rateCell}</td>
+        <td>${changeCell}</td>
+        <td>${coverage}</td>
+        <td>${updatedCell}</td>
+        <td>${entry.coverageLabel}</td>
       `;
 
       return row;
@@ -223,4 +228,75 @@ function buildCaptionLabel(selectedState, selectedDistrict) {
   }
 
   return selectedDistrict;
+}
+
+function buildDistrictRows(selectedState, selectedDistrict) {
+  if (selectedState === "All states") {
+    return buildAggregatedDistrictRows(
+      rates.filter((entry) => selectedDistrict === "All districts" || entry.district === selectedDistrict),
+    );
+  }
+
+  const districts = getDistrictsForState(selectedState);
+  const scopedDistricts =
+    selectedDistrict === "All districts"
+      ? districts
+      : districts.filter((district) => district === selectedDistrict);
+
+  return scopedDistricts.map((district) => {
+    const matches = rates.filter((entry) => entry.state === selectedState && entry.district === district);
+    return buildDistrictRow(selectedState, district, matches);
+  });
+}
+
+function buildAggregatedDistrictRows(entries) {
+  const groups = new Map();
+
+  entries.forEach((entry) => {
+    const key = `${entry.state}::${entry.district}`;
+    const bucket = groups.get(key) ?? [];
+    bucket.push(entry);
+    groups.set(key, bucket);
+  });
+
+  return [...groups.entries()]
+    .map(([key, group]) => {
+      const [state, district] = key.split("::");
+      return buildDistrictRow(state, district, group);
+    })
+    .sort((left, right) => left.state.localeCompare(right.state) || left.district.localeCompare(right.district));
+}
+
+function buildDistrictRow(state, district, matches) {
+  if (matches.length === 0) {
+    return {
+      market: district,
+      district,
+      state,
+      rate: null,
+      change: null,
+      updatedAt: null,
+      unit: "quintal",
+      marketCount: 0,
+      coverageLabel: "No live cotton rate",
+    };
+  }
+
+  const totalRate = matches.reduce((sum, entry) => sum + entry.rate, 0);
+  const totalChange = matches.reduce((sum, entry) => sum + entry.change, 0);
+  const latestEntry = [...matches].sort(
+    (left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+  )[0];
+
+  return {
+    market: district,
+    district,
+    state,
+    rate: Math.round(totalRate / matches.length),
+    change: Math.round(totalChange / matches.length),
+    updatedAt: latestEntry.updatedAt,
+    unit: latestEntry.unit,
+    marketCount: matches.length,
+    coverageLabel: latestEntry.source?.name ?? "Mandi feed",
+  };
 }
