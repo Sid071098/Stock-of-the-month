@@ -110,13 +110,14 @@ function renderTable(visibleRates) {
       const row = document.createElement("tr");
       const moveClass = entry.change > 0 ? "up" : entry.change < 0 ? "down" : "flat";
       const sourceName = entry.source?.name ?? "Pending source";
+      row.className = "table-row";
 
       row.innerHTML = `
         <td>
-          <strong>${entry.market}</strong>
+          <strong class="market-name">${entry.market}</strong>
           <span class="subcell">${entry.district}</span>
         </td>
-        <td>${entry.region}</td>
+        <td><span class="state-chip">${entry.region}</span></td>
         <td>${formatRate(entry.rate, entry.unit)}</td>
         <td><span class="move ${moveClass}">${formatChange(entry.change)}</span></td>
         <td>${formatUpdatedAt(entry.updatedAt)}</td>

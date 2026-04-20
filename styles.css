@@ -1,16 +1,19 @@
 :root {
   color-scheme: light;
-  --bg: #f3efe6;
-  --ink: #1e1f1b;
-  --muted: #645f56;
-  --panel: rgba(255, 252, 245, 0.88);
-  --panel-strong: #fff9ee;
-  --line: rgba(79, 63, 39, 0.16);
-  --accent: #1e5a46;
-  --accent-soft: #dff2ea;
+  --bg: #f4ead5;
+  --bg-deep: #ead5aa;
+  --ink: #1f211e;
+  --muted: #6e6559;
+  --panel: rgba(255, 252, 246, 0.78);
+  --panel-strong: #fff9ef;
+  --line: rgba(90, 69, 35, 0.14);
+  --accent: #1f6a51;
+  --accent-strong: #154837;
+  --accent-soft: #def1e7;
+  --gold: #c69231;
   --warn: #b6582f;
   --down: #a33e2f;
-  --shadow: 0 18px 40px rgba(45, 37, 25, 0.1);
+  --shadow: 0 22px 50px rgba(56, 41, 14, 0.11);
 }
 
 * {
@@ -20,11 +23,24 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-family: "Baskerville", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(203, 164, 104, 0.22), transparent 32%),
-    linear-gradient(180deg, #f8f3e7 0%, #efe5cf 100%);
+    radial-gradient(circle at top left, rgba(198, 146, 49, 0.22), transparent 28%),
+    radial-gradient(circle at 85% 20%, rgba(31, 106, 81, 0.12), transparent 24%),
+    linear-gradient(180deg, #fbf4e6 0%, var(--bg) 46%, #ecddbe 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 72%);
 }
 
 button,
@@ -35,15 +51,15 @@ select {
 .shell {
   width: min(1200px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 32px 0 56px;
+  padding: 36px 0 64px;
 }
 
 .hero {
   display: grid;
   grid-template-columns: 1.8fr 1fr;
-  gap: 24px;
+  gap: 28px;
   align-items: end;
-  margin-bottom: 28px;
+  margin-bottom: 34px;
 }
 
 .hero-copy h1,
@@ -77,14 +93,15 @@ table,
 .hero-copy h1 {
   max-width: 10ch;
   font-size: clamp(2.7rem, 7vw, 5.3rem);
-  line-height: 0.95;
+  line-height: 0.93;
   margin-top: 8px;
+  text-wrap: balance;
 }
 
 .hero-text {
   max-width: 58ch;
   margin-top: 18px;
-  font-size: 1.06rem;
+  font-size: 1.08rem;
   line-height: 1.7;
   color: rgba(30, 31, 27, 0.8);
 }
@@ -94,13 +111,28 @@ table,
 .metric {
   background: var(--panel);
   border: 1px solid var(--line);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(16px);
   box-shadow: var(--shadow);
 }
 
 .hero-card {
+  position: relative;
+  overflow: hidden;
   padding: 24px;
-  border-radius: 24px;
+  border-radius: 28px;
+  background:
+    linear-gradient(160deg, rgba(255, 250, 240, 0.94), rgba(242, 232, 208, 0.88)),
+    var(--panel);
+}
+
+.hero-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -40px -40px auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(31, 106, 81, 0.18), transparent 68%);
 }
 
 .card-label,
@@ -117,16 +149,76 @@ table,
   margin-top: 8px;
   font-size: clamp(2.2rem, 5vw, 4rem);
   line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .card-subtext {
   margin-top: 10px;
   line-height: 1.5;
+  max-width: 26ch;
+}
+
+.card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.card-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), #5eb48f);
+  box-shadow: 0 0 0 6px rgba(31, 106, 81, 0.12);
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(90, 69, 35, 0.12);
+  background: rgba(255, 249, 237, 0.74);
+  font-size: 0.92rem;
+  color: #4b443b;
+}
+
+.hero-card-band {
+  position: relative;
+  z-index: 1;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(90, 69, 35, 0.12);
+}
+
+.band-label {
+  margin: 0;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.band-copy {
+  margin: 6px 0 0;
+  max-width: 32ch;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--muted);
 }
 
 .dashboard {
   display: grid;
-  gap: 22px;
+  gap: 24px;
 }
 
 .topbar,
@@ -155,16 +247,21 @@ table,
 
 select,
 button {
-  min-height: 46px;
-  border-radius: 14px;
+  min-height: 48px;
+  border-radius: 16px;
   border: 1px solid var(--line);
   background: rgba(255, 249, 238, 0.92);
-  padding: 0 14px;
+  padding: 0 16px;
   color: var(--ink);
 }
 
+select {
+  min-width: 180px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
 button {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   color: #f8f4ec;
   cursor: pointer;
   transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
@@ -178,17 +275,17 @@ button:hover {
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .metric,
 .panel {
-  border-radius: 22px;
-  padding: 22px;
+  border-radius: 24px;
+  padding: 24px;
 }
 
 .metric.accent {
-  background: linear-gradient(135deg, rgba(30, 90, 70, 0.95), rgba(39, 119, 94, 0.85));
+  background: linear-gradient(135deg, rgba(31, 106, 81, 0.98), rgba(21, 72, 55, 0.92));
   color: #f7f5f0;
 }
 
@@ -201,6 +298,7 @@ button:hover {
   margin-top: 14px;
   font-size: clamp(1.75rem, 3vw, 2.6rem);
   line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .metric-copy {
@@ -211,11 +309,13 @@ button:hover {
 .content-grid {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
-  gap: 18px;
+  gap: 20px;
 }
 
 .summary-panel {
-  background: linear-gradient(180deg, rgba(255, 250, 241, 0.98), rgba(245, 237, 219, 0.92));
+  background:
+    radial-gradient(circle at top right, rgba(198, 146, 49, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(255, 250, 241, 0.98), rgba(245, 237, 219, 0.92));
 }
 
 .pill,
@@ -230,7 +330,7 @@ button:hover {
 .pill {
   min-height: 34px;
   padding: 0 12px;
-  background: rgba(30, 90, 70, 0.1);
+  background: rgba(31, 106, 81, 0.1);
   color: var(--accent);
   font-size: 0.88rem;
 }
@@ -240,8 +340,8 @@ button:hover {
 }
 
 .summary-headline {
-  font-size: 1.14rem;
-  line-height: 1.7;
+  font-size: 1.18rem;
+  line-height: 1.75;
 }
 
 .summary-list {
@@ -255,6 +355,9 @@ button:hover {
 .table-wrap {
   margin-top: 18px;
   overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(90, 69, 35, 0.08);
+  background: rgba(255, 253, 248, 0.66);
 }
 
 table {
@@ -265,7 +368,7 @@ table {
 
 th,
 td {
-  padding: 14px 10px;
+  padding: 16px 14px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
@@ -276,12 +379,39 @@ th {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
+  background: rgba(247, 239, 222, 0.76);
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(10px);
 }
 
 .subcell {
   display: block;
   margin-top: 4px;
   font-size: 0.88rem;
+}
+
+.market-name {
+  font-size: 1rem;
+}
+
+.table-row {
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.table-row:hover {
+  background: rgba(222, 241, 231, 0.34);
+}
+
+.state-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(198, 146, 49, 0.12);
+  color: #7a5310;
+  font-size: 0.86rem;
 }
 
 .move {
@@ -307,21 +437,29 @@ th {
 }
 
 .source-panel {
-  background: rgba(255, 252, 246, 0.84);
+  background:
+    radial-gradient(circle at right top, rgba(31, 106, 81, 0.08), transparent 24%),
+    rgba(255, 252, 246, 0.84);
 }
 
 .source-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
   margin-top: 18px;
 }
 
 .source-card {
-  padding: 16px;
-  border-radius: 18px;
+  padding: 18px;
+  border-radius: 20px;
   border: 1px solid var(--line);
-  background: rgba(255, 253, 248, 0.92);
+  background: linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(252, 246, 234, 0.92));
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.source-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(56, 41, 14, 0.08);
 }
 
 .source-name {
@@ -393,6 +531,15 @@ th {
   .hero-card {
     padding: 18px;
     border-radius: 18px;
+  }
+
+  .hero-badges {
+    gap: 8px;
+  }
+
+  .hero-badge,
+  .state-chip {
+    font-size: 0.84rem;
   }
 
   table {
