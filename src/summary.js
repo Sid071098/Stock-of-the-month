@@ -19,7 +19,7 @@ function formatSigned(value) {
   return formatted;
 }
 
-export function summarizeRates(rates, region = "All states") {
+export function summarizeRates(rates, scopeLabel = "Indian") {
   if (!rates.length) {
     return {
       averageRate: "--",
@@ -53,13 +53,12 @@ export function summarizeRates(rates, region = "All states") {
     trendLabel = "Weak";
   }
 
-  const scopeLabel = region === "All states" ? "Indian" : `${region}`;
   const headline =
     `${scopeLabel} cotton markets averaged ${formatMoney(average)} per quintal today, ` +
     `with ${highest.market} trading strongest and ${lowest.market} quoting the lowest level.`;
 
   const bullets = [
-    `${highest.market} in ${highest.region} is the highest tracked mandi at ${formatMoney(highest.rate)} per quintal, ` +
+    `${highest.market} in ${highest.state} is the highest tracked mandi at ${formatMoney(highest.rate)} per quintal, ` +
       `leaving a spread of ${formatMoney(spread)} against ${lowest.market}.`,
     `${strongestMove.market} showed the best day-on-day move at ${formatSigned(strongestMove.change)}, ` +
       `while ${weakestMove.market} saw the softest move at ${formatSigned(weakestMove.change)}.`,

@@ -1,7 +1,8 @@
 import { buildDailySnapshot, sourceCatalog } from "./data.js";
 import { formatChange, formatRate, summarizeRates } from "./summary.js";
 
-const regionFilter = document.querySelector("#region-filter");
+const stateFilter = document.querySelector("#state-filter");
+const districtFilter = document.querySelector("#district-filter");
 const refreshButton = document.querySelector("#refresh-button");
 const headlineDate = document.querySelector("#headline-date");
 const spreadValue = document.querySelector("#spread-value");
@@ -22,35 +23,68 @@ const sourceGrid = document.querySelector("#source-grid");
 let rates = buildDailySnapshot();
 
 renderStateOptions();
+renderDistrictOptions();
 renderSources();
 renderDashboard();
 
-regionFilter.addEventListener("change", renderDashboard);
+stateFilter.addEventListener("change", () => {
+  renderDistrictOptions();
+  renderDashboard();
+});
+districtFilter.addEventListener("change", renderDashboard);
 refreshButton.addEventListener("click", () => {
   rates = buildDailySnapshot();
+  renderStateOptions();
+  renderDistrictOptions();
   renderDashboard();
 });
 
 function renderStateOptions() {
-  const uniqueStates = ["All states", ...new Set(rates.map((entry) => entry.region))];
+  const uniqueStates = ["All states", ...new Set(rates.map((entry) => entry.state))];
+  const currentValue = stateFilter.value;
 
-  regionFilter.replaceChildren(
-    ...uniqueStates.map((region) => {
+  stateFilter.replaceChildren(
+    ...uniqueStates.map((state) => {
       const option = document.createElement("option");
-      option.value = region;
-      option.textContent = region;
+      option.value = state;
+      option.textContent = state;
       return option;
     }),
   );
+
+  stateFilter.value = uniqueStates.includes(currentValue) ? currentValue : "All states";
+}
+
+function renderDistrictOptions() {
+  const selectedState = stateFilter.value || "All states";
+  const districtScope =
+    selectedState === "All states"
+      ? rates
+      : rates.filter((entry) => entry.state === selectedState);
+  const uniqueDistricts = ["All districts", ...new Set(districtScope.map((entry) => entry.district))];
+  const currentValue = districtFilter.value;
+
+  districtFilter.replaceChildren(
+    ...uniqueDistricts.map((district) => {
+      const option = document.createElement("option");
+      option.value = district;
+      option.textContent = district;
+      return option;
+    }),
+  );
+
+  districtFilter.value = uniqueDistricts.includes(currentValue) ? currentValue : "All districts";
 }
 
 function renderDashboard() {
-  const selectedRegion = regionFilter.value || "All states";
-  const visibleRates =
-    selectedRegion === "All states"
-      ? rates
-      : rates.filter((entry) => entry.region === selectedRegion);
-  const summary = summarizeRates(visibleRates, selectedRegion);
+  const selectedState = stateFilter.value || "All states";
+  const selectedDistrict = districtFilter.value || "All districts";
+  const visibleRates = rates.filter((entry) => {
+    const matchesState = selectedState === "All states" || entry.state === selectedState;
+    const matchesDistrict = selectedDistrict === "All districts" || entry.district === selectedDistrict;
+    return matchesState && matchesDistrict;
+  });
+  const summary = summarizeRates(visibleRates, buildScopeLabel(selectedState, selectedDistrict));
 
   headlineDate.textContent = `Indian cotton mandi overview for ${new Intl.DateTimeFormat("en-IN", {
     dateStyle: "full",
@@ -61,10 +95,10 @@ function renderDashboard() {
   spreadText.textContent =
     visibleRates.length > 0
       ? `${summary.topMarket} to ${summary.bottomMarket} across ${visibleRates.length} tracked mandis`
-      : "No spread available for this state selection";
+      : "No spread available for this location selection";
 
   averageRate.textContent = summary.averageRate;
-  averageCaption.textContent = `${selectedRegion} daily average based on the latest mandi readings.`;
+  averageCaption.textContent = `${buildCaptionLabel(selectedState, selectedDistrict)} daily average based on the latest mandi readings.`;
 
   topMarket.textContent = summary.topMarket;
   topCaption.textContent = visibleRates.length
@@ -117,7 +151,8 @@ function renderTable(visibleRates) {
           <strong class="market-name">${entry.market}</strong>
           <span class="subcell">${entry.district}</span>
         </td>
-        <td><span class="state-chip">${entry.region}</span></td>
+        <td><span class="state-chip">${entry.state}</span></td>
+        <td><span class="district-chip">${entry.district}</span></td>
         <td>${formatRate(entry.rate, entry.unit)}</td>
         <td><span class="move ${moveClass}">${formatChange(entry.change)}</span></td>
         <td>${formatUpdatedAt(entry.updatedAt)}</td>
@@ -156,4 +191,36 @@ function formatUpdatedAt(value) {
     hour12: true,
     timeZone: "Asia/Kolkata",
   }).format(new Date(value));
+}
+
+function buildScopeLabel(selectedState, selectedDistrict) {
+  if (selectedState === "All states" && selectedDistrict === "All districts") {
+    return "Indian";
+  }
+
+  if (selectedState !== "All states" && selectedDistrict === "All districts") {
+    return selectedState;
+  }
+
+  if (selectedState !== "All states" && selectedDistrict !== "All districts") {
+    return `${selectedDistrict}, ${selectedState}`;
+  }
+
+  return selectedDistrict;
+}
+
+function buildCaptionLabel(selectedState, selectedDistrict) {
+  if (selectedState === "All states" && selectedDistrict === "All districts") {
+    return "All India";
+  }
+
+  if (selectedState !== "All states" && selectedDistrict === "All districts") {
+    return selectedState;
+  }
+
+  if (selectedState !== "All states" && selectedDistrict !== "All districts") {
+    return `${selectedDistrict} in ${selectedState}`;
+  }
+
+  return selectedDistrict;
 }

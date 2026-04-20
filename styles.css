@@ -469,6 +469,17 @@ th {
   font-size: 0.86rem;
 }
 
+.district-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(27, 111, 183, 0.1);
+  color: #1b6fb7;
+  font-size: 0.86rem;
+}
+
 .move {
   min-width: 72px;
   min-height: 32px;
@@ -606,9 +617,10 @@ th {
   }
 
   .hero-badge,
-  .state-chip {
-    font-size: 0.84rem;
-  }
+  .state-chip,
+  .district-chip {
+  font-size: 0.84rem;
+}
 
   table {
     min-width: 640px;

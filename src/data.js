@@ -47,7 +47,7 @@ export const baseRates = [
   {
     market: "Rajkot",
     district: "Rajkot",
-    region: "Gujarat",
+    state: "Gujarat",
     sourceId: "gujarat-ginners",
     currency: "INR",
     unit: "quintal",
@@ -58,7 +58,7 @@ export const baseRates = [
   {
     market: "Gondal",
     district: "Rajkot",
-    region: "Gujarat",
+    state: "Gujarat",
     sourceId: "agmarknet",
     currency: "INR",
     unit: "quintal",
@@ -67,9 +67,20 @@ export const baseRates = [
     updatedAt: "2026-04-20T17:25:00+05:30",
   },
   {
+    market: "Surendranagar",
+    district: "Surendranagar",
+    state: "Gujarat",
+    sourceId: "agmarknet",
+    currency: "INR",
+    unit: "quintal",
+    rate: 7240,
+    previousRate: 7205,
+    updatedAt: "2026-04-20T17:15:00+05:30",
+  },
+  {
     market: "Akola",
     district: "Akola",
-    region: "Maharashtra",
+    state: "Maharashtra",
     sourceId: "maharashtra-mills",
     currency: "INR",
     unit: "quintal",
@@ -80,7 +91,7 @@ export const baseRates = [
   {
     market: "Yavatmal",
     district: "Yavatmal",
-    region: "Maharashtra",
+    state: "Maharashtra",
     sourceId: "agmarknet",
     currency: "INR",
     unit: "quintal",
@@ -91,7 +102,7 @@ export const baseRates = [
   {
     market: "Warangal",
     district: "Hanamkonda",
-    region: "Telangana",
+    state: "Telangana",
     sourceId: "telangana-traders",
     currency: "INR",
     unit: "quintal",
@@ -102,7 +113,7 @@ export const baseRates = [
   {
     market: "Adilabad",
     district: "Adilabad",
-    region: "Telangana",
+    state: "Telangana",
     sourceId: "agmarknet",
     currency: "INR",
     unit: "quintal",
@@ -113,7 +124,7 @@ export const baseRates = [
   {
     market: "Sirsa",
     district: "Sirsa",
-    region: "Haryana",
+    state: "Haryana",
     sourceId: "mcx-kapas",
     currency: "INR",
     unit: "quintal",
@@ -124,7 +135,7 @@ export const baseRates = [
   {
     market: "Bathinda",
     district: "Bathinda",
-    region: "Punjab",
+    state: "Punjab",
     sourceId: "punjab-auctions",
     currency: "INR",
     unit: "quintal",
@@ -135,7 +146,7 @@ export const baseRates = [
   {
     market: "Hanumangarh",
     district: "Hanumangarh",
-    region: "Rajasthan",
+    state: "Rajasthan",
     sourceId: "agmarknet",
     currency: "INR",
     unit: "quintal",
