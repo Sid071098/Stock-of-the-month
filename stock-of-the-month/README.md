@@ -32,11 +32,18 @@ Copy `.env.example` to `.env.local` and provide your Stripe keys:
 
 ```bash
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
+STRIPE_PRICE_ID=price_your_price_id_here
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID=prctbl_1TTSXAGgdCjtxcdnpaUHd3vI
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-The Checkout route creates a `$199/month` subscription with inline `price_data`, so a pre-created Stripe Price ID is not required.
+The Checkout route supports either:
+
+- a pre-created Stripe Price ID via `STRIPE_PRICE_ID`, or
+- inline `price_data` when `STRIPE_PRICE_ID` is not provided.
+
+If `NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID` is set, the homepage will embed Stripe's Pricing Table directly in the pricing section.
 
 ## Run Locally
 

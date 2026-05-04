@@ -8,6 +8,7 @@ import {
   Sparkles,
   TrendingUp
 } from "lucide-react";
+import StripePricingTable from "./components/StripePricingTable";
 
 const chartPoints = [
   "M 0 116",
@@ -23,6 +24,9 @@ const thesis = [
   "Advertising tier creates a second growth engine beyond membership fees.",
   "Disciplined content spend and buybacks support free cash flow per share."
 ];
+
+const pricingTableId = process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID;
+const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 export default function Home() {
   return (
@@ -177,15 +181,22 @@ export default function Home() {
             <span className="text-5xl font-semibold text-white">$199</span>
             <span className="pb-2 text-sm text-muted">/ month</span>
           </div>
-          <form action="/api/checkout" method="POST" className="mt-6">
-            <button
-              type="submit"
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-bull px-6 text-sm font-bold text-slate-950 transition hover:bg-emerald-300"
-            >
-              Subscribe Now
-              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </form>
+          {pricingTableId ? (
+            <StripePricingTable
+              pricingTableId={pricingTableId}
+              publishableKey={publishableKey ?? ""}
+            />
+          ) : (
+            <form action="/api/checkout" method="POST" className="mt-6">
+              <button
+                type="submit"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-bull px-6 text-sm font-bold text-slate-950 transition hover:bg-emerald-300"
+              >
+                Subscribe Now
+                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </form>
+          )}
           <p id="risk" className="mt-4 text-xs leading-5 text-muted">
             Research is educational and not financial advice. Investing involves risk,
             including possible loss of principal.

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripePriceId = process.env.STRIPE_PRICE_ID;
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export async function POST() {
@@ -16,25 +17,29 @@ export async function POST() {
     apiVersion: "2024-06-20"
   });
 
+  const lineItems = stripePriceId
+    ? [{ price: stripePriceId, quantity: 1 }]
+    : [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: 19900,
+            recurring: {
+              interval: "month"
+            },
+            product_data: {
+              name: "Signal Desk: Stock of the Month",
+              description: "Monthly premium equity research subscription"
+            }
+          }
+        }
+      ];
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     payment_method_types: ["card"],
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "usd",
-          unit_amount: 19900,
-          recurring: {
-            interval: "month"
-          },
-          product_data: {
-            name: "Signal Desk: Stock of the Month",
-            description: "Monthly premium equity research subscription"
-          }
-        }
-      }
-    ],
+    line_items: lineItems,
     success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/cancel`,
     allow_promotion_codes: true,
