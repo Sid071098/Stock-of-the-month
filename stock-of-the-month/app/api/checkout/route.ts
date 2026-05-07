@@ -3,15 +3,17 @@ import Stripe from "stripe";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripePriceId = process.env.STRIPE_PRICE_ID;
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const appUrlFallback = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-export async function POST() {
+export async function POST(request: Request) {
   if (!stripeSecretKey) {
     return NextResponse.json(
       { error: "Missing STRIPE_SECRET_KEY environment variable." },
       { status: 500 }
     );
   }
+
+  const origin = request.headers.get("origin") || new URL(request.url).origin || appUrlFallback;
 
   const stripe = new Stripe(stripeSecretKey, {
     apiVersion: "2024-06-20"
@@ -40,8 +42,8 @@ export async function POST() {
     mode: "subscription",
     payment_method_types: ["card"],
     line_items: lineItems,
-    success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/cancel`,
+    success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/cancel`,
     allow_promotion_codes: true,
     subscription_data: {
       metadata: {
