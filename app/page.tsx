@@ -1,16 +1,18 @@
 import {
   ArrowRight,
   BarChart3,
-  BookOpenText,
-  CheckCircle2,
-  ChevronRight,
-  Crown,
+  Check,
+  FileText,
+  Grid2X2,
   LockKeyhole,
+  MoreHorizontal,
   Newspaper,
   Search,
   ShieldCheck,
   Sparkles,
-  TrendingUp
+  Star,
+  Trophy,
+  UserCircle2
 } from "lucide-react";
 import StripePricingTable from "./components/StripePricingTable";
 import { getStockOfMonth, type StockOfMonth } from "./lib/stockOfMonth";
@@ -24,70 +26,65 @@ const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || default
 
 export const revalidate = 3600;
 
-function buildMonthlyIdeas(featuredPick: StockOfMonth) {
-  return [
-    {
-      ticker: featuredPick.ticker,
-      name: featuredPick.name,
-      label: "Stock of the Month",
-      date: featuredPick.date,
-      title: `Why ${featuredPick.ticker} is the desk's highest-conviction idea this month`,
-      summary: featuredPick.summary,
-      score: "A",
-      tone: "Bullish"
-    },
-    {
-      ticker: "GOOGL",
-      name: "Alphabet",
-      label: "Watchlist",
-      date: "May 07, 2026",
-      title: "Search durability meets AI infrastructure optionality",
-      summary:
-        "Alphabet screens well for cash generation, ecosystem reach, and AI investment capacity, but sentiment remains catalyst-driven.",
-      score: "B+",
-      tone: "Constructive"
-    },
-    {
-      ticker: "TSM",
-      name: "Taiwan Semiconductor",
-      label: "Semiconductor Pick",
-      date: "May 06, 2026",
-      title: "The manufacturing backbone behind the AI capex cycle",
-      summary:
-        "TSM remains a clean way to underwrite advanced-node demand without choosing a single end-device winner.",
-      score: "A-",
-      tone: "Bullish"
-    },
-    {
-      ticker: "COST",
-      name: "Costco",
-      label: "Defensive Growth",
-      date: "May 05, 2026",
-      title: "Membership economics continue to compound quietly",
-      summary:
-        "Costco's renewal rates, traffic consistency, and merchandising trust keep it relevant when investors want quality at scale.",
-      score: "B+",
-      tone: "Steady"
-    }
-  ];
-}
-
-const framework = [
-  "Business quality and competitive durability",
-  "Revenue growth, margin expansion, and cash conversion",
-  "Valuation versus forward catalysts and downside risk",
-  "Clear monthly action framework for your own due diligence"
+const winningPicks = [
+  {
+    ticker: "FTAI",
+    name: "FTAI Aviation",
+    picked: "July 2024",
+    returnText: "187%",
+    color: "bg-cyan-600"
+  },
+  {
+    ticker: "NET",
+    name: "Cloudflare",
+    picked: "September 2024",
+    returnText: "160%",
+    color: "bg-orange-500"
+  },
+  {
+    ticker: "HWM",
+    name: "Howmet",
+    picked: "January 2025",
+    returnText: "120%",
+    color: "bg-teal-600"
+  },
+  {
+    ticker: "CRWD",
+    name: "CrowdStrike",
+    picked: "August 2024",
+    returnText: "96%",
+    color: "bg-rose-600"
+  }
 ];
 
-const stats = [
-  ["1", "stock of the month"],
-  ["4", "supporting watchlist ideas"],
-  ["12", "research issues per year"],
-  ["$1.99", "monthly subscription"]
+const differentiators = [
+  {
+    number: "1.",
+    title: "Focused monthly stock selection",
+    copy: "One primary idea each month keeps the research process clear, disciplined, and easy to follow."
+  },
+  {
+    number: "2.",
+    title: "Analyst-style thesis and risk notes",
+    copy: "Each pick includes the story, catalysts, valuation context, and the risks that could break the thesis."
+  },
+  {
+    number: "3.",
+    title: "Built for investors who want signal",
+    copy: "No noisy alert stream. You get a concise research brief and a practical checklist for your own due diligence."
+  }
 ];
 
-export default async function Home() {
-  const featuredPick = await getStockOfMonth().catch(() => ({
+const included = [
+  "Monthly stock-of-the-month suggestion",
+  "Research notes and catalyst checklist",
+  "Risk markers and sell-discipline prompts",
+  "Supporting watchlist ideas",
+  "Stripe-secured subscription access"
+];
+
+function getFallbackPick(): StockOfMonth {
+  return {
     ticker: "NFLX",
     name: "Netflix",
     price: "$92.12",
@@ -104,291 +101,297 @@ export default async function Home() {
       ["Quality", "91"],
       ["Growth", "84"],
       ["Momentum", "78"]
-    ] as [string, string][]
-  }));
-  const monthlyIdeas = buildMonthlyIdeas(featuredPick);
+    ]
+  };
+}
+
+export default async function Home() {
+  const featuredPick = await getStockOfMonth().catch(getFallbackPick);
 
   return (
-    <main className="min-h-screen bg-[#f4f7fb] text-slate-950">
+    <main className="min-h-screen bg-white text-[#21005d]">
       <TopNav />
-
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 lg:grid-cols-[1fr_430px] lg:py-16">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-              {featuredPick.date} Stock of the Month
-            </div>
-            <h1 className="max-w-4xl text-5xl font-semibold leading-[1.03] tracking-normal text-slate-950 md:text-7xl">
-              Stock ideas with the story behind the signal.
-            </h1>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600">
-              A StockStory-inspired research page focused on one premium monthly
-              suggestion, supported by a concise watchlist of high-quality companies
-              worth tracking.
-            </p>
-
-            <div className="mt-8 flex max-w-2xl items-center gap-3 rounded-md border border-slate-200 bg-slate-50 p-2">
-              <Search className="ml-2 h-5 w-5 text-slate-400" aria-hidden="true" />
-              <div className="min-w-0 flex-1 text-sm font-medium text-slate-500">
-                {featuredPick.ticker}, GOOGL, TSM, COST
-              </div>
-              <a
-                href="#latest"
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
-                Browse Picks
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </a>
-            </div>
-
-            <div className="mt-8 grid max-w-3xl grid-cols-2 gap-3 md:grid-cols-4">
-              {stats.map(([value, label]) => (
-                <div key={label} className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
-                  <p className="text-2xl font-semibold text-slate-950">{value}</p>
-                  <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <FeaturedCard featuredPick={featuredPick} />
-        </div>
-      </section>
-
-      <section id="latest" className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1fr_360px]">
-        <div>
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">Latest Suggestions</p>
-              <h2 className="mt-2 text-3xl font-semibold text-slate-950">Monthly stock research feed</h2>
-            </div>
-            <Newspaper className="hidden h-8 w-8 text-slate-300 sm:block" aria-hidden="true" />
-          </div>
-
-          <div className="divide-y divide-slate-200 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-            {monthlyIdeas.map((idea) => (
-              <article key={idea.ticker} className="grid gap-4 p-5 transition hover:bg-slate-50 md:grid-cols-[86px_1fr_96px]">
-                <div className="flex h-16 w-16 items-center justify-center rounded-md bg-slate-950 text-xl font-bold text-white">
-                  {idea.ticker}
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    <span>{idea.label}</span>
-                    <span className="text-slate-300">/</span>
-                    <span>{idea.date}</span>
-                  </div>
-                  <h3 className="mt-2 text-xl font-semibold leading-snug text-slate-950">{idea.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{idea.summary}</p>
-                  <a
-                    href={idea.ticker === featuredPick.ticker ? "#featured" : "#pricing"}
-                    className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700"
-                  >
-                    Read suggestion
-                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                </div>
-                <div className="flex items-start justify-between gap-3 md:block md:text-right">
-                  <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-                    <p className="text-xs text-slate-500">Score</p>
-                    <p className="text-lg font-semibold text-slate-950">{idea.score}</p>
-                  </div>
-                  <p className="mt-0 rounded-md bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 md:mt-3">
-                    {idea.tone}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-
-        <aside className="space-y-5">
-          <section className="rounded-md border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-700">
-                <Crown className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-950">This Month's Pick</p>
-                <p className="text-sm text-slate-500">{featuredPick.name} ({featuredPick.ticker})</p>
-              </div>
-            </div>
-            <p className="mt-4 text-sm leading-6 text-slate-600">
-              Unlock the full monthly brief with thesis, valuation notes, catalyst
-              map, and risk checklist.
-            </p>
-            <div className="mt-5">
-              <a
-                href="#pricing"
-                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 text-sm font-bold text-white transition hover:bg-emerald-500"
-              >
-                Subscribe Now
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </a>
-            </div>
-            <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
-              <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-              Secure checkout powered by Stripe
-            </div>
-          </section>
-
-          <section className="rounded-md border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Research Framework</p>
-            <div className="mt-5 space-y-4">
-              {framework.map((item) => (
-                <div key={item} className="flex gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" aria-hidden="true" />
-                  <p className="text-sm leading-6 text-slate-200">{item}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </aside>
-      </section>
-
-      <section id="featured" className="border-y border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-14 lg:grid-cols-[0.85fr_1.15fr]">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">Featured Analysis</p>
-            <h2 className="mt-3 text-4xl font-semibold leading-tight text-slate-950">
-              {featuredPick.ticker} earns the premium spot for {featuredPick.date}.
-            </h2>
-            <p className="mt-4 text-slate-600">
-              The public page gives readers a clear summary. Subscribers get the
-              full recommendation memo, valuation context, and sell discipline.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <AnalysisTile
-              icon={<BookOpenText className="h-5 w-5" />}
-              title="Story"
-              copy="Streaming scale is becoming a broader monetization platform across paid sharing, ads, and live programming."
-            />
-            <AnalysisTile
-              icon={<TrendingUp className="h-5 w-5" />}
-              title="Catalysts"
-              copy="Ad-tier growth, content efficiency, and buyback cadence are the key signals to watch over the next few quarters."
-            />
-            <AnalysisTile
-              icon={<ShieldCheck className="h-5 w-5" />}
-              title="Risks"
-              copy="Valuation sensitivity, content competition, and subscriber growth normalization keep position sizing important."
-            />
-          </div>
-        </div>
-      </section>
-
-      <section id="pricing" className="mx-auto grid max-w-7xl gap-8 px-6 py-14 lg:grid-cols-[1fr_430px]">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">Premium Access</p>
-          <h2 className="mt-3 text-4xl font-semibold text-slate-950">Get the full Stock of the Month brief.</h2>
-          <p className="mt-4 max-w-2xl text-slate-600">
-            Built for investors who want a focused monthly idea, not an endless
-            stream of alerts. Every issue includes the suggestion, evidence, valuation
-            notes, catalysts, risks, and a practical monitoring checklist.
-          </p>
-          <p id="risk" className="mt-5 max-w-2xl text-xs leading-5 text-slate-500">
-            Research is educational and not financial advice. Investing involves
-            risk, including possible loss of principal.
-          </p>
-        </div>
-
-        <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-500">Monthly membership</p>
-          <div className="mt-2 flex items-end gap-2">
-            <span className="text-5xl font-semibold text-slate-950">$1.99</span>
-            <span className="pb-2 text-sm text-slate-500">/ month</span>
-          </div>
-
-          <div className="mt-6">
-            <StripePricingTable
-              pricingTableId={pricingTableId}
-              publishableKey={publishableKey}
-            />
-          </div>
-        </div>
-      </section>
+      <OfferBar />
+      <Hero featuredPick={featuredPick} />
+      <Differentiators />
+      <CheckoutSection featuredPick={featuredPick} />
     </main>
   );
 }
 
 function TopNav() {
   return (
-    <nav className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+    <nav className="sticky top-0 z-30 border-b border-slate-100 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <a href="#" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-950 text-emerald-300">
-            <BarChart3 className="h-5 w-5" aria-hidden="true" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-md bg-[#ff765f] text-white">
+            <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
-          <div>
-            <p className="text-sm font-bold text-slate-950">StockMonth</p>
-            <p className="text-xs text-slate-500">One premium pick at a time</p>
-          </div>
+          <span className="text-3xl font-bold text-[#21005d]">StockMonth</span>
         </a>
-        <div className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
-          <a href="#latest" className="hover:text-slate-950">Latest Suggestions</a>
-          <a href="#featured" className="hover:text-slate-950">Featured Pick</a>
-          <a href="#pricing" className="hover:text-slate-950">Subscribe</a>
+
+        <div className="hidden items-center gap-8 text-base font-bold text-[#21005d] lg:flex">
+          <a href="#latest" className="inline-flex items-center gap-2">
+            <Newspaper className="h-5 w-5" aria-hidden="true" />
+            Newsfeed
+          </a>
+          <a href="#different" className="inline-flex items-center gap-2">
+            <Grid2X2 className="h-5 w-5" aria-hidden="true" />
+            Discover
+          </a>
+          <a href="#pricing" className="inline-flex items-center gap-2">
+            <Star className="h-5 w-5" aria-hidden="true" />
+            Watchlist
+          </a>
+          <a href="#pricing" className="inline-flex items-center gap-2">
+            <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+            More
+          </a>
+        </div>
+
+        <div className="hidden items-center gap-4 xl:flex">
+          <div className="flex h-12 w-72 items-center gap-3 rounded-full border border-slate-200 px-4 text-slate-400">
+            <Search className="h-5 w-5" aria-hidden="true" />
+            <span className="text-base font-semibold">Search for stocks...</span>
+          </div>
+          <a
+            href="#pricing"
+            className="inline-flex h-12 items-center justify-center rounded-md bg-[#ff765f] px-5 text-center text-sm font-extrabold leading-tight text-white transition hover:bg-[#f25f48]"
+          >
+            Unlock Monthly Pick
+          </a>
+          <UserCircle2 className="h-8 w-8 text-[#21005d]" aria-hidden="true" />
         </div>
       </div>
     </nav>
   );
 }
 
-function FeaturedCard({ featuredPick }: { featuredPick: StockOfMonth }) {
+function OfferBar() {
   return (
-    <article className="rounded-md border border-slate-200 bg-slate-950 p-6 text-white shadow-xl">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold text-emerald-300">{featuredPick.rating}</p>
-          <h2 className="mt-2 text-4xl font-semibold">{featuredPick.ticker}</h2>
-          <p className="mt-1 text-slate-300">{featuredPick.name}</p>
-        </div>
-        <div className="rounded-md bg-emerald-400 px-3 py-2 text-sm font-bold text-slate-950">
-          {featuredPick.change}
-        </div>
-      </div>
+    <div className="sticky top-20 z-20 border-b border-[#ffd8cf] bg-[#ffe0d8] px-4 py-3 text-center font-bold text-[#21005d] shadow-sm">
+      <span className="mr-3">Offer expires in:</span>
+      <CountdownValue value="28" label="hours" />
+      <CountdownValue value="52" label="minutes" />
+      <CountdownValue value="43" label="seconds" />
+    </div>
+  );
+}
 
-      <div className="mt-6 rounded-md border border-white/10 bg-white/[0.04] p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm text-slate-300">Reference price</p>
-          <p className="text-2xl font-semibold">{featuredPick.price}</p>
+function CountdownValue({ value, label }: { value: string; label: string }) {
+  return (
+    <span className="mx-1 inline-flex items-center gap-2">
+      <span className="rounded-md bg-[#ff765f] px-3 py-1 text-xl font-extrabold text-white">{value}</span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function Hero({ featuredPick }: { featuredPick: StockOfMonth }) {
+  return (
+    <section className="overflow-hidden bg-[#21005d] text-white">
+      <div className="mx-auto max-w-7xl px-6 pb-16 pt-9">
+        <div className="mx-auto max-w-2xl space-y-4">
+          <PlanRow label="Monthly" oldPrice="$9.99" price="$1.99" />
+          <PlanRow label="Featured" oldPrice="$49.99" price="$1.99" highlight="This month" />
         </div>
-        <div className="h-28 rounded-md bg-[linear-gradient(180deg,rgba(16,185,129,0.18),rgba(16,185,129,0)),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:100%_100%,44px_44px,44px_44px]" />
-      </div>
 
-      <h3 className="mt-6 text-xl font-semibold leading-snug">{featuredPick.headline}</h3>
-      <p className="mt-3 text-sm leading-6 text-slate-300">{featuredPick.summary}</p>
-
-      <div className="mt-6 grid grid-cols-3 gap-3">
-        {featuredPick.scores.map(([label, value]) => (
-          <div key={label} className="rounded-md border border-white/10 bg-white/[0.04] p-3">
-            <p className="text-xs text-slate-400">{label}</p>
-            <p className="mt-1 text-xl font-semibold text-emerald-300">{value}</p>
+        <div className="mx-auto mt-14 max-w-4xl text-center">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-[#ffdcd3]">
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            {featuredPick.date} Stock of the Month
           </div>
-        ))}
+          <h1 className="text-5xl font-extrabold leading-tight md:text-7xl">
+            Unlock this month&apos;s stock pick
+          </h1>
+          <p className="mx-auto mt-5 max-w-3xl text-xl leading-8 text-[#ded1ff]">
+            {featuredPick.name} ({featuredPick.ticker}) is this month&apos;s featured idea.
+            Subscribe for the research thesis, catalysts, and risk checklist.
+          </p>
+          <a
+            href="#pricing"
+            className="mt-8 inline-flex h-14 items-center justify-center rounded-full bg-[#ff765f] px-10 text-base font-extrabold text-white transition hover:bg-[#f25f48]"
+          >
+            Unlock this month&apos;s picks
+          </a>
+        </div>
+
+        <section id="latest" className="mt-16">
+          <h2 className="text-center text-4xl font-extrabold text-white">Recent Winning Picks</h2>
+          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {winningPicks.map((pick) => (
+              <WinningPickCard key={pick.ticker} pick={pick} />
+            ))}
+          </div>
+        </section>
+      </div>
+    </section>
+  );
+}
+
+function PlanRow({
+  label,
+  oldPrice,
+  price,
+  highlight
+}: {
+  label: string;
+  oldPrice: string;
+  price: string;
+  highlight?: string;
+}) {
+  return (
+    <div className="grid items-center gap-4 rounded-md bg-white/12 px-5 py-5 shadow-lg md:grid-cols-[1fr_auto_auto]">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-white/25 px-4 py-2 text-sm font-extrabold text-white">{label}</span>
+        {highlight && (
+          <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-extrabold text-white">
+            {highlight}
+          </span>
+        )}
+      </div>
+      <div className="text-3xl font-extrabold">
+        <span className="mr-2 text-2xl text-white/35 line-through">{oldPrice}</span>
+        {price}
+      </div>
+      <a
+        href="#pricing"
+        className="inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-extrabold uppercase text-[#21005d]"
+      >
+        Sign up now
+      </a>
+    </div>
+  );
+}
+
+function WinningPickCard({
+  pick
+}: {
+  pick: {
+    ticker: string;
+    name: string;
+    picked: string;
+    returnText: string;
+    color: string;
+  };
+}) {
+  return (
+    <article className="rounded-md bg-white p-6 text-[#21005d] shadow-xl">
+      <div className="flex items-start gap-4">
+        <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full ${pick.color} text-xl font-extrabold text-white`}>
+          {pick.ticker.slice(0, 1)}
+        </div>
+        <div>
+          <h3 className="text-2xl font-extrabold leading-tight">
+            {pick.name} ({pick.ticker})
+          </h3>
+          <p className="mt-1 text-sm font-semibold text-[#7766a4]">Picked: {pick.picked}</p>
+          <p className="text-sm font-semibold text-[#7766a4]">Returns as of: December 2025</p>
+        </div>
+      </div>
+      <div className="mt-7 rounded-md bg-emerald-100 px-4 py-4 text-center text-xl font-extrabold text-emerald-800">
+        Total Return {pick.returnText}
       </div>
     </article>
   );
 }
 
-function AnalysisTile({
-  icon,
-  title,
-  copy
+function Differentiators() {
+  return (
+    <section id="different" className="bg-white px-6 py-16">
+      <div className="mx-auto max-w-6xl">
+        <h2 className="text-center text-5xl font-extrabold leading-tight text-[#21005d]">
+          What Makes StockMonth Different?
+        </h2>
+
+        <div className="mt-10 grid gap-5 lg:grid-cols-2">
+          {differentiators.slice(0, 2).map((item) => (
+            <DifferentiatorCard key={item.number} item={item} />
+          ))}
+          <div className="lg:col-span-2">
+            <DifferentiatorCard item={differentiators[2]} wide />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DifferentiatorCard({
+  item,
+  wide = false
 }: {
-  icon: React.ReactNode;
-  title: string;
-  copy: string;
+  item: { number: string; title: string; copy: string };
+  wide?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50 p-5">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-white text-emerald-700 shadow-sm">
-        {icon}
+    <article className={`rounded-md border border-slate-200 bg-white p-8 shadow-sm ${wide ? "lg:grid lg:grid-cols-[1fr_260px] lg:items-center lg:gap-10" : ""}`}>
+      <div>
+        <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-full bg-[#e4d8ff] text-2xl font-extrabold text-[#21005d]">
+          {item.number}
+        </div>
+        <h3 className="text-2xl font-extrabold text-[#21005d]">{item.title}</h3>
+        <p className="mt-4 text-xl leading-8 text-[#21005d]">{item.copy}</p>
       </div>
-      <p className="font-semibold text-slate-950">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{copy}</p>
-    </div>
+      {wide && (
+        <div className="mt-8 rounded-md bg-[#e4d8ff] p-6 text-center lg:mt-0">
+          <Trophy className="mx-auto h-16 w-16 text-[#ff765f]" aria-hidden="true" />
+          <p className="mt-4 text-lg font-extrabold text-[#21005d]">Simple, focused, monthly</p>
+        </div>
+      )}
+    </article>
+  );
+}
+
+function CheckoutSection({ featuredPick }: { featuredPick: StockOfMonth }) {
+  return (
+    <section id="pricing" className="bg-[#21005d] px-6 py-16 text-white">
+      <div className="mx-auto grid max-w-7xl overflow-hidden rounded-md border border-white/10 bg-[#21005d] shadow-2xl lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="p-8 md:p-12">
+          <p className="text-lg font-extrabold text-[#ffb7a9]">Try StockMonth Edge today</p>
+          <h2 className="mt-4 text-5xl font-extrabold leading-tight">Subscribe for detailed analysis.</h2>
+          <p className="mt-5 text-xl leading-8 text-[#ded1ff]">
+            Get the full {featuredPick.ticker} research brief plus the monthly watchlist,
+            risk notes, and catalysts to monitor.
+          </p>
+
+          <h3 className="mt-12 text-2xl font-extrabold">What you get</h3>
+          <div className="mt-6 space-y-5">
+            {included.map((item) => (
+              <div key={item} className="flex items-center gap-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600">
+                  <Check className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="text-lg font-bold">{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 space-y-3 text-lg font-bold text-white">
+            <p>Questions? Contact support through your Stripe receipt email.</p>
+            <p className="underline">How does StockMonth research work? Read the brief after subscribing.</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 text-slate-950 md:p-10">
+          <div className="mb-8 rounded-md border border-slate-200 bg-slate-50 p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-500">Subscribe to StockMonth</p>
+                <p className="mt-2 text-4xl font-extrabold text-slate-950">$1.99</p>
+                <p className="mt-1 text-sm font-semibold text-slate-500">per month</p>
+              </div>
+              <ShieldCheck className="h-12 w-12 text-emerald-600" aria-hidden="true" />
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-slate-500">
+              <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+              Secure payment powered by Stripe
+            </div>
+          </div>
+
+          <StripePricingTable pricingTableId={pricingTableId} publishableKey={publishableKey} />
+        </div>
+      </div>
+    </section>
   );
 }
