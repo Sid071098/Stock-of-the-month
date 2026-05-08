@@ -15,8 +15,12 @@ import {
 import StripePricingTable from "./components/StripePricingTable";
 import { getStockOfMonth, type StockOfMonth } from "./lib/stockOfMonth";
 
-const pricingTableId = process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID;
-const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const defaultPricingTableId = "prctbl_1TUwppGgdCjtxcdnqrbSE1lS";
+const defaultPublishableKey =
+  "pk_live_51OXc79GgdCjtxcdnXkj1Q1Ntr72QpH8DRR3FVWjsGBAz0wwzvU5xlJG0BQsqxK0ZWVnLJC19XwUHjF1FFJlRy6V500oqCRBuDX";
+
+const pricingTableId = process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID || defaultPricingTableId;
+const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || defaultPublishableKey;
 
 export const revalidate = 3600;
 
@@ -213,15 +217,15 @@ export default async function Home() {
               Unlock the full monthly brief with thesis, valuation notes, catalyst
               map, and risk checklist.
             </p>
-            <form action="/api/checkout" method="POST" className="mt-5">
-              <button
-                type="submit"
+            <div className="mt-5">
+              <a
+                href="#pricing"
                 className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 text-sm font-bold text-white transition hover:bg-emerald-500"
               >
                 Subscribe Now
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </form>
+              </a>
+            </div>
             <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
               <LockKeyhole className="h-4 w-4" aria-hidden="true" />
               Secure checkout powered by Stripe
@@ -297,24 +301,12 @@ export default async function Home() {
             <span className="pb-2 text-sm text-slate-500">/ month</span>
           </div>
 
-          {pricingTableId ? (
-            <div className="mt-6">
-              <StripePricingTable
-                pricingTableId={pricingTableId}
-                publishableKey={publishableKey ?? ""}
-              />
-            </div>
-          ) : (
-            <form action="/api/checkout" method="POST" className="mt-6">
-              <button
-                type="submit"
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-slate-950 px-6 text-sm font-bold text-white transition hover:bg-slate-800"
-              >
-                Subscribe Now
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </form>
-          )}
+          <div className="mt-6">
+            <StripePricingTable
+              pricingTableId={pricingTableId}
+              publishableKey={publishableKey}
+            />
+          </div>
         </div>
       </section>
     </main>

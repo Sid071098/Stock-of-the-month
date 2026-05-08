@@ -38,7 +38,7 @@ Copy `.env.example` to `.env.local` and provide your Stripe keys:
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_PRICE_ID=price_your_price_id_here
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
-NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID=prctbl_1TTSXAGgdCjtxcdnpaUHd3vI
+NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID=prctbl_1TUwppGgdCjtxcdnqrbSE1lS
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 STOCK_STORY_PICK_URL=
 STOCK_STORY_API_KEY=
