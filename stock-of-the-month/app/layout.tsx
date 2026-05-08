@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Stock of the Month | NFLX",
-  description: "A premium monthly equity research subscription featuring Netflix as this month's highlighted stock."
+  title: "StockMonth | Stock of the Month Suggestions",
+  description: "A StockStory-inspired monthly stock suggestion site featuring one premium pick and a focused research watchlist."
 };
 
 export default function RootLayout({

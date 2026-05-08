@@ -10,6 +10,10 @@ stock-of-the-month/
 │   ├── api/
 │   │   └── checkout/
 │   │       └── route.ts
+│   │   └── stock-of-month/
+│   │       └── route.ts
+│   ├── lib/
+│   │   └── stockOfMonth.ts
 │   ├── cancel/
 │   │   └── page.tsx
 │   ├── success/
@@ -36,6 +40,9 @@ STRIPE_PRICE_ID=price_your_price_id_here
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
 NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID=prctbl_1TTSXAGgdCjtxcdnpaUHd3vI
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+STOCK_STORY_PICK_URL=
+STOCK_STORY_API_KEY=
+STOCK_STORY_AUTH_HEADER=Authorization
 ```
 
 The Checkout route supports either:
@@ -44,6 +51,34 @@ The Checkout route supports either:
 - inline `price_data` when `STRIPE_PRICE_ID` is not provided.
 
 If `NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID` is set, the homepage will embed Stripe's Pricing Table directly in the pricing section.
+
+## Dynamic Stock of the Month
+
+The homepage reads the featured pick from `app/lib/stockOfMonth.ts`. If `STOCK_STORY_PICK_URL` is set, the server fetches that JSON endpoint with `cache: "no-store"` and optional authentication. If the endpoint is missing or unavailable, the site falls back to the `STOCK_MONTH_*` environment values.
+
+The expected JSON can use these canonical keys:
+
+```json
+{
+  "ticker": "NFLX",
+  "name": "Netflix",
+  "price": 92.12,
+  "change": "+18.16% 1Y",
+  "rating": "Featured Pick",
+  "date": "May 2026",
+  "headline": "Netflix is this month's featured stock suggestion.",
+  "summary": "Short thesis text.",
+  "source": "StockStory",
+  "asOf": "2026-05-07T00:00:00.000Z",
+  "scores": [
+    ["Quality", "91"],
+    ["Growth", "84"],
+    ["Momentum", "78"]
+  ]
+}
+```
+
+The normalized data is also exposed at `/api/stock-of-month`.
 
 ## Run Locally
 
@@ -56,8 +91,10 @@ Open `http://localhost:3000`.
 
 ## Key Files
 
-- `app/page.tsx`: Main NFLX landing page, stock chart placeholder, thesis, metrics, and subscription CTA.
+- `app/page.tsx`: StockStory-inspired homepage with dynamic stock of the month, suggestions feed, and subscription CTA.
 - `app/api/checkout/route.ts`: Stripe Checkout Session creation for a recurring monthly subscription.
+- `app/api/stock-of-month/route.ts`: Normalized JSON endpoint for the current stock of the month.
+- `app/lib/stockOfMonth.ts`: Server-side provider for StockStory/API data with environment fallbacks.
 - `app/success/page.tsx`: Payment successful page.
 - `app/cancel/page.tsx`: Payment cancelled page.
 

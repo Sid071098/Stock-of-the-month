@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     apiVersion: "2024-06-20"
   });
 
-  const lineItems = stripePriceId
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = stripePriceId
     ? [{ price: stripePriceId, quantity: 1 }]
     : [
         {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
             currency: "usd",
             unit_amount: 19900,
             recurring: {
-              interval: "month"
+              interval: "month" as const
             },
             product_data: {
               name: "Signal Desk: Stock of the Month",
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
       }
     }
   });
+
 
   if (!session.url) {
     return NextResponse.json(
