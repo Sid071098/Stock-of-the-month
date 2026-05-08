@@ -79,7 +79,7 @@ const stats = [
   ["1", "stock of the month"],
   ["4", "supporting watchlist ideas"],
   ["12", "research issues per year"],
-  ["$199", "monthly subscription"]
+  ["$1.99", "monthly subscription"]
 ];
 
 export default async function Home() {
@@ -275,7 +275,7 @@ export default async function Home() {
         <div className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm text-slate-500">Monthly membership</p>
           <div className="mt-2 flex items-end gap-2">
-            <span className="text-5xl font-semibold text-slate-950">$199</span>
+            <span className="text-5xl font-semibold text-slate-950">$1.99</span>
             <span className="pb-2 text-sm text-slate-500">/ month</span>
           </div>
 

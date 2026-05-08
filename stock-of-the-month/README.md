@@ -48,7 +48,7 @@ STOCK_STORY_AUTH_HEADER=Authorization
 The Checkout route supports either:
 
 - a pre-created Stripe Price ID via `STRIPE_PRICE_ID`, or
-- inline `price_data` when `STRIPE_PRICE_ID` is not provided.
+- inline `$1.99/month` `price_data` when `STRIPE_PRICE_ID` is not provided.
 
 If `NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID` is set, the homepage will embed Stripe's Pricing Table directly in the pricing section.
 
