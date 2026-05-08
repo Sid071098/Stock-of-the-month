@@ -12,7 +12,12 @@ const messages: Record<string, string> = {
 export default function CheckoutErrorPage({
   searchParams
 }: {
-  searchParams?: { code?: string };
+  searchParams?: {
+    code?: string;
+    stripe_type?: string;
+    stripe_code?: string;
+    stripe_message?: string;
+  };
 }) {
   const code = searchParams?.code ?? "stripe_checkout_failed";
   const message = messages[code] ?? messages.stripe_checkout_failed;
@@ -29,6 +34,13 @@ export default function CheckoutErrorPage({
         <p className="mt-4 rounded-md bg-slate-50 px-4 py-3 font-mono text-sm text-slate-600">
           code: {code}
         </p>
+        {(searchParams?.stripe_type || searchParams?.stripe_code || searchParams?.stripe_message) && (
+          <div className="mt-4 rounded-md bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            {searchParams?.stripe_type && <p>Stripe type: {searchParams.stripe_type}</p>}
+            {searchParams?.stripe_code && <p>Stripe code: {searchParams.stripe_code}</p>}
+            {searchParams?.stripe_message && <p className="mt-2">Stripe message: {searchParams.stripe_message}</p>}
+          </div>
+        )}
         <Link
           href="/"
           className="mt-8 inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"

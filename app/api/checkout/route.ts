@@ -65,16 +65,34 @@ export async function POST(request: Request) {
 
     return NextResponse.redirect(session.url, { status: 303 });
   } catch (error) {
-    console.error("Stripe Checkout failed", getStripeErrorSummary(error));
+    const summary = getStripeErrorSummary(error);
+    console.error("Stripe Checkout failed", summary);
 
-    return redirectToCheckoutError(origin, "stripe_checkout_failed");
+    return redirectToCheckoutError(origin, "stripe_checkout_failed", summary);
   }
 }
 
-function redirectToCheckoutError(origin: string, code: string) {
-  return NextResponse.redirect(`${origin}/checkout-error?code=${encodeURIComponent(code)}`, {
-    status: 303
-  });
+function redirectToCheckoutError(
+  origin: string,
+  code: string,
+  detail?: { type?: string; code?: string; message?: string }
+) {
+  const url = new URL("/checkout-error", origin);
+  url.searchParams.set("code", code);
+
+  if (detail?.type) {
+    url.searchParams.set("stripe_type", detail.type);
+  }
+
+  if (detail?.code) {
+    url.searchParams.set("stripe_code", detail.code);
+  }
+
+  if (detail?.message) {
+    url.searchParams.set("stripe_message", detail.message.slice(0, 260));
+  }
+
+  return NextResponse.redirect(url, { status: 303 });
 }
 
 function getStripeErrorSummary(error: unknown) {
