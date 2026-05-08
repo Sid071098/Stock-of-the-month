@@ -51,7 +51,7 @@ type SourcePayload = Partial<
 >;
 
 export async function getStockOfMonth(): Promise<StockOfMonth> {
-  const sourceUrl = process.env.STOCK_STORY_PICK_URL;
+  const sourceUrl = normalizeUrl(process.env.STOCK_STORY_PICK_URL);
 
   if (!sourceUrl) {
     return fallbackPick;
@@ -67,6 +67,15 @@ export async function getStockOfMonth(): Promise<StockOfMonth> {
       return {
         ...fallbackPick,
         source: `Fallback: source returned ${response.status}`
+      };
+    }
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (!contentType.includes("application/json")) {
+      return {
+        ...fallbackPick,
+        source: "Fallback: source did not return JSON"
       };
     }
 
@@ -86,13 +95,39 @@ function buildSourceHeaders(): HeadersInit {
   };
 
   const apiKey = process.env.STOCK_STORY_API_KEY;
-  const authHeader = process.env.STOCK_STORY_AUTH_HEADER ?? "Authorization";
+  const authHeader = sanitizeHeaderName(process.env.STOCK_STORY_AUTH_HEADER) ?? "Authorization";
 
   if (apiKey) {
     headers[authHeader] = authHeader.toLowerCase() === "authorization" ? `Bearer ${apiKey}` : apiKey;
   }
 
   return headers;
+}
+
+function normalizeUrl(value: string | undefined): string | undefined {
+  if (!value?.trim()) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+      return undefined;
+    }
+
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function sanitizeHeaderName(value: string | undefined): string | undefined {
+  if (!value?.trim()) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return /^[A-Za-z0-9-]+$/.test(trimmed) ? trimmed : undefined;
 }
 
 function normalizeSourcePayload(payload: SourcePayload): StockOfMonth {

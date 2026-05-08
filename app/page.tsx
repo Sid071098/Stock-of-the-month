@@ -18,7 +18,7 @@ import { getStockOfMonth, type StockOfMonth } from "./lib/stockOfMonth";
 const pricingTableId = process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID;
 const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 function buildMonthlyIdeas(featuredPick: StockOfMonth) {
   return [
@@ -83,7 +83,25 @@ const stats = [
 ];
 
 export default async function Home() {
-  const featuredPick = await getStockOfMonth();
+  const featuredPick = await getStockOfMonth().catch(() => ({
+    ticker: "NFLX",
+    name: "Netflix",
+    price: "$92.12",
+    change: "+18.16% 1Y",
+    rating: "Featured Pick",
+    date: "May 2026",
+    headline:
+      "Netflix is our Stock of the Month as advertising, live events, and disciplined content spending reshape the earnings story.",
+    summary:
+      "Our monthly research brief frames NFLX as a premium media platform with expanding monetization surfaces, stronger free cash flow, and a cleaner shareholder return profile.",
+    source: "Page fallback",
+    asOf: new Date().toISOString(),
+    scores: [
+      ["Quality", "91"],
+      ["Growth", "84"],
+      ["Momentum", "78"]
+    ] as [string, string][]
+  }));
   const monthlyIdeas = buildMonthlyIdeas(featuredPick);
 
   return (
