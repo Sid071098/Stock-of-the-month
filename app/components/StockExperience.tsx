@@ -20,10 +20,12 @@ import {
   Mail,
   RefreshCcw,
   Save,
+  Search,
   Settings,
-  ShieldCheck,
   Sparkles,
+  Star,
   TrendingUp,
+  X,
   UserPlus,
   UserCircle
 } from "lucide-react";
@@ -47,6 +49,14 @@ type AuthNotice = {
   message: string;
   type: "error" | "success" | "info";
 };
+
+const authWinningPicks = [
+  { name: "FTAI Aviation", return: "187%", ticker: "FTAI", picked: "July 2024" },
+  { name: "Cloudflare", return: "160%", ticker: "NET", picked: "September 2024" },
+  { name: "Howmet", return: "120%", ticker: "HWM", picked: "January 2025" },
+  { name: "CrowdStrike", return: "96%", ticker: "CRWD", picked: "August 2024" },
+  { name: "Wabtec", return: "52%", ticker: "WAB", picked: "June 2024" }
+];
 
 type StockExperienceProps = {
   archivePicks: ArchivePick[];
@@ -179,6 +189,7 @@ function AuthLoadingScreen() {
 
 function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUser) => void }) {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [authPanelOpen, setAuthPanelOpen] = useState(false);
   const [notice, setNotice] = useState<AuthNotice | null>(null);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -192,6 +203,11 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   function showNotice(nextNotice: AuthNotice) {
     setNotice(nextNotice);
     window.setTimeout(() => setNotice((current) => (current?.message === nextNotice.message ? null : current)), 4000);
+  }
+
+  function openAuthPanel(nextMode: "login" | "signup" | "forgot") {
+    setMode(nextMode);
+    setAuthPanelOpen(true);
   }
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
@@ -281,10 +297,10 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] px-6 py-8 text-slate-950">
+    <main className="min-h-screen bg-white text-[#210947]">
       {notice && (
         <div
-          className={`fixed right-5 top-5 z-50 max-w-sm rounded-md border p-4 text-sm font-bold shadow-2xl ${
+          className={`fixed right-5 top-5 z-[70] max-w-sm rounded-md border p-4 text-sm font-bold shadow-2xl ${
             notice.type === "error"
               ? "border-rose-200 bg-rose-50 text-rose-700"
               : notice.type === "success"
@@ -297,40 +313,103 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       )}
 
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center">
-        <div className="grid w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-2xl lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="relative overflow-hidden bg-[#0f172a] p-8 text-white md:p-10">
-            <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#ff4f00]/20" />
-            <div className="absolute bottom-0 right-0 h-0 w-0 border-b-[180px] border-l-[180px] border-b-[#ff4f00]/25 border-l-transparent" />
-            <div className="relative z-10 flex h-full flex-col justify-between gap-12">
-              <div>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#ff4f00] text-white">
-                    <BarChart3 className="h-7 w-7" aria-hidden="true" />
-                  </div>
-                  <span className="text-2xl font-black tracking-tight">StockyMonth</span>
-                </div>
-                <h1 className="mt-10 max-w-xl text-3xl font-black leading-tight md:text-4xl">
-                  Sign in to unlock your monthly stock research dashboard.
-                </h1>
-                <p className="mt-5 max-w-lg text-base font-medium leading-relaxed text-slate-300">
-                  Create an account, review the latest Stock of the Month, and explore the public archive from one clean trading workspace.
-                </p>
-              </div>
+      <header className="border-b border-slate-100 bg-white px-6 py-5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-[#ff4f00] text-white">
+              <BarChart3 className="h-7 w-7" aria-hidden="true" />
+            </div>
+            <span className="text-2xl font-black tracking-tight">StockyMonth</span>
+          </div>
 
-              <div className="grid gap-3">
-                {["Protected dashboard access", "Registered-user detection", "Forgot-password recovery flow"].map((item) => (
-                  <div key={item} className="flex items-center gap-3 rounded-md border border-white/10 bg-white/5 p-3">
-                    <ShieldCheck className="h-5 w-5 text-[#22c55e]" aria-hidden="true" />
-                    <span className="text-sm font-black text-slate-100">{item}</span>
-                  </div>
+          <div className="hidden h-12 w-full max-w-md items-center gap-3 rounded-full border border-slate-200 px-5 text-slate-400 shadow-sm lg:flex">
+            <Search className="h-5 w-5" aria-hidden="true" />
+            <span className="text-sm font-bold">Search for stocks...</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => openAuthPanel("login")}
+              className="h-12 rounded-full border border-[#210947] bg-white px-6 text-sm font-black uppercase tracking-wide text-[#210947] transition hover:bg-[#fff1ea]"
+            >
+              Log in
+            </button>
+            <button
+              type="button"
+              onClick={() => openAuthPanel("signup")}
+              className="h-12 rounded-full bg-[#210947] px-7 text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#310a68]"
+            >
+              Get started
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section className="px-6 py-12 md:py-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.88fr_1.12fr]">
+          <div>
+            <h1 className="max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-[#210947] md:text-5xl">
+              Get Investing Superpowers With StockyMonth
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg font-semibold leading-8 text-[#3f2d64]">
+              StockyMonth helps you find buy-and-hold stocks with the potential to multiply your net worth. AI-powered,
+              research-backed, and built for monthly conviction.
+            </p>
+            <button
+              type="button"
+              onClick={() => openAuthPanel("signup")}
+              className="mt-8 inline-flex h-14 w-full max-w-sm items-center justify-center rounded-full bg-[#210947] px-8 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68]"
+            >
+              Get started, it&apos;s free
+            </button>
+
+            <div className="mt-7 flex flex-wrap items-center gap-3 text-emerald-700">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <Star key={index} className="h-5 w-5 fill-current" aria-hidden="true" />
                 ))}
               </div>
+              <p className="text-base font-black">Trusted by 700,000+ investors</p>
             </div>
-          </section>
+          </div>
 
-          <section className="p-6 md:p-10">
-            <div className="mb-6 inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
+          <InvestorHeroIllustration />
+        </div>
+      </section>
+
+      <section className="bg-[#22006c] px-6 py-14 text-white">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="text-center text-3xl font-black tracking-tight md:text-4xl">Recent Winning Picks</h2>
+          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+            {authWinningPicks.map((pick) => (
+              <AuthWinningPickCard key={pick.ticker} pick={pick} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {authPanelOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#210947]/40 px-4 py-8 backdrop-blur-sm">
+          <section className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-md border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl md:p-8">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">StockyMonth Access</p>
+                <h2 className="mt-2 text-2xl font-black text-[#210947]">
+                  {mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : "Recover your password"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Close authentication panel"
+                onClick={() => setAuthPanelOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="mt-6 inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
               <button
                 type="button"
                 onClick={() => setMode("login")}
@@ -354,14 +433,12 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             </div>
 
             {mode === "login" && (
-              <form onSubmit={handleLogin}>
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Member Login</p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">Welcome back</h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              <form className="mt-6" onSubmit={handleLogin}>
+                <p className="text-sm leading-relaxed text-slate-600">
                   Enter the email and password you used when creating your StockyMonth account.
                 </p>
 
-                <div className="mt-7 grid gap-4">
+                <div className="mt-6 grid gap-4">
                   <AuthInput
                     autoComplete="email"
                     icon={<Mail className="h-5 w-5" aria-hidden="true" />}
@@ -395,7 +472,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? "Checking account..." : "Login"}
                 </button>
@@ -403,14 +480,12 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             )}
 
             {mode === "signup" && (
-              <form onSubmit={handleSignup}>
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Create Account</p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">Start with StockyMonth</h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              <form className="mt-6" onSubmit={handleSignup}>
+                <p className="text-sm leading-relaxed text-slate-600">
                   Sign up with your first name, last name, and email address. Existing users will be prompted to log in.
                 </p>
 
-                <div className="mt-7 grid gap-4 sm:grid-cols-2">
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   <AuthInput label="First name" onChange={setFirstName} placeholder="First name" type="text" value={firstName} />
                   <AuthInput label="Last name" onChange={setLastName} placeholder="Last name" type="text" value={lastName} />
                   <div className="sm:col-span-2">
@@ -440,22 +515,20 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isSubmitting ? "Creating account..." : "Sign up"}
+                  {isSubmitting ? "Creating account..." : "Get started"}
                 </button>
               </form>
             )}
 
             {mode === "forgot" && (
-              <form onSubmit={handleForgotPassword}>
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Password Recovery</p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">Forgot password?</h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              <form className="mt-6" onSubmit={handleForgotPassword}>
+                <p className="text-sm leading-relaxed text-slate-600">
                   Enter your registered email address and StockyMonth will prepare the reset flow.
                 </p>
 
-                <div className="mt-7">
+                <div className="mt-6">
                   <AuthInput
                     autoComplete="email"
                     icon={<Mail className="h-5 w-5" aria-hidden="true" />}
@@ -470,7 +543,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <button
                     type="submit"
-                    className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+                    className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68]"
                   >
                     Send reset instructions
                   </button>
@@ -486,8 +559,70 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             )}
           </section>
         </div>
-      </div>
+      )}
     </main>
+  );
+}
+
+function InvestorHeroIllustration() {
+  return (
+    <div className="relative mx-auto hidden h-[430px] w-full max-w-xl md:block" aria-hidden="true">
+      <div className="absolute right-10 top-8 h-72 w-72 rounded-full bg-[#fff1ea]" />
+      <div className="absolute right-6 top-20 h-48 w-72">
+        <div className="absolute bottom-0 left-8 h-24 w-5 rounded-t bg-[#ff9b64]" />
+        <div className="absolute bottom-0 left-20 h-36 w-5 rounded-t bg-[#ff6b4a]" />
+        <div className="absolute bottom-0 left-32 h-28 w-5 rounded-t bg-[#ff9b64]" />
+        <div className="absolute bottom-0 left-44 h-44 w-5 rounded-t bg-[#ff3b6d]" />
+        <div className="absolute bottom-0 left-56 h-[136px] w-5 rounded-t bg-[#ff6b4a]" />
+        <div className="absolute left-8 top-12 h-24 w-64 border-t-2 border-dashed border-[#c9c2df]" />
+      </div>
+
+      <div className="absolute right-20 top-20 h-52 w-64 rounded-[40px] bg-[#07031d] shadow-2xl" />
+      <div className="absolute right-24 top-2 h-48 w-52 rotate-[-14deg] rounded-[48px] bg-[#ef0068]" />
+      <div className="absolute right-28 top-24 h-44 w-44 rounded-[40px] bg-gradient-to-br from-[#ff8a3d] to-[#ef0068]" />
+      <div className="absolute right-40 top-36 text-[96px] font-black leading-none text-white">$</div>
+      <div className="absolute right-44 top-14 h-20 w-24 rounded-b-[46px] rounded-t-[24px] bg-[#090421]" />
+      <div className="absolute right-56 top-16 h-10 w-10 rounded-full bg-[#d8dcf5]" />
+      <div className="absolute right-[100px] top-16 h-10 w-10 rounded-full bg-[#d8dcf5]" />
+
+      <div className="absolute bottom-4 right-28 h-28 w-64 rotate-6 rounded-md bg-[#cbd3ee] shadow-xl">
+        <div className="mx-auto mt-4 h-16 w-48 rounded bg-white p-3">
+          <div className="flex h-full items-end gap-2">
+            {[42, 64, 35, 72, 58, 88].map((height, index) => (
+              <span key={`${height}-${index}`} className="flex-1 rounded-t bg-[#210947]" style={{ height: `${height}%` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute bottom-12 right-0 h-20 w-28 rotate-[-20deg] rounded-tl-[48px] bg-[#ef0068]" />
+      <div className="absolute right-14 top-0 h-20 w-10 rotate-[24deg] border-2 border-[#090421]" />
+      <div className="absolute bottom-14 left-24 h-8 w-16 rotate-[-12deg] rounded-md bg-[#ff6b4a]" />
+      <div className="absolute bottom-20 right-24 h-8 w-16 rotate-[15deg] rounded-md bg-[#ff6b4a]" />
+      <TrendingUp className="absolute bottom-12 right-4 h-32 w-32 text-[#ef0068]" strokeWidth={5} />
+    </div>
+  );
+}
+
+function AuthWinningPickCard({ pick }: { pick: (typeof authWinningPicks)[number] }) {
+  return (
+    <article className="rounded-md bg-white p-5 text-[#210947] shadow-xl">
+      <div className="flex items-start gap-3">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#fff1ea] text-sm font-black text-[#ff4f00] ring-1 ring-orange-100">
+          {pick.ticker.slice(0, 2)}
+        </div>
+        <div>
+          <h3 className="text-lg font-black leading-tight">
+            {pick.name} ({pick.ticker})
+          </h3>
+          <p className="mt-1 text-sm font-bold leading-5 text-[#6c5d7f]">Picked: {pick.picked}</p>
+          <p className="text-sm font-bold leading-5 text-[#6c5d7f]">Returns as of: December 2025</p>
+        </div>
+      </div>
+      <div className="mt-7 rounded-md bg-emerald-100 px-4 py-4 text-center text-lg font-black text-emerald-700">
+        Total Return {pick.return}
+      </div>
+    </article>
   );
 }
 
