@@ -10,7 +10,7 @@ export default function HistoryPage() {
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Dashboard
         </Link>
-        <h1 className="mt-8 text-4xl font-black md:text-5xl">Pick History</h1>
+        <h1 className="mt-8 text-3xl font-black md:text-4xl">Pick History</h1>
         <p className="mt-4 max-w-2xl text-lg leading-8 text-[#4d3f68]">
           Timeline of StockyMonth picks across 2025 and 2026.
         </p>
@@ -27,7 +27,7 @@ export default function HistoryPage() {
                 <span className="font-bold">{pick.month}</span>
               </div>
               <div>
-                <h2 className="text-2xl font-black">
+                <h2 className="text-xl font-black">
                   {pick.name} ({pick.ticker})
                 </h2>
               </div>

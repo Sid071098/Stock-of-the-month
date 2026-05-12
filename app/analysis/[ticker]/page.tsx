@@ -25,7 +25,7 @@ export default async function AnalysisPage({
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <section className="rounded-md border border-[#efe7f7] bg-white/85 p-6 shadow-xl backdrop-blur-xl">
             <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">AI Analysis</p>
-            <h1 className="mt-3 text-4xl font-black md:text-5xl">
+            <h1 className="mt-3 text-3xl font-black md:text-4xl">
               {snapshot.name} ({snapshot.ticker})
             </h1>
             <p className="mt-4 text-lg leading-8 text-[#4d3f68]">{analysis.thesis}</p>
@@ -38,7 +38,7 @@ export default async function AnalysisPage({
 
           <section className="rounded-md border border-[#efe7f7] bg-white/85 p-6 shadow-xl backdrop-blur-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-2xl font-black">30-day performance</h2>
+              <h2 className="text-xl font-black">30-day performance</h2>
               <span className="rounded-full bg-[#fff1ea] px-3 py-1 text-sm font-black text-[#ff6b4a]">Alpha Vantage</span>
             </div>
             <AnalysisChart data={snapshot.sparkline} />
@@ -52,7 +52,7 @@ export default async function AnalysisPage({
         </div>
 
         <section className="mt-6 rounded-md border border-[#efe7f7] bg-white p-6 shadow-xl">
-          <h2 className="text-2xl font-black">Technical Stats</h2>
+          <h2 className="text-xl font-black">Technical Stats</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="P/E Ratio" value={snapshot.peRatio} light />
             <Stat label="52-Week High" value={snapshot.high52} light />
@@ -99,7 +99,7 @@ function Stat({
   return (
     <div className={`rounded-md p-4 ${light ? "border border-[#efe7f7] bg-[#fffaf7]" : "border border-[#efe7f7] bg-white"}`}>
       <p className="text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</p>
-      <p className={`mt-1 text-2xl font-black ${positive === undefined ? "text-[#210947]" : positive ? "text-emerald-700" : "text-rose-600"}`}>
+      <p className={`mt-1 text-xl font-black ${positive === undefined ? "text-[#210947]" : positive ? "text-emerald-700" : "text-rose-600"}`}>
         {value}
       </p>
     </div>

@@ -112,7 +112,7 @@ function TopNav() {
           <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#ff6b4a] text-white">
             <BarChart3 className="h-7 w-7" aria-hidden="true" />
           </div>
-          <span className="text-3xl font-black tracking-tight text-[#210947]">StockyMonth</span>
+          <span className="text-2xl font-black tracking-tight text-[#210947]">StockyMonth</span>
         </Link>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -205,10 +205,10 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             {monthlyPick.month} Stock of the Month
           </p>
-          <h1 className="mt-7 max-w-4xl text-4xl font-black leading-tight text-[#210947] md:text-5xl">
+          <h1 className="mt-7 max-w-4xl text-3xl font-black leading-tight text-[#210947] md:text-4xl">
             Monthly stock picks with focused data, thesis, and quality shortlist.
           </h1>
-          <p className="mt-5 max-w-3xl text-xl leading-9 text-[#4d3f68]">
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-[#4d3f68]">
             {monthlyPick.name} ({monthlyPick.ticker}) is the current featured idea. Review the thesis,
             open detailed Alpha Vantage charts, and compare six high-quality stocks.
           </p>
@@ -233,7 +233,7 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
             <div className="flex items-center justify-between border-b border-[#efe7f7] pb-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8d7ca3]">Latest stock pick</p>
-                <h2 className="mt-2 text-3xl font-black text-[#210947]">{monthlyPick.ticker}</h2>
+                <h2 className="mt-2 text-2xl font-black text-[#210947]">{monthlyPick.ticker}</h2>
               </div>
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-700">
                 {monthlyPick.rating}
@@ -283,7 +283,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
       <div className="mx-auto max-w-[1460px]">
         <div className="mb-7 flex items-center gap-3 text-[#210947]">
           <CircleGauge className="h-6 w-6" aria-hidden="true" />
-          <h2 className="text-2xl font-black tracking-tight md:text-3xl">Our Latest Stock Pick</h2>
+          <h2 className="text-xl font-black tracking-tight md:text-2xl">Our Latest Stock Pick</h2>
         </div>
 
         <article className="overflow-hidden rounded-md border border-[#e7e1ea] bg-white p-5 shadow-sm md:p-7">
@@ -299,7 +299,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
                 </span>
               </div>
 
-              <h3 className="mt-5 font-serif text-3xl font-black leading-tight text-[#210947] md:text-4xl">
+              <h3 className="mt-5 text-2xl font-black leading-tight text-[#210947] md:text-3xl">
                 {monthlyPick.name} ({monthlyPick.ticker})
               </h3>
 
@@ -317,14 +317,14 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
                 </span>
               </div>
 
-              <p className="mt-5 max-w-5xl text-xl font-bold leading-9 text-[#796b99]">{monthlyPick.summary}</p>
+              <p className="mt-5 max-w-5xl text-lg font-bold leading-8 text-[#796b99]">{monthlyPick.summary}</p>
 
               <div className="mt-9">
                 <div className="mb-6 flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#210947] text-[#ff7b59]">
                     <CircleDollarSign className="h-6 w-6" aria-hidden="true" />
                   </span>
-                  <h4 className="text-xl font-black uppercase tracking-tight text-[#210947]">
+                  <h4 className="text-lg font-black uppercase tracking-tight text-[#210947]">
                     Why are we backing {monthlyPick.ticker} with our own money?
                   </h4>
                 </div>
@@ -369,7 +369,7 @@ function MonthlyPickArtwork({ month }: { month: string }) {
           <span className="text-[#210947]">
             <BadgeCheck className="h-12 w-12" aria-hidden="true" />
           </span>
-          <h3 className="font-serif text-4xl font-black text-[#210947] md:text-5xl">{month} Pick</h3>
+          <h3 className="text-3xl font-black text-[#210947] md:text-4xl">{month} Pick</h3>
         </div>
 
         <div className="relative rounded-md bg-white p-7 shadow-sm md:p-9">
@@ -383,7 +383,7 @@ function MonthlyPickArtwork({ month }: { month: string }) {
             </div>
           </div>
 
-          <blockquote className="mt-8 font-serif text-2xl font-black leading-tight text-[#210947] md:text-[28px] md:leading-tight">
+          <blockquote className="mt-8 text-xl font-black leading-tight text-[#210947] md:text-2xl md:leading-tight">
             "The components: the lowest-cost position, multiple powerful secular tailwinds, and improving business fundamentals.
             The result: the twin turbines of explosive EPS/FCF growth and a likely re-rating that will send the stock soaring over a multi-year period."
           </blockquote>
@@ -420,7 +420,7 @@ function BackingPoint({
       <span className={`flex h-9 w-9 items-center justify-center rounded-md ${colors[accent]}`}>
         {icon}
       </span>
-      <p className="text-xl font-bold leading-8 text-[#210947]">{text}</p>
+      <p className="text-lg font-bold leading-8 text-[#210947]">{text}</p>
     </div>
   );
 }
@@ -431,7 +431,7 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Top 6 High Quality Picks</p>
-          <h2 className="mt-3 text-4xl font-black text-[#210947]">Static shortlist you can update from admin</h2>
+          <h2 className="mt-3 text-3xl font-black text-[#210947]">Static shortlist you can update from admin</h2>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -447,7 +447,7 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
                 </div>
                 <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">{pick.tag}</span>
               </div>
-              <h3 className="mt-5 text-2xl font-black text-[#210947] group-hover:text-[#ff6b4a]">
+              <h3 className="mt-5 text-xl font-black text-[#210947] group-hover:text-[#ff6b4a]">
                 {pick.name} ({pick.ticker})
               </h3>
               <p className="mt-1 font-bold text-[#6c5d7f]">{pick.sector}</p>
@@ -480,7 +480,7 @@ function PricingSection({
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div>
           <p className="text-lg font-black text-[#ffb29d]">Subscribe to StockyMonth</p>
-          <h2 className="mt-3 text-4xl font-black">Get monthly picks for $1.99</h2>
+          <h2 className="mt-3 text-3xl font-black">Get monthly picks for $1.99</h2>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-[#e5d8f4]">
             Unlock {monthlyPick.ticker}, top quality ideas, detailed analysis, and pick history. Student promo codes are supported at checkout.
           </p>
@@ -502,7 +502,7 @@ function PricingSection({
             <form action="/api/checkout" method="POST" className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-6">
               <p className="text-sm font-black uppercase tracking-[0.18em] text-[#8d7ca3]">Monthly</p>
               <div className="mt-4 flex items-end gap-2">
-                <span className="text-5xl font-black">$1.99</span>
+                <span className="text-4xl font-black">$1.99</span>
                 <span className="pb-2 text-lg font-bold text-[#6c5d7f]">/month</span>
               </div>
               <button className="mt-6 inline-flex h-14 w-full items-center justify-center rounded-full bg-[#ff6b4a] text-base font-black text-white transition hover:bg-[#f45d3c]">
@@ -555,7 +555,7 @@ function AdminPanel({
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Admin</p>
-          <h2 className="mt-3 text-4xl font-black text-[#210947]">Manage monthly and quality picks</h2>
+          <h2 className="mt-3 text-3xl font-black text-[#210947]">Manage monthly and quality picks</h2>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
