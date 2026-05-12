@@ -10,6 +10,7 @@ export async function getMonthlyPickSummary(pick: MonthlyPick): Promise<string[]
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
+      cache: "no-store",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json"
@@ -20,7 +21,7 @@ export async function getMonthlyPickSummary(pick: MonthlyPick): Promise<string[]
           {
             role: "system",
             content:
-              "You summarize equity research for a SaaS dashboard. Return compact JSON only with key bullets, an array of 3-4 short punchy strings. Do not provide personalized financial advice."
+              "You summarize equity research for a SaaS dashboard. Return compact JSON only with key bullets, an array of 3-4 short punchy strings. Vary the wording naturally between requests. Do not provide personalized financial advice."
           },
           {
             role: "user",
@@ -28,9 +29,8 @@ export async function getMonthlyPickSummary(pick: MonthlyPick): Promise<string[]
           }
         ],
         response_format: { type: "json_object" },
-        temperature: 0.35
-      }),
-      next: { revalidate: 3600 }
+        temperature: 0.65
+      })
     });
 
     if (!response.ok) {

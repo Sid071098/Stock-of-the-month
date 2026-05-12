@@ -310,7 +310,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 
         <Reveal as="article" className="overflow-hidden rounded-md border border-slate-800 bg-[#0f172a] p-5 shadow-2xl md:p-7">
           <div className="grid gap-8 lg:grid-cols-[0.62fr_1fr] lg:items-stretch">
-            <MonthlyPickArtwork month={monthlyPick.month} />
+            <MonthlyPickArtwork monthlyPick={monthlyPick} />
 
             <div className="flex min-w-0 flex-col justify-center py-2">
               <div className="flex flex-wrap items-center gap-3">
@@ -388,6 +388,8 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 }
 
 function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
   return (
     <section id="all-picks" className="bg-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-7xl">
@@ -405,7 +407,20 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
           {picks.map((pick, index) => {
             return (
               <Reveal key={`${pick.month}-${pick.ticker}`} delay={(index % 6) * 55}>
-                <article className="relative min-h-full overflow-hidden rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+                <article
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setActiveIndex(index)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setActiveIndex(index);
+                    }
+                  }}
+                  className={`relative min-h-full cursor-pointer overflow-hidden rounded-md border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-orange-200 hover:bg-orange-50/40 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-100 ${
+                    activeIndex === index ? "border-[#ff4f00] bg-orange-50 shadow-xl ring-2 ring-orange-100" : "border-slate-200"
+                  }`}
+                >
                   <div className="mb-5 flex items-start justify-between gap-4">
                     <div className="flex gap-3">
                       <ArchiveLogo pick={pick} />
@@ -418,7 +433,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                     </div>
                     <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
                       <LiveDot />
-                      Active Buy
+                      {activeIndex === index ? "Selected" : "Active Buy"}
                     </span>
                   </div>
 
@@ -448,9 +463,9 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
   );
 }
 
-function MonthlyPickArtwork({ month }: { month: string }) {
+function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   return (
-    <div className="relative min-h-[360px] overflow-hidden rounded-md bg-[#d6e9e7] p-5 sm:p-8">
+    <div className="relative min-h-[460px] overflow-hidden rounded-md bg-[#d6e9e7] p-5 sm:p-8">
       <div className="absolute -left-20 -top-20 h-48 w-48 rounded-full bg-[#207d72]" />
       <div className="absolute left-20 -top-24 h-56 w-56 rounded-full bg-[#88beb8]" />
       <div className="absolute -left-16 top-24 h-36 w-36 rounded-[42px] bg-[#bce3df]" />
@@ -461,31 +476,34 @@ function MonthlyPickArtwork({ month }: { month: string }) {
       <div className="absolute bottom-0 right-0 h-0 w-0 border-b-[150px] border-l-[150px] border-b-[#207d72] border-l-transparent" />
       <div className="absolute bottom-0 right-20 h-0 w-0 border-b-[120px] border-l-[120px] border-b-[#88beb8] border-l-transparent" />
 
-      <div className="relative z-10 flex h-full min-h-[320px] flex-col justify-center">
-        <div className="mb-10 flex items-center justify-center gap-4">
-          <span className="text-[#210947]">
-            <BadgeCheck className="h-12 w-12" aria-hidden="true" />
+      <div className="relative z-10 flex min-h-[420px] flex-col">
+        <div className="flex items-center justify-start gap-4">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/75 text-[#210947] shadow-sm">
+            <BadgeCheck className="h-7 w-7" aria-hidden="true" />
           </span>
-          <h3 className="text-2xl font-black text-[#210947] md:text-3xl">{month} Pick</h3>
-        </div>
-
-        <div className="relative rounded-md bg-white p-6 shadow-sm md:p-7">
-          <div className="absolute -top-6 left-8 flex items-center">
-            <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-[#ffcfbf]">
-              <div className="mx-auto mt-2 h-7 w-7 rounded-full bg-[#21104d]" />
-              <div className="mx-auto mt-1 h-7 w-10 rounded-t-full bg-[#ff7b59]" />
-            </div>
-            <div className="-ml-2 flex h-14 w-14 items-center justify-center rounded-full bg-[#210947] text-[#ff7b59] ring-4 ring-white">
-              <CircleDollarSign className="h-8 w-8" aria-hidden="true" />
-            </div>
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#207d72]">Dynamic LLM Brief</p>
+            <h3 className="mt-1 text-2xl font-black text-[#210947] md:text-3xl">{monthlyPick.month} Pick</h3>
           </div>
-
-          <blockquote className="mt-8 text-base font-black leading-relaxed text-[#210947] md:text-lg">
-            "The components: the lowest-cost position, multiple powerful secular tailwinds, and improving business fundamentals.
-            The result: the twin turbines of explosive EPS/FCF growth and a likely re-rating that will send the stock soaring over a multi-year period."
-          </blockquote>
-          <p className="mt-5 text-sm font-black text-[#210947]">- StockyMonth Research Committee</p>
         </div>
+
+        <div className="relative mt-6 rounded-md bg-white/95 p-5 shadow-sm md:p-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="text-sm font-black text-[#210947]">Exclusive Analysis for Subscribers</p>
+            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-[#ff4f00]">AI refreshed</span>
+          </div>
+          <ul className="grid gap-3">
+            {(monthlyPick.summaryBullets?.length ? monthlyPick.summaryBullets : [monthlyPick.thesis]).slice(0, 4).map((item) => (
+              <li key={item} className="flex gap-3 text-sm font-bold leading-relaxed text-[#210947]">
+                <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#ff4f00]" />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-[#207d72]">StockyMonth Research Committee</p>
+        </div>
+
+        <MiniLiveChart ticker={monthlyPick.ticker} />
       </div>
     </div>
   );
@@ -540,6 +558,48 @@ function DashboardLiveChart({ ticker }: { ticker: string }) {
         </div>
       ) : (
         <div className="h-56 animate-pulse rounded-md bg-slate-800/70" />
+      )}
+    </div>
+  );
+}
+
+function MiniLiveChart({ ticker }: { ticker: string }) {
+  const [sparkline, setSparkline] = useState<SparklinePoint[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void fetch(`/api/snapshot/${ticker}`)
+      .then((response) => response.json())
+      .then((payload: { snapshot?: { sparkline?: SparklinePoint[] } }) => {
+        if (isMounted && Array.isArray(payload.snapshot?.sparkline)) {
+          setSparkline(payload.snapshot.sparkline);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSparkline([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [ticker]);
+
+  return (
+    <div className="mt-5 rounded-md border border-white/50 bg-[#0f172a]/90 p-4 shadow-xl">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-300">Live price signal</p>
+        <span className="inline-flex items-center gap-2 rounded-full bg-orange-500/15 px-2.5 py-1 text-[11px] font-black text-orange-200">
+          <LiveDot />
+          Alpha
+        </span>
+      </div>
+      {sparkline.length > 0 ? (
+        <AnalysisChart data={sparkline} heightClassName="h-32" strokeColor="#ff4f00" />
+      ) : (
+        <div className="h-32 animate-pulse rounded-md bg-white/10" />
       )}
     </div>
   );

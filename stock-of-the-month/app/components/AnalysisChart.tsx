@@ -5,19 +5,23 @@ import type { SparklinePoint } from "../lib/marketData";
 
 export default function AnalysisChart({
   data,
-  heightClassName = "h-72"
+  heightClassName = "h-72",
+  strokeColor = "#22c55e"
 }: {
   data: SparklinePoint[];
   heightClassName?: string;
+  strokeColor?: string;
 }) {
+  const gradientId = `stockymonthSparkline-${strokeColor.replace(/[^a-zA-Z0-9]/g, "")}`;
+
   return (
     <div className={`${heightClassName} w-full`}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 10 }}>
           <defs>
-            <linearGradient id="stockymonthSparkline" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.45} />
-              <stop offset="95%" stopColor="#22c55e" stopOpacity={0.02} />
+            <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.45} />
+              <stop offset="95%" stopColor={strokeColor} stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <XAxis dataKey="date" hide />
@@ -33,8 +37,8 @@ export default function AnalysisChart({
           />
           <Area
             dataKey="close"
-            fill="url(#stockymonthSparkline)"
-            stroke="#22c55e"
+            fill={`url(#${gradientId})`}
+            stroke={strokeColor}
             strokeWidth={3}
             type="monotone"
           />

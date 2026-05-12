@@ -2,6 +2,8 @@ import StockExperience from "../components/StockExperience";
 import { getMonthlyPickSummary } from "../lib/monthlySummary";
 import { allPicks, defaultMonthlyPick, defaultQualityPicks } from "../lib/picks";
 
+export const dynamic = "force-dynamic";
+
 const defaultPricingTableId = "prctbl_1TUwppGgdCjtxcdnqrbSE1lS";
 const defaultPublishableKey =
   "pk_live_51OXc79GgdCjtxcdnXkj1Q1Ntr72QpH8DRR3FVWjsGBAz0wwzvU5xlJG0BQsqxK0ZWVnLJC19XwUHjF1FFJlRy6V500oqCRBuDX";
