@@ -90,3 +90,18 @@ export const defaultQualityPicks: QualityPick[] = [
     thesis: "A global nicotine products company with strong free cash flow, pricing power, and meaningful smoke-free product expansion."
   }
 ];
+
+export const pickHistory = [
+  { month: "May 2026", ticker: "EQT", name: "EQT", status: "Active Buy" },
+  { month: "April 2026", ticker: "DASH", name: "DoorDash", status: "Active Buy" },
+  { month: "March 2026", ticker: "BMI", name: "Badger Meter", status: "Active Buy" },
+  { month: "February 2026", ticker: "MSI", name: "Motorola Solutions", status: "Active Buy" },
+  { month: "January 2026", ticker: "AJG", name: "Arthur J. Gallagher", status: "Active Buy" },
+  { month: "December 2025", ticker: "CSW", name: "CSW Industrials", status: "Active Buy" },
+  { month: "November 2025", ticker: "LPLA", name: "LPL Financial", status: "Active Buy" },
+  { month: "October 2025", ticker: "FSS", name: "Federal Signal", status: "Active Buy" },
+  { month: "September 2025", ticker: "BLBD", name: "Blue Bird", status: "Active Buy" },
+  { month: "August 2025", ticker: "NFLX", name: "Netflix", status: "Active Buy" },
+  { month: "July 2025", ticker: "EME", name: "EMCOR", status: "Active Buy" },
+  { month: "June 2025", ticker: "MSFT", name: "Microsoft", status: "Active Buy" }
+];

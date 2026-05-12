@@ -1,0 +1,24 @@
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+export async function POST(request: Request) {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const customerId = request.headers.get("x-stockymonth-customer") ?? process.env.STRIPE_TEST_CUSTOMER_ID;
+
+  if (!stripeSecretKey || !customerId) {
+    return NextResponse.redirect(new URL("/checkout-error?code=missing_portal_config", appUrl), { status: 303 });
+  }
+
+  const stripe = new Stripe(stripeSecretKey, {
+    apiVersion: "2024-06-20"
+  });
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: customerId,
+    return_url: `${appUrl}/dashboard`
+  });
+
+  return NextResponse.redirect(session.url, { status: 303 });
+}

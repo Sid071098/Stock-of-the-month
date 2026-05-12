@@ -28,13 +28,17 @@ type StockExperienceProps = {
   defaultQualityPicks: QualityPick[];
   pricingTableId: string;
   publishableKey: string;
+  showAdmin?: boolean;
+  showPricing?: boolean;
 };
 
 export default function StockExperience({
   defaultMonthlyPick,
   defaultQualityPicks,
   pricingTableId,
-  publishableKey
+  publishableKey,
+  showAdmin = false,
+  showPricing = true
 }: StockExperienceProps) {
   const [monthlyPick, setMonthlyPick] = useState(defaultMonthlyPick);
   const [qualityPicks, setQualityPicks] = useState(defaultQualityPicks);
@@ -73,45 +77,49 @@ export default function StockExperience({
   }
 
   return (
-    <main className="min-h-screen bg-[#fffaf7] text-[#210c2c]">
+    <main className="min-h-screen bg-[#0f172a] text-white">
       <TopNav />
       <Hero monthlyPick={monthlyPick} />
       <MonthlyPickSection monthlyPick={monthlyPick} />
       <QualityPicksSection picks={qualityPicks} />
-      <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
-      <AdminPanel
-        monthlyPick={monthlyPick}
-        qualityPicks={qualityPicks}
-        onResetMonthlyPick={resetMonthlyPick}
-        onResetQualityPicks={resetQualityPicks}
-        onSaveMonthlyPick={saveMonthlyPick}
-        onSaveQualityPicks={saveQualityPicks}
-      />
+      {showPricing && (
+        <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
+      )}
+      {showAdmin && (
+        <AdminPanel
+          monthlyPick={monthlyPick}
+          qualityPicks={qualityPicks}
+          onResetMonthlyPick={resetMonthlyPick}
+          onResetQualityPicks={resetQualityPicks}
+          onSaveMonthlyPick={saveMonthlyPick}
+          onSaveQualityPicks={saveQualityPicks}
+        />
+      )}
     </main>
   );
 }
 
 function TopNav() {
   return (
-    <nav className="sticky top-0 z-40 border-b border-orange-100 bg-white/95 shadow-sm backdrop-blur">
+    <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#0f172a]/90 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <a href="#" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#ff6b45] text-white shadow-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#22c55e] text-[#0f172a] shadow-sm">
             <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
-          <span className="text-3xl font-extrabold tracking-tight text-[#210c2c]">StockMonth</span>
+          <span className="text-3xl font-extrabold tracking-tight text-white">Stockymonth</span>
         </a>
 
         <div className="hidden items-center gap-3 md:flex">
           <a
             href="#stock-of-month"
-            className="rounded-full bg-orange-50 px-5 py-3 text-sm font-extrabold text-[#210c2c] transition hover:bg-orange-100"
+            className="rounded-full bg-white/10 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-white/15"
           >
             Stock of the Month
           </a>
           <a
             href="#quality-picks"
-            className="rounded-full px-5 py-3 text-sm font-extrabold text-[#210c2c] transition hover:bg-orange-50"
+            className="rounded-full px-5 py-3 text-sm font-extrabold text-slate-200 transition hover:bg-white/10"
           >
             Top 6 High Quality Picks
           </a>
@@ -131,9 +139,9 @@ function ProfileMenu() {
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className="inline-flex h-12 items-center gap-2 rounded-full border border-orange-200 bg-white px-3 text-sm font-extrabold text-[#210c2c] shadow-sm transition hover:border-orange-300 hover:bg-orange-50"
+        className="inline-flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-white/15"
       >
-        <UserCircle className="h-7 w-7 text-[#ff6b45]" aria-hidden="true" />
+        <UserCircle className="h-7 w-7 text-[#22c55e]" aria-hidden="true" />
         <span className="hidden sm:inline">Profile</span>
         <ChevronDown className="h-4 w-4" aria-hidden="true" />
       </button>

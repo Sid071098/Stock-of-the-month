@@ -36,7 +36,7 @@ export async function POST(request: Request) {
               interval: "month" as const
             },
             product_data: {
-              name: "Signal Desk: Stock of the Month",
+              name: "Stockymonth",
               description: "Monthly premium equity research subscription"
             }
           }
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       subscription_data: {
         metadata: {
           plan: "stock-of-the-month",
-          featuredTicker: "NFLX"
+          featuredTicker: "EQT"
         }
       }
     });
