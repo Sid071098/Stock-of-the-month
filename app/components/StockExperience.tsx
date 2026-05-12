@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import type React from "react";
 import { useEffect, useState } from "react";
 import {
   BadgeCheck,
   BarChart3,
+  BriefcaseBusiness,
   ChevronDown,
+  CircleDollarSign,
+  CircleGauge,
   Crown,
+  Database,
   Edit3,
   LineChart,
   LogOut,
@@ -14,6 +19,7 @@ import {
   Save,
   Settings,
   Sparkles,
+  TrendingUp,
   UserCircle
 } from "lucide-react";
 import StripePricingTable from "./StripePricingTable";
@@ -257,57 +263,165 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 }
 
 function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
+  const backingPoints = [
+    {
+      icon: <CircleDollarSign className="h-5 w-5" aria-hidden="true" />,
+      text: "EQT is the lowest-cost major natural gas producer in the U.S. It can stay profitable in weak gas markets and generate outsized cash flow when prices rise."
+    },
+    {
+      icon: <TrendingUp className="h-5 w-5" aria-hidden="true" />,
+      text: "EQT stands to benefit from two major long-term tailwinds. LNG export growth is globalizing the gas market, while AI data center buildouts are driving new electricity demand."
+    },
+    {
+      icon: <BriefcaseBusiness className="h-5 w-5" aria-hidden="true" />,
+      text: "CEO Toby Rice helped drive EQT's transformation and 4x+ stock appreciation since taking the reins in 2019, owns over $100 million of stock, and receives just a $1 salary."
+    }
+  ];
+
   return (
-    <section id="stock-of-month" className="px-6 py-16">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Stock of the Month</p>
-            <h2 className="mt-3 text-4xl font-black text-[#210947]">{monthlyPick.month} Pick</h2>
-          </div>
-          <Link
-            href={`/analysis/${monthlyPick.ticker}`}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#210947] px-6 text-sm font-black text-white transition hover:bg-[#32145f]"
-          >
-            Detailed analysis
-            <LineChart className="h-4 w-4" aria-hidden="true" />
-          </Link>
+    <section id="stock-of-month" className="bg-white px-6 py-8 md:py-12">
+      <div className="mx-auto max-w-[1460px]">
+        <div className="mb-7 flex items-center gap-3 text-[#210947]">
+          <CircleGauge className="h-6 w-6" aria-hidden="true" />
+          <h2 className="text-2xl font-black tracking-tight md:text-3xl">Our Latest Stock Pick</h2>
         </div>
 
-        <article className="overflow-hidden rounded-md border border-[#efe7f7] bg-white shadow-xl">
-          <div className="grid gap-0 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="bg-[#f0e6ff] p-8">
-              <div className="flex h-16 w-16 items-center justify-center rounded-md bg-[#ff6b4a] text-xl font-black text-white">
-                {monthlyPick.ticker.slice(0, 2)}
+        <article className="overflow-hidden rounded-md border border-[#e7e1ea] bg-white p-5 shadow-sm md:p-7">
+          <div className="grid gap-10 lg:grid-cols-[0.72fr_1fr] lg:items-stretch">
+            <MonthlyPickArtwork month={monthlyPick.month} />
+
+            <div className="flex min-w-0 flex-col justify-center py-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <EQTLogo />
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#21877a] px-4 py-2 text-base font-black text-white">
+                  <BadgeCheck className="h-5 w-5" aria-hidden="true" />
+                  {monthlyPick.rating}
+                </span>
               </div>
-              <p className="mt-8 text-sm font-black uppercase tracking-[0.18em] text-[#8d7ca3]">Manual monthly selection</p>
-              <h3 className="mt-3 text-4xl font-black text-[#210947]">{monthlyPick.name}</h3>
-              <p className="mt-2 text-lg font-bold text-[#4d3f68]">{monthlyPick.sector}</p>
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                <MiniStat label="Current price" value={monthlyPick.price} />
-                <MiniStat label="Latest move" value={monthlyPick.change} positive={monthlyPick.change.startsWith("+")} />
+
+              <h3 className="mt-5 font-serif text-3xl font-black leading-tight text-[#210947] md:text-4xl">
+                {monthlyPick.name} ({monthlyPick.ticker})
+              </h3>
+
+              <div className="mt-5 flex flex-wrap items-center gap-x-7 gap-y-3 text-base font-black text-[#7a6a9b]">
+                <span className="inline-flex items-center gap-2">
+                  <BriefcaseBusiness className="h-5 w-5 text-[#7a6a9b]" aria-hidden="true" />
+                  {monthlyPick.sector}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Database className="h-5 w-5 text-[#7a6a9b]" aria-hidden="true" />
+                  {monthlyPick.price}{" "}
+                  <span className={monthlyPick.change.startsWith("+") ? "text-emerald-700" : "text-[#df2d74]"}>
+                    ({monthlyPick.change})
+                  </span>
+                </span>
               </div>
-            </div>
-            <div className="p-8">
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-700">
-                {monthlyPick.rating}
-              </span>
-              <h4 className="mt-6 text-2xl font-black text-[#210947]">Investment thesis</h4>
-              <p className="mt-4 text-lg leading-9 text-[#4d3f68]">{monthlyPick.thesis}</p>
-              <p className="mt-5 leading-8 text-[#6c5d7f]">{monthlyPick.summary}</p>
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                {["Opportunity", "Quality", "Risk"].map((label, index) => (
-                  <div key={label} className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
-                    <p className="text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</p>
-                    <p className="mt-2 text-2xl font-black text-[#22c55e]">{[91, 87, 78][index]}</p>
-                  </div>
-                ))}
+
+              <p className="mt-5 max-w-5xl text-xl font-bold leading-9 text-[#796b99]">{monthlyPick.summary}</p>
+
+              <div className="mt-9">
+                <div className="mb-6 flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#210947] text-[#ff7b59]">
+                    <CircleDollarSign className="h-6 w-6" aria-hidden="true" />
+                  </span>
+                  <h4 className="text-xl font-black uppercase tracking-tight text-[#210947]">
+                    Why are we backing {monthlyPick.ticker} with our own money?
+                  </h4>
+                </div>
+
+                <div className="grid gap-7">
+                  {backingPoints.map((point, index) => (
+                    <BackingPoint key={point.text} accent={index} icon={point.icon} text={point.text} />
+                  ))}
+                </div>
               </div>
+
+              <Link
+                href={`/analysis/${monthlyPick.ticker}`}
+                className="mt-9 inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-[#ff6b4a] px-6 text-sm font-black text-white transition hover:bg-[#f45d3c]"
+              >
+                Detailed analysis
+                <LineChart className="h-4 w-4" aria-hidden="true" />
+              </Link>
             </div>
           </div>
         </article>
       </div>
     </section>
+  );
+}
+
+function MonthlyPickArtwork({ month }: { month: string }) {
+  return (
+    <div className="relative min-h-[420px] overflow-hidden rounded-md bg-[#d6e9e7] p-6 sm:p-10">
+      <div className="absolute -left-20 -top-20 h-48 w-48 rounded-full bg-[#207d72]" />
+      <div className="absolute left-20 -top-24 h-56 w-56 rounded-full bg-[#88beb8]" />
+      <div className="absolute -left-16 top-24 h-36 w-36 rounded-[42px] bg-[#bce3df]" />
+      <div className="absolute right-24 top-0 h-24 w-64 bg-[#bde2df]" />
+      <div className="absolute right-12 top-0 h-24 w-28 skew-x-[-24deg] bg-[#7db4ae]" />
+      <div className="absolute -right-10 top-8 h-28 w-28 rounded-[42px] bg-[#207d72] rotate-45" />
+      <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-[#207d72]" />
+      <div className="absolute bottom-0 right-0 h-0 w-0 border-b-[150px] border-l-[150px] border-b-[#207d72] border-l-transparent" />
+      <div className="absolute bottom-0 right-20 h-0 w-0 border-b-[120px] border-l-[120px] border-b-[#88beb8] border-l-transparent" />
+
+      <div className="relative z-10 flex h-full min-h-[360px] flex-col justify-center">
+        <div className="mb-12 flex items-center justify-center gap-4">
+          <span className="text-[#210947]">
+            <BadgeCheck className="h-12 w-12" aria-hidden="true" />
+          </span>
+          <h3 className="font-serif text-4xl font-black text-[#210947] md:text-5xl">{month} Pick</h3>
+        </div>
+
+        <div className="relative rounded-md bg-white p-7 shadow-sm md:p-9">
+          <div className="absolute -top-6 left-8 flex items-center">
+            <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-[#ffcfbf]">
+              <div className="mx-auto mt-2 h-7 w-7 rounded-full bg-[#21104d]" />
+              <div className="mx-auto mt-1 h-7 w-10 rounded-t-full bg-[#ff7b59]" />
+            </div>
+            <div className="-ml-2 flex h-14 w-14 items-center justify-center rounded-full bg-[#210947] text-[#ff7b59] ring-4 ring-white">
+              <CircleDollarSign className="h-8 w-8" aria-hidden="true" />
+            </div>
+          </div>
+
+          <blockquote className="mt-8 font-serif text-2xl font-black leading-tight text-[#210947] md:text-[28px] md:leading-tight">
+            "The components: the lowest-cost position, multiple powerful secular tailwinds, and improving business fundamentals.
+            The result: the twin turbines of explosive EPS/FCF growth and a likely re-rating that will send the stock soaring over a multi-year period."
+          </blockquote>
+          <p className="mt-6 text-base font-black text-[#210947]">- Anthony Lee, Lead Analyst at StockyMonth</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EQTLogo() {
+  return (
+    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#04083d] text-white shadow-sm ring-4 ring-white">
+      <span className="relative text-xl font-black tracking-[-0.12em]">
+        E<span className="text-[#ff5377]">Q</span>T
+      </span>
+    </div>
+  );
+}
+
+function BackingPoint({
+  accent,
+  icon,
+  text
+}: {
+  accent: number;
+  icon: React.ReactNode;
+  text: string;
+}) {
+  const colors = ["bg-[#fff1ea] text-[#ff6b4a]", "bg-[#ffe5dc] text-[#ff6b4a]", "bg-[#ffd8cc] text-[#ff6b4a]"];
+
+  return (
+    <div className="grid grid-cols-[40px_1fr] gap-4">
+      <span className={`flex h-9 w-9 items-center justify-center rounded-md ${colors[accent]}`}>
+        {icon}
+      </span>
+      <p className="text-xl font-bold leading-8 text-[#210947]">{text}</p>
+    </div>
   );
 }
 

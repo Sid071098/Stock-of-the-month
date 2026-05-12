@@ -24,14 +24,14 @@ export const defaultMonthlyPick: MonthlyPick = {
   ticker: "EQT",
   name: "EQT",
   sector: "Upstream Natural Gas E&P",
-  price: "$56.45",
-  change: "+0.88%",
+  price: "$55.69",
+  change: "-1.35%",
   rating: "Active Buy",
   month: "May 2026",
   thesis:
-    "EQT is this month's stock pick, focused on low-cost natural gas production and operating leverage if commodity prices improve.",
+    "EQT is the lowest-cost major natural gas producer in the U.S. It can stay profitable in weak gas markets and generate outsized cash flow when prices rise.",
   summary:
-    "EQT operates in the Appalachian Basin and gives subscribers a timely energy infrastructure idea to evaluate through cost position, cash flow sensitivity, balance sheet discipline, and natural gas demand catalysts."
+    "Operating exclusively in the Appalachian Basin across Pennsylvania, West Virginia, and Ohio, EQT extracts natural gas trapped in underground shale formations using horizontal drilling and hydraulic fracturing techniques."
 };
 
 export const defaultQualityPicks: QualityPick[] = [
