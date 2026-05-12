@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       cache: "no-store",
       headers: {
         Accept: "application/json",
-        "User-Agent": "StockMonth/1.0"
+        "User-Agent": "StockyMonth/1.0"
       }
     });
 
@@ -113,7 +113,7 @@ async function fetchStooqQuotes(symbols: string[]) {
       cache: "no-store",
       headers: {
         Accept: "text/csv",
-        "User-Agent": "StockMonth/1.0"
+        "User-Agent": "StockyMonth/1.0"
       }
     });
 

@@ -1,27 +1,26 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   BadgeCheck,
   BarChart3,
-  Check,
   ChevronDown,
   Crown,
   Edit3,
-  LockKeyhole,
+  LineChart,
   LogOut,
   RefreshCcw,
   Save,
   Settings,
-  ShieldCheck,
   Sparkles,
   UserCircle
 } from "lucide-react";
 import StripePricingTable from "./StripePricingTable";
 import type { MonthlyPick, QualityPick } from "../lib/picks";
 
-const monthlyStorageKey = "stockmonth.monthlyPick";
-const qualityStorageKey = "stockmonth.qualityPicks";
+const monthlyStorageKey = "stockymonth.monthlyPick";
+const qualityStorageKey = "stockymonth.qualityPicks";
 
 type StockExperienceProps = {
   defaultMonthlyPick: MonthlyPick;
@@ -77,7 +76,7 @@ export default function StockExperience({
   }
 
   return (
-    <main className="min-h-screen bg-[#0f172a] text-white">
+    <main className="min-h-screen bg-[#fffaf7] text-[#210947]">
       <TopNav />
       <Hero monthlyPick={monthlyPick} />
       <MonthlyPickSection monthlyPick={monthlyPick} />
@@ -101,25 +100,25 @@ export default function StockExperience({
 
 function TopNav() {
   return (
-    <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#0f172a]/90 shadow-sm backdrop-blur">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-        <a href="#" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#22c55e] text-[#0f172a] shadow-sm">
-            <BarChart3 className="h-6 w-6" aria-hidden="true" />
+    <nav className="sticky top-0 z-40 border-b border-[#efe7f7] bg-white/95 shadow-sm backdrop-blur">
+      <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-6">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#ff6b4a] text-white">
+            <BarChart3 className="h-7 w-7" aria-hidden="true" />
           </div>
-          <span className="text-3xl font-extrabold tracking-tight text-white">Stockymonth</span>
-        </a>
+          <span className="text-3xl font-black tracking-tight text-[#210947]">StockyMonth</span>
+        </Link>
 
         <div className="hidden items-center gap-3 md:flex">
           <a
             href="#stock-of-month"
-            className="rounded-full bg-white/10 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-white/15"
+            className="rounded-full bg-[#fff1ea] px-5 py-3 text-sm font-black text-[#ff6b4a] transition hover:bg-[#ffe0d4]"
           >
             Stock of the Month
           </a>
           <a
             href="#quality-picks"
-            className="rounded-full px-5 py-3 text-sm font-extrabold text-slate-200 transition hover:bg-white/10"
+            className="rounded-full px-5 py-3 text-sm font-black text-[#210947] transition hover:bg-[#fff1ea]"
           >
             Top 6 High Quality Picks
           </a>
@@ -139,47 +138,52 @@ function ProfileMenu() {
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className="inline-flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-white/15"
+        className="inline-flex h-12 items-center gap-2 rounded-full border border-[#210947] bg-white px-3 text-sm font-black text-[#210947] shadow-sm transition hover:bg-[#fff1ea]"
       >
-        <UserCircle className="h-7 w-7 text-[#22c55e]" aria-hidden="true" />
+        <UserCircle className="h-7 w-7" aria-hidden="true" />
         <span className="hidden sm:inline">Profile</span>
         <ChevronDown className="h-4 w-4" aria-hidden="true" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 rounded-md border border-orange-100 bg-white p-4 text-[#210c2c] shadow-2xl">
-          <div className="flex items-start gap-3 border-b border-orange-100 pb-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#210c2c] text-sm font-extrabold text-white">
+        <div className="absolute right-0 mt-3 w-80 rounded-md border border-[#efe7f7] bg-white p-4 text-[#210947] shadow-2xl">
+          <div className="flex items-start gap-3 border-b border-[#efe7f7] pb-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#210947] text-sm font-black text-white">
               SP
             </div>
             <div>
-              <p className="text-sm font-extrabold">Siddharth Patel</p>
-              <p className="text-xs font-semibold text-slate-500">Admin access</p>
+              <p className="text-sm font-black">Siddharth Patel</p>
+              <p className="text-xs font-semibold text-[#6c5d7f]">Subscriber access</p>
             </div>
           </div>
 
-          <div className="mt-4 rounded-md bg-orange-50 p-4">
+          <div className="mt-4 rounded-md bg-[#fff1ea] p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-extrabold">Subscription</p>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
+              <p className="text-sm font-black">Subscription</p>
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
                 $1.99/mo
               </span>
             </div>
-            <p className="mt-2 text-xs font-semibold leading-5 text-slate-600">
-              Monthly pick research and quality-stock shortlist access.
+            <p className="mt-2 text-xs font-semibold leading-5 text-[#6c5d7f]">
+              Monthly pick research, six quality ideas, history, and live ticker analysis.
             </p>
           </div>
 
           <div className="mt-4 grid gap-2">
-            <a href="#pricing" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold hover:bg-orange-50">
-              <Crown className="h-4 w-4 text-[#ff6b45]" aria-hidden="true" />
-              Manage subscription
-            </a>
-            <a href="#admin" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold hover:bg-orange-50">
-              <Settings className="h-4 w-4 text-[#ff6b45]" aria-hidden="true" />
-              Admin editor
-            </a>
-            <button type="button" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-bold text-slate-500 hover:bg-orange-50">
+            <Link href="/history" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold hover:bg-[#fff1ea]">
+              <Crown className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
+              Pick history
+            </Link>
+            <form action="/api/customer-portal" method="POST">
+              <button className="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-bold hover:bg-[#fff1ea]">
+                <Settings className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
+                Manage subscription
+              </button>
+            </form>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-bold text-[#6c5d7f] hover:bg-[#fff1ea]"
+            >
               <LogOut className="h-4 w-4" aria-hidden="true" />
               Sign out
             </button>
@@ -192,55 +196,64 @@ function ProfileMenu() {
 
 function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   return (
-    <section className="border-b border-orange-100 bg-white px-6 py-16">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_440px] lg:items-center">
+    <section className="border-b border-[#efe7f7] bg-white px-6 py-14">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#fff1eb] px-4 py-2 text-sm font-extrabold text-[#d94f2b]">
+          <p className="inline-flex items-center gap-2 rounded-full bg-[#fff1ea] px-4 py-2 text-sm font-black text-[#ff6b4a]">
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             {monthlyPick.month} Stock of the Month
-          </div>
-          <h1 className="mt-6 max-w-4xl text-5xl font-black leading-tight tracking-tight text-[#210c2c] md:text-7xl">
-            One monthly stock idea. Six quality names to watch.
+          </p>
+          <h1 className="mt-7 max-w-4xl text-4xl font-black leading-tight text-[#210947] md:text-5xl">
+            Monthly stock picks with focused data, thesis, and quality shortlist.
           </h1>
-          <p className="mt-5 max-w-3xl text-xl leading-8 text-[#5f5068]">
-            {monthlyPick.name} ({monthlyPick.ticker}) is the current featured pick.
-            Review the thesis, compare the quality shortlist, and subscribe when you want the full research flow.
+          <p className="mt-5 max-w-3xl text-xl leading-9 text-[#4d3f68]">
+            {monthlyPick.name} ({monthlyPick.ticker}) is the current featured idea. Subscribers can review the thesis,
+            open detailed Alpha Vantage charts, and compare six high-quality stocks.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
               href="#stock-of-month"
-              className="inline-flex h-14 items-center justify-center rounded-full bg-[#ff6b45] px-8 text-base font-extrabold text-white shadow-sm transition hover:bg-[#f05c38]"
+              className="inline-flex h-14 items-center justify-center rounded-full bg-[#210947] px-8 text-base font-black text-white transition hover:bg-[#32145f]"
             >
               View stock of the month
             </a>
             <a
               href="#quality-picks"
-              className="inline-flex h-14 items-center justify-center rounded-full border border-orange-200 bg-white px-8 text-base font-extrabold text-[#210c2c] transition hover:bg-orange-50"
+              className="inline-flex h-14 items-center justify-center rounded-full bg-[#ff6b4a] px-8 text-base font-black text-white transition hover:bg-[#f45d3c]"
             >
-              See top 6 picks
+              See top quality picks
             </a>
           </div>
         </div>
 
-        <div className="rounded-md border border-orange-100 bg-[#fff7f2] p-6 shadow-xl">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d94f2b]">Current pick</p>
-              <h2 className="mt-3 text-4xl font-black text-[#210c2c]">
-                {monthlyPick.name} ({monthlyPick.ticker})
-              </h2>
+        <div className="rounded-md border border-[#efe7f7] bg-[#f7f0ff] p-5 shadow-xl">
+          <div className="rounded-md bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#efe7f7] pb-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8d7ca3]">Latest stock pick</p>
+                <h2 className="mt-2 text-3xl font-black text-[#210947]">{monthlyPick.ticker}</h2>
+              </div>
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-700">
+                {monthlyPick.rating}
+              </span>
             </div>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-700">
-              {monthlyPick.rating}
-            </span>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <MiniStat label="Price" value={monthlyPick.price} />
+              <MiniStat label="Move" value={monthlyPick.change} positive={monthlyPick.change.startsWith("+")} />
+              <MiniStat label="Sector" value={monthlyPick.sector} />
+            </div>
+            <div className="mt-6 h-44 rounded-md bg-[#fffaf7] p-4">
+              <div className="flex h-full items-end gap-2">
+                {[42, 58, 49, 70, 63, 76, 68, 82, 78, 90, 84, 96].map((height, index) => (
+                  <div
+                    key={`${height}-${index}`}
+                    className="flex-1 rounded-t bg-[#ff6b4a]"
+                    style={{ height: `${height}%`, opacity: 0.45 + index / 24 }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-
-          <div className="mt-7 grid grid-cols-2 gap-3">
-            <Metric label="Price" value={monthlyPick.price} />
-            <Metric label="Move" value={monthlyPick.change} positive={monthlyPick.change.startsWith("+")} />
-          </div>
-
-          <p className="mt-6 text-base font-semibold leading-7 text-[#5f5068]">{monthlyPick.thesis}</p>
         </div>
       </div>
     </section>
@@ -251,56 +264,52 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   return (
     <section id="stock-of-month" className="px-6 py-16">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-7">
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-[#d94f2b]">Stock of the Month</p>
-          <h2 className="mt-3 text-4xl font-black text-[#210c2c]">{monthlyPick.month} Pick</h2>
+        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Stock of the Month</p>
+            <h2 className="mt-3 text-4xl font-black text-[#210947]">{monthlyPick.month} Pick</h2>
+          </div>
+          <Link
+            href={`/analysis/${monthlyPick.ticker}`}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#210947] px-6 text-sm font-black text-white transition hover:bg-[#32145f]"
+          >
+            Detailed analysis
+            <LineChart className="h-4 w-4" aria-hidden="true" />
+          </Link>
         </div>
 
-        <div className="grid overflow-hidden rounded-md border border-orange-100 bg-white shadow-sm lg:grid-cols-[0.82fr_1.18fr]">
-          <div className="flex min-h-80 flex-col justify-between bg-[#ffe4d8] p-8">
-            <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-md bg-[#ff6b45] text-lg font-black text-white">
-                {monthlyPick.ticker.slice(0, 3)}
+        <article className="overflow-hidden rounded-md border border-[#efe7f7] bg-white shadow-xl">
+          <div className="grid gap-0 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="bg-[#f0e6ff] p-8">
+              <div className="flex h-16 w-16 items-center justify-center rounded-md bg-[#ff6b4a] text-xl font-black text-white">
+                {monthlyPick.ticker.slice(0, 2)}
               </div>
-              <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#d94f2b]">{monthlyPick.rating}</span>
+              <p className="mt-8 text-sm font-black uppercase tracking-[0.18em] text-[#8d7ca3]">Manual monthly selection</p>
+              <h3 className="mt-3 text-4xl font-black text-[#210947]">{monthlyPick.name}</h3>
+              <p className="mt-2 text-lg font-bold text-[#4d3f68]">{monthlyPick.sector}</p>
+              <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                <MiniStat label="Current price" value={monthlyPick.price} />
+                <MiniStat label="Latest move" value={monthlyPick.change} positive={monthlyPick.change.startsWith("+")} />
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.2em] text-[#d94f2b]">Manual monthly selection</p>
-              <h3 className="mt-3 text-5xl font-black text-[#210c2c]">{monthlyPick.month}</h3>
+            <div className="p-8">
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-700">
+                {monthlyPick.rating}
+              </span>
+              <h4 className="mt-6 text-2xl font-black text-[#210947]">Investment thesis</h4>
+              <p className="mt-4 text-lg leading-9 text-[#4d3f68]">{monthlyPick.thesis}</p>
+              <p className="mt-5 leading-8 text-[#6c5d7f]">{monthlyPick.summary}</p>
+              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                {["Opportunity", "Quality", "Risk"].map((label, index) => (
+                  <div key={label} className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
+                    <p className="text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</p>
+                    <p className="mt-2 text-2xl font-black text-[#22c55e]">{[91, 87, 78][index]}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-
-          <div className="p-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h3 className="text-3xl font-black text-[#210c2c]">
-                  {monthlyPick.name} ({monthlyPick.ticker})
-                </h3>
-                <p className="mt-2 text-sm font-extrabold text-[#7a687f]">{monthlyPick.sector}</p>
-              </div>
-              <div className="rounded-md border border-orange-100 bg-[#fffaf7] px-4 py-3 text-right">
-                <p className="text-2xl font-black text-[#210c2c]">{monthlyPick.price}</p>
-                <p className={`text-sm font-black ${monthlyPick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
-                  {monthlyPick.change}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-md border border-orange-100 bg-[#fffaf7] p-5">
-              <p className="text-xs font-black uppercase tracking-wide text-[#d94f2b]">Investment thesis</p>
-              <p className="mt-3 text-lg leading-8 text-[#5f5068]">{monthlyPick.summary}</p>
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              {["Quality", "Growth", "Timing"].map((label, index) => (
-                <div key={label} className="rounded-md border border-orange-100 bg-white p-4">
-                  <p className="text-xs font-black uppercase tracking-wide text-[#a493aa]">{label}</p>
-                  <p className="mt-1 text-2xl font-black text-[#ff6b45]">{[92, 86, 81][index]}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        </article>
       </div>
     </section>
   );
@@ -308,45 +317,38 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 
 function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
   return (
-    <section id="quality-picks" className="border-y border-orange-100 bg-white px-6 py-16">
+    <section id="quality-picks" className="border-y border-[#efe7f7] bg-white px-6 py-16">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-[#d94f2b]">Top 6 High Quality Picks</p>
-            <h2 className="mt-3 text-4xl font-black text-[#210c2c]">Static shortlist from StockStory right now</h2>
-          </div>
-          <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700">
-            High Quality + Timely Buy
-          </div>
+        <div className="mb-8">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Top 6 High Quality Picks</p>
+          <h2 className="mt-3 text-4xl font-black text-[#210947]">Static shortlist you can update from admin</h2>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {picks.map((pick) => (
-            <article key={pick.ticker} className="rounded-md border border-orange-100 bg-[#fffaf7] p-6 shadow-sm">
+            <Link
+              key={pick.ticker}
+              href={`/analysis/${pick.ticker}`}
+              className="group rounded-md border border-[#efe7f7] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+            >
               <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-lg font-black text-[#ff6b45] shadow-sm">
-                    {pick.ticker.slice(0, 2)}
-                  </div>
-                  <div>
-                    <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
-                      {pick.tag}
-                    </span>
-                    <h3 className="mt-3 text-2xl font-black text-[#210c2c]">
-                      {pick.name} ({pick.ticker})
-                    </h3>
-                  </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#fff1ea] text-lg font-black text-[#ff6b4a]">
+                  {pick.ticker.slice(0, 2)}
                 </div>
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">{pick.tag}</span>
               </div>
-              <p className="mt-2 text-sm font-extrabold text-[#7a687f]">{pick.sector}</p>
-              <div className="mt-5 flex items-center gap-3">
-                <p className="text-xl font-black text-[#210c2c]">{pick.price}</p>
+              <h3 className="mt-5 text-2xl font-black text-[#210947] group-hover:text-[#ff6b4a]">
+                {pick.name} ({pick.ticker})
+              </h3>
+              <p className="mt-1 font-bold text-[#6c5d7f]">{pick.sector}</p>
+              <div className="mt-5 flex items-end justify-between">
+                <p className="text-xl font-black text-[#210947]">{pick.price}</p>
                 <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
                   {pick.change}
                 </p>
               </div>
-              <p className="mt-5 text-base leading-7 text-[#5f5068]">{pick.thesis}</p>
-            </article>
+              <p className="mt-5 line-clamp-3 leading-7 text-[#4d3f68]">{pick.thesis}</p>
+            </Link>
           ))}
         </div>
       </div>
@@ -364,44 +366,40 @@ function PricingSection({
   publishableKey: string;
 }) {
   return (
-    <section id="pricing" className="bg-[#210c2c] px-6 py-16 text-white">
-      <div className="mx-auto grid max-w-7xl overflow-hidden rounded-md border border-white/10 bg-[#2d123a] shadow-2xl lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="p-8 md:p-12">
-          <p className="text-lg font-black text-orange-200">Subscribe to StockMonth</p>
-          <h2 className="mt-4 text-5xl font-black leading-tight">Get the full {monthlyPick.ticker} research brief.</h2>
-          <p className="mt-5 text-xl leading-8 text-purple-100">
-            One simple subscription for monthly stock-of-the-month research and the quality-stock shortlist.
+    <section id="pricing" className="bg-[#210947] px-6 py-16 text-white">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div>
+          <p className="text-lg font-black text-[#ffb29d]">Subscribe to StockyMonth</p>
+          <h2 className="mt-3 text-4xl font-black">Get monthly picks for $1.99</h2>
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#e5d8f4]">
+            Unlock {monthlyPick.ticker}, top quality ideas, detailed analysis, and pick history. Student promo codes are supported at checkout.
           </p>
-
-          <div className="mt-10 space-y-5">
-            {["$1.99 monthly subscription", "Manual monthly pick updates", "Editable high-quality stock shortlist", "Stripe-secured checkout"].map((item) => (
-              <div key={item} className="flex items-center gap-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ff6b45]">
-                  <Check className="h-5 w-5" aria-hidden="true" />
+          <div className="mt-8 grid gap-4">
+            {["Stock of the month", "Top 6 quality stocks", "Alpha Vantage chart analysis"].map((item) => (
+              <div key={item} className="flex items-center gap-3 text-lg font-black">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ff6b4a]">
+                  <BadgeCheck className="h-5 w-5" aria-hidden="true" />
                 </span>
-                <span className="text-lg font-bold">{item}</span>
+                {item}
               </div>
             ))}
           </div>
         </div>
-
-        <div className="bg-white p-6 text-[#210c2c] md:p-10">
-          <div className="mb-8 rounded-md border border-orange-100 bg-[#fffaf7] p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold text-[#7a687f]">Monthly plan</p>
-                <p className="mt-2 text-4xl font-black">$1.99</p>
-                <p className="mt-1 text-sm font-semibold text-[#7a687f]">per month</p>
+        <div className="rounded-md bg-white p-6 text-[#210947] shadow-2xl md:p-10">
+          {pricingTableId && publishableKey ? (
+            <StripePricingTable pricingTableId={pricingTableId} publishableKey={publishableKey} />
+          ) : (
+            <form action="/api/checkout" method="POST" className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-6">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-[#8d7ca3]">Monthly</p>
+              <div className="mt-4 flex items-end gap-2">
+                <span className="text-5xl font-black">$1.99</span>
+                <span className="pb-2 text-lg font-bold text-[#6c5d7f]">/month</span>
               </div>
-              <ShieldCheck className="h-12 w-12 text-[#ff6b45]" aria-hidden="true" />
-            </div>
-            <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#7a687f]">
-              <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-              Secure payment powered by Stripe
-            </div>
-          </div>
-
-          <StripePricingTable pricingTableId={pricingTableId} publishableKey={publishableKey} />
+              <button className="mt-6 inline-flex h-14 w-full items-center justify-center rounded-full bg-[#ff6b4a] text-base font-black text-white transition hover:bg-[#f45d3c]">
+                Subscribe now
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </section>
@@ -439,50 +437,36 @@ function AdminPanel({
   }
 
   function updateQualityField(index: number, field: keyof QualityPick, value: string) {
-    setQualityDrafts((current) =>
-      current.map((pick, pickIndex) => (pickIndex === index ? { ...pick, [field]: value } : pick))
-    );
+    setQualityDrafts((current) => current.map((pick, pickIndex) => (pickIndex === index ? { ...pick, [field]: value } : pick)));
   }
 
   return (
     <section id="admin" className="bg-[#fffaf7] px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-[#d94f2b]">Admin</p>
-          <h2 className="mt-3 text-4xl font-black text-[#210c2c]">Manage monthly and quality picks</h2>
-          <p className="mt-3 max-w-3xl text-base font-semibold leading-7 text-[#5f5068]">
-            These admin controls save changes in this browser. For production-wide updates, connect this form to a database and protected admin login.
-          </p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Admin</p>
+          <h2 className="mt-3 text-4xl font-black text-[#210947]">Manage monthly and quality picks</h2>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="rounded-md border border-orange-100 bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center gap-2">
-              <Edit3 className="h-5 w-5 text-[#ff6b45]" aria-hidden="true" />
-              <h3 className="text-2xl font-black text-[#210c2c]">Add one stock per month</h3>
+          <div className="rounded-md border border-[#efe7f7] bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center gap-3">
+              <Edit3 className="h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
+              <h3 className="text-2xl font-black text-[#210947]">Add one stock per month</h3>
             </div>
-
             <div className="grid gap-4">
-              <Field label="Month" value={monthlyDraft.month} onChange={(value) => updateMonthlyField("month", value)} />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Ticker" value={monthlyDraft.ticker} onChange={(value) => updateMonthlyField("ticker", value.toUpperCase())} />
-                <Field label="Name" value={monthlyDraft.name} onChange={(value) => updateMonthlyField("name", value)} />
-              </div>
-              <Field label="Sector" value={monthlyDraft.sector} onChange={(value) => updateMonthlyField("sector", value)} />
-              <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Price" value={monthlyDraft.price} onChange={(value) => updateMonthlyField("price", value)} />
-                <Field label="Change" value={monthlyDraft.change} onChange={(value) => updateMonthlyField("change", value)} />
-                <Field label="Rating" value={monthlyDraft.rating} onChange={(value) => updateMonthlyField("rating", value)} />
-              </div>
-              <AreaField label="Headline thesis" value={monthlyDraft.thesis} onChange={(value) => updateMonthlyField("thesis", value)} />
-              <AreaField label="Summary" value={monthlyDraft.summary} onChange={(value) => updateMonthlyField("summary", value)} />
+              <TextInput label="Ticker" value={monthlyDraft.ticker} onChange={(value) => updateMonthlyField("ticker", value.toUpperCase())} />
+              <TextInput label="Company" value={monthlyDraft.name} onChange={(value) => updateMonthlyField("name", value)} />
+              <TextInput label="Month" value={monthlyDraft.month} onChange={(value) => updateMonthlyField("month", value)} />
+              <TextInput label="Price" value={monthlyDraft.price} onChange={(value) => updateMonthlyField("price", value)} />
+              <TextInput label="Change" value={monthlyDraft.change} onChange={(value) => updateMonthlyField("change", value)} />
+              <TextArea label="Investment thesis" value={monthlyDraft.thesis} onChange={(value) => updateMonthlyField("thesis", value)} />
             </div>
-
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => onSaveMonthlyPick(monthlyDraft)}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-[#ff6b45] px-5 text-sm font-black text-white"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-[#ff6b4a] px-5 text-sm font-black text-white"
               >
                 <Save className="h-4 w-4" aria-hidden="true" />
                 Save monthly pick
@@ -490,7 +474,7 @@ function AdminPanel({
               <button
                 type="button"
                 onClick={onResetMonthlyPick}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-orange-200 px-5 text-sm font-black text-[#210c2c]"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#210947]"
               >
                 <RefreshCcw className="h-4 w-4" aria-hidden="true" />
                 Reset
@@ -498,35 +482,29 @@ function AdminPanel({
             </div>
           </div>
 
-          <div className="rounded-md border border-orange-100 bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center gap-2">
-              <BadgeCheck className="h-5 w-5 text-[#ff6b45]" aria-hidden="true" />
-              <h3 className="text-2xl font-black text-[#210c2c]">Add or modify top 6 stocks</h3>
+          <div className="rounded-md border border-[#efe7f7] bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center gap-3">
+              <BadgeCheck className="h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
+              <h3 className="text-2xl font-black text-[#210947]">Add or modify top 6 stocks</h3>
             </div>
-
-            <div className="space-y-5">
+            <div className="grid gap-4 md:grid-cols-2">
               {qualityDrafts.map((pick, index) => (
-                <div key={`${pick.ticker}-${index}`} className="rounded-md border border-orange-100 bg-[#fffaf7] p-4">
-                  <p className="mb-3 text-xs font-black uppercase tracking-wide text-[#d94f2b]">Quality pick {index + 1}</p>
-                  <div className="grid gap-3 md:grid-cols-4">
-                    <Field compact label="Ticker" value={pick.ticker} onChange={(value) => updateQualityField(index, "ticker", value.toUpperCase())} />
-                    <Field compact label="Name" value={pick.name} onChange={(value) => updateQualityField(index, "name", value)} />
-                    <Field compact label="Price" value={pick.price} onChange={(value) => updateQualityField(index, "price", value)} />
-                    <Field compact label="Change" value={pick.change} onChange={(value) => updateQualityField(index, "change", value)} />
-                  </div>
-                  <div className="mt-3 grid gap-3 md:grid-cols-[0.7fr_1.3fr]">
-                    <Field compact label="Sector" value={pick.sector} onChange={(value) => updateQualityField(index, "sector", value)} />
-                    <Field compact label="Thesis" value={pick.thesis} onChange={(value) => updateQualityField(index, "thesis", value)} />
+                <div key={`${pick.ticker}-${index}`} className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
+                  <p className="mb-3 text-xs font-black uppercase tracking-wide text-[#ff6b4a]">Quality pick {index + 1}</p>
+                  <div className="grid gap-3">
+                    <TextInput compact label="Ticker" value={pick.ticker} onChange={(value) => updateQualityField(index, "ticker", value.toUpperCase())} />
+                    <TextInput compact label="Name" value={pick.name} onChange={(value) => updateQualityField(index, "name", value)} />
+                    <TextInput compact label="Price" value={pick.price} onChange={(value) => updateQualityField(index, "price", value)} />
+                    <TextInput compact label="Change" value={pick.change} onChange={(value) => updateQualityField(index, "change", value)} />
                   </div>
                 </div>
               ))}
             </div>
-
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => onSaveQualityPicks(qualityDrafts)}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-[#ff6b45] px-5 text-sm font-black text-white"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-[#ff6b4a] px-5 text-sm font-black text-white"
               >
                 <Save className="h-4 w-4" aria-hidden="true" />
                 Save top 6
@@ -534,7 +512,7 @@ function AdminPanel({
               <button
                 type="button"
                 onClick={onResetQualityPicks}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-orange-200 px-5 text-sm font-black text-[#210c2c]"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#210947]"
               >
                 <RefreshCcw className="h-4 w-4" aria-hidden="true" />
                 Reset
@@ -547,7 +525,7 @@ function AdminPanel({
   );
 }
 
-function Field({
+function TextInput({
   compact = false,
   label,
   onChange,
@@ -560,17 +538,17 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-black uppercase tracking-wide text-[#a493aa]">{label}</span>
+      <span className="mb-2 block text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className={`${compact ? "h-10" : "h-12"} w-full rounded-md border border-orange-100 bg-white px-3 text-sm font-bold text-[#210c2c] outline-none transition focus:border-[#ff6b45]`}
+        className={`${compact ? "h-10" : "h-12"} w-full rounded-md border border-[#efe7f7] bg-white px-3 text-sm font-bold text-[#210947] outline-none transition focus:border-[#ff6b4a]`}
       />
     </label>
   );
 }
 
-function AreaField({
+function TextArea({
   label,
   onChange,
   value
@@ -581,22 +559,30 @@ function AreaField({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-black uppercase tracking-wide text-[#a493aa]">{label}</span>
+      <span className="mb-2 block text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</span>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={4}
-        className="w-full rounded-md border border-orange-100 bg-white px-3 py-3 text-sm font-bold leading-6 text-[#210c2c] outline-none transition focus:border-[#ff6b45]"
+        className="w-full rounded-md border border-[#efe7f7] bg-white px-3 py-3 text-sm font-bold leading-6 text-[#210947] outline-none transition focus:border-[#ff6b4a]"
       />
     </label>
   );
 }
 
-function Metric({ label, positive, value }: { label: string; positive?: boolean; value: string }) {
+function MiniStat({
+  label,
+  positive,
+  value
+}: {
+  label: string;
+  positive?: boolean;
+  value: string;
+}) {
   return (
-    <div className="rounded-md border border-orange-100 bg-white p-4">
-      <p className="text-xs font-black uppercase tracking-wide text-[#a493aa]">{label}</p>
-      <p className={`mt-1 text-2xl font-black ${positive === undefined ? "text-[#210c2c]" : positive ? "text-emerald-700" : "text-rose-600"}`}>
+    <div className="rounded-md border border-[#efe7f7] bg-white p-4">
+      <p className="text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</p>
+      <p className={`mt-1 text-xl font-black ${positive === undefined ? "text-[#210947]" : positive ? "text-emerald-700" : "text-rose-600"}`}>
         {value}
       </p>
     </div>
@@ -605,8 +591,8 @@ function Metric({ label, positive, value }: { label: string; positive?: boolean;
 
 function readStoredValue<T>(key: string): T | null {
   try {
-    const value = window.localStorage.getItem(key);
-    return value ? (JSON.parse(value) as T) : null;
+    const rawValue = window.localStorage.getItem(key);
+    return rawValue ? (JSON.parse(rawValue) as T) : null;
   } catch {
     return null;
   }

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
               interval: "month" as const
             },
             product_data: {
-              name: "Stockymonth",
+              name: "StockyMonth",
               description: "Monthly premium equity research subscription"
             }
           }

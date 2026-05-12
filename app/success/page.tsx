@@ -34,29 +34,29 @@ export default function SuccessPage({
   }, [searchParams?.session_id]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0f172a] px-6 text-slate-50">
-      <section className="w-full max-w-2xl rounded-md border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-emerald-400/15 text-emerald-300">
+    <main className="flex min-h-screen items-center justify-center bg-[#fffaf7] px-6 text-[#210947]">
+      <section className="w-full max-w-2xl rounded-md border border-[#efe7f7] bg-white p-8 shadow-2xl">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
           <CheckCircle2 className="h-8 w-8" aria-hidden="true" />
         </div>
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Payment Successful</p>
-        <h1 className="mt-3 text-4xl font-black text-white">Welcome to Stockymonth</h1>
-        <p className="mt-4 leading-7 text-slate-300">{status}</p>
+        <p className="text-sm font-black uppercase tracking-[0.18em] text-emerald-700">Payment Successful</p>
+        <h1 className="mt-3 text-4xl font-black">Welcome to StockyMonth</h1>
+        <p className="mt-4 leading-7 text-[#4d3f68]">{status}</p>
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-md border border-white/10 bg-white/[0.06] p-4">
-            <FileText className="mb-3 h-5 w-5 text-emerald-300" aria-hidden="true" />
-            <p className="text-sm font-semibold text-white">AI analysis unlocked</p>
-            <p className="mt-1 text-sm text-slate-400">Opportunity, health, and risk</p>
+          <div className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
+            <FileText className="mb-3 h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
+            <p className="text-sm font-black">AI analysis unlocked</p>
+            <p className="mt-1 text-sm text-[#6c5d7f]">Opportunity, health, and risk</p>
           </div>
-          <div className="rounded-md border border-white/10 bg-white/[0.06] p-4">
-            <Gauge className="mb-3 h-5 w-5 text-emerald-300" aria-hidden="true" />
-            <p className="text-sm font-semibold text-white">Dashboard access</p>
-            <p className="mt-1 text-sm text-slate-400">Monthly signal updates</p>
+          <div className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
+            <Gauge className="mb-3 h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
+            <p className="text-sm font-black">Dashboard access</p>
+            <p className="mt-1 text-sm text-[#6c5d7f]">Monthly signal updates</p>
           </div>
         </div>
         <Link
           href="/dashboard"
-          className="mt-8 inline-flex h-11 items-center justify-center rounded-md bg-emerald-400 px-5 text-sm font-black text-slate-950 transition hover:bg-emerald-300"
+          className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-[#ff6b4a] px-5 text-sm font-black text-white transition hover:bg-[#f45d3c]"
         >
           Open Dashboard
         </Link>
