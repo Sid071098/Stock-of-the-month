@@ -53,7 +53,33 @@ type QuoteSnapshot = {
 
 const alphaBaseUrl = "https://www.alphavantage.co/query";
 const maxResults = 6;
-const quoteLimit = 5;
+const quoteLimit = 3;
+const searchCacheTtl = 60 * 1000;
+const quoteCacheTtl = 60 * 1000;
+const searchCache = new Map<string, { expiresAt: number; payload: AlphaSearchPayload }>();
+const quoteCache = new Map<string, { expiresAt: number; snapshot: QuoteSnapshot | null }>();
+const popularSymbols = new Set([
+  "AAPL",
+  "AMZN",
+  "AVGO",
+  "COST",
+  "CRM",
+  "CRWD",
+  "EQT",
+  "GOOGL",
+  "HD",
+  "JPM",
+  "LLY",
+  "META",
+  "MSFT",
+  "NFLX",
+  "NVDA",
+  "ORCL",
+  "SHOP",
+  "TSLA",
+  "V",
+  "WMT"
+]);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -76,11 +102,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const searchPayload = await fetchAlpha<AlphaSearchPayload>({
-      apikey: apiKey,
-      function: "SYMBOL_SEARCH",
-      keywords: query
-    });
+    const searchPayload = await fetchSearch(query, apiKey);
 
     if (searchPayload.Note || searchPayload.Information) {
       return NextResponse.json(
@@ -102,21 +124,22 @@ export async function GET(request: Request) {
       .filter((match): match is StockSearchMatch => Boolean(match))
       .sort((a, b) => {
         const regionScore = Number(b.region === "United States") - Number(a.region === "United States");
-        return regionScore || b.matchScore - a.matchScore;
+        return regionScore || scoreMatch(b, query) - scoreMatch(a, query);
       })
       .slice(0, maxResults);
 
-    const quoteResults = await Promise.allSettled(
-      matches.slice(0, quoteLimit).map((match) => fetchQuote(match.symbol, apiKey))
-    );
-
     const quotes = new Map<string, QuoteSnapshot>();
-    quoteResults.forEach((result, index) => {
-      const symbol = matches[index]?.symbol;
-      if (symbol && result.status === "fulfilled" && result.value) {
-        quotes.set(symbol, result.value);
+
+    for (const match of matches.slice(0, quoteLimit)) {
+      try {
+        const snapshot = await fetchQuote(match.symbol, apiKey);
+        if (snapshot) {
+          quotes.set(match.symbol, snapshot);
+        }
+      } catch {
+        // Search results should still render even if Alpha Vantage throttles quote snapshots.
       }
-    });
+    }
 
     const results = matches.map((match) => ({
       ...match,
@@ -153,7 +176,35 @@ export async function GET(request: Request) {
   }
 }
 
+async function fetchSearch(query: string, apiKey: string) {
+  const cacheKey = query.toLowerCase();
+  const cached = searchCache.get(cacheKey);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.payload;
+  }
+
+  const payload = await fetchAlpha<AlphaSearchPayload>({
+    apikey: apiKey,
+    function: "SYMBOL_SEARCH",
+    keywords: query
+  });
+
+  searchCache.set(cacheKey, {
+    expiresAt: Date.now() + searchCacheTtl,
+    payload
+  });
+
+  return payload;
+}
+
 async function fetchQuote(symbol: string, apiKey: string): Promise<QuoteSnapshot | null> {
+  const cached = quoteCache.get(symbol);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.snapshot;
+  }
+
   const payload = await fetchAlpha<AlphaQuotePayload>({
     apikey: apiKey,
     function: "GLOBAL_QUOTE",
@@ -161,21 +212,36 @@ async function fetchQuote(symbol: string, apiKey: string): Promise<QuoteSnapshot
   });
 
   if (payload.Note || payload.Information || payload["Error Message"]) {
+    quoteCache.set(symbol, {
+      expiresAt: Date.now() + quoteCacheTtl,
+      snapshot: null
+    });
     return null;
   }
 
   const quote = payload["Global Quote"];
   if (!quote) {
+    quoteCache.set(symbol, {
+      expiresAt: Date.now() + quoteCacheTtl,
+      snapshot: null
+    });
     return null;
   }
 
-  return {
+  const snapshot = {
     change: parseNumeric(quote["09. change"]),
     changePercent: parseNumeric(quote["10. change percent"]?.replace("%", "")),
     latestTradingDay: quote["07. latest trading day"] ?? null,
     price: parseNumeric(quote["05. price"]),
     volume: parseNumeric(quote["06. volume"])
   };
+
+  quoteCache.set(symbol, {
+    expiresAt: Date.now() + quoteCacheTtl,
+    snapshot
+  });
+
+  return snapshot;
 }
 
 async function fetchAlpha<T>(params: Record<string, string>) {
@@ -223,6 +289,18 @@ function parseNumeric(value: string | undefined) {
 
   const number = Number(value.replace(/,/g, ""));
   return Number.isFinite(number) ? number : null;
+}
+
+function scoreMatch(match: StockSearchMatch, query: string) {
+  const normalizedQuery = query.toLowerCase();
+  const normalizedName = match.name.toLowerCase();
+  const normalizedSymbol = match.symbol.toLowerCase();
+  const exactTickerBoost = normalizedSymbol === normalizedQuery ? 8 : 0;
+  const tickerPrefixBoost = normalizedSymbol.startsWith(normalizedQuery) ? 3 : 0;
+  const namePrefixBoost = normalizedName.startsWith(normalizedQuery) ? 2 : 0;
+  const popularBoost = popularSymbols.has(match.symbol) ? 2.5 : 0;
+
+  return match.matchScore + exactTickerBoost + tickerPrefixBoost + namePrefixBoost + popularBoost;
 }
 
 function sanitizeQuery(value: string | null) {

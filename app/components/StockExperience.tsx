@@ -683,6 +683,7 @@ function AuthStockSearch() {
             <div className="max-h-[420px] overflow-y-auto p-2">
               {results.map((stock) => {
                 const isPositive = (stock.changePercent ?? 0) >= 0;
+                const hasLiveQuote = stock.price !== null;
 
                 return (
                   <button
@@ -698,8 +699,12 @@ function AuthStockSearch() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-base font-black text-[#210947]">{stock.symbol}</span>
-                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-emerald-700">
-                            Live
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
+                              hasLiveQuote ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-[#ff4f00]"
+                            }`}
+                          >
+                            {hasLiveQuote ? "Live" : "Match"}
                           </span>
                         </div>
                         <p className="mt-1 truncate text-sm font-semibold text-slate-600">{stock.name}</p>
