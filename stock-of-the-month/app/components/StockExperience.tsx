@@ -435,7 +435,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             {mode === "login" && (
               <form className="mt-6" onSubmit={handleLogin}>
                 <p className="text-sm leading-relaxed text-slate-600">
-                  Enter the email and password you used when creating your StockyMonth account.
+                  Enter your email and password.
                 </p>
 
                 <div className="mt-6 grid gap-4">
@@ -482,7 +482,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             {mode === "signup" && (
               <form className="mt-6" onSubmit={handleSignup}>
                 <p className="text-sm leading-relaxed text-slate-600">
-                  Sign up with your first name, last name, and email address. Existing users will be prompted to log in.
+                  Sign up with your first name, last name, and email address.
                 </p>
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
