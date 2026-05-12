@@ -53,7 +53,8 @@ type QuoteSnapshot = {
 
 const alphaBaseUrl = "https://www.alphavantage.co/query";
 const maxResults = 6;
-const quoteLimit = 3;
+const quoteLimit = 1;
+const alphaRequestGapMs = 1100;
 const searchCacheTtl = 60 * 1000;
 const quoteCacheTtl = 60 * 1000;
 const searchCache = new Map<string, { expiresAt: number; payload: AlphaSearchPayload }>();
@@ -132,6 +133,7 @@ export async function GET(request: Request) {
 
     for (const match of matches.slice(0, quoteLimit)) {
       try {
+        await wait(alphaRequestGapMs);
         const snapshot = await fetchQuote(match.symbol, apiKey);
         if (snapshot) {
           quotes.set(match.symbol, snapshot);
@@ -301,6 +303,12 @@ function scoreMatch(match: StockSearchMatch, query: string) {
   const popularBoost = popularSymbols.has(match.symbol) ? 2.5 : 0;
 
   return match.matchScore + exactTickerBoost + tickerPrefixBoost + namePrefixBoost + popularBoost;
+}
+
+function wait(milliseconds: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
 }
 
 function sanitizeQuery(value: string | null) {
