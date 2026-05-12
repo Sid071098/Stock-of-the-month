@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -5,7 +6,10 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://easecaseinc.com";
 
 export async function POST(request: Request) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const customerId = request.headers.get("x-stockymonth-customer") ?? process.env.STRIPE_TEST_CUSTOMER_ID;
+  const customerId =
+    cookies().get("stockymonth_customer")?.value ??
+    request.headers.get("x-stockymonth-customer") ??
+    process.env.STRIPE_TEST_CUSTOMER_ID;
 
   if (!stripeSecretKey || !customerId) {
     return NextResponse.redirect(new URL("/checkout-error?code=missing_portal_config", appUrl), { status: 303 });

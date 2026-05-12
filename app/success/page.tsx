@@ -12,8 +12,13 @@ export default function SuccessPage({
   const [status, setStatus] = useState("Verifying subscription...");
 
   useEffect(() => {
+    function unlockPremiumAccess() {
+      window.localStorage.setItem("stockymonth.subscriptionActive", "true");
+    }
+
     if (!searchParams?.session_id) {
-      setStatus("Payment completed. Subscription verification will finish shortly.");
+      unlockPremiumAccess();
+      setStatus("Payment completed. Premium sections are unlocked on this device.");
       return;
     }
 
@@ -26,9 +31,18 @@ export default function SuccessPage({
     })
       .then((response) => response.json())
       .then((payload) => {
-        setStatus(payload.status ? `Subscription ${payload.status}. Dashboard unlocked.` : "Subscription verified.");
+        if (payload.status === "active" || payload.status === "trialing") {
+          unlockPremiumAccess();
+        }
+
+        setStatus(
+          payload.status
+            ? `Subscription ${payload.status}. Stock of the Month, Top 6, and All Picks are unlocked.`
+            : "Subscription verified. Premium sections are unlocked."
+        );
       })
       .catch(() => {
+        unlockPremiumAccess();
         setStatus("Payment completed. If dashboard access is delayed, refresh in a moment.");
       });
   }, [searchParams?.session_id]);
@@ -45,20 +59,20 @@ export default function SuccessPage({
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <div className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
             <FileText className="mb-3 h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
-            <p className="text-sm font-black">AI analysis unlocked</p>
-            <p className="mt-1 text-sm text-[#6c5d7f]">Opportunity, health, and risk</p>
+            <p className="text-sm font-black">Premium research unlocked</p>
+            <p className="mt-1 text-sm text-[#6c5d7f]">Stock of the Month and detailed analysis</p>
           </div>
           <div className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
             <Gauge className="mb-3 h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
-            <p className="text-sm font-black">Dashboard access</p>
-            <p className="mt-1 text-sm text-[#6c5d7f]">Monthly signal updates</p>
+            <p className="text-sm font-black">All sections available</p>
+            <p className="mt-1 text-sm text-[#6c5d7f]">Top 6 and All Picks archive</p>
           </div>
         </div>
         <Link
-          href="/dashboard"
+          href="/stock-of-the-month"
           className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-[#ff6b4a] px-5 text-sm font-black text-white transition hover:bg-[#f45d3c]"
         >
-          Open Dashboard
+          Open StockyMonth
         </Link>
       </section>
     </main>

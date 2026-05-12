@@ -24,7 +24,9 @@ import {
   TrendingUp,
   X,
   UserPlus,
-  UserCircle
+  UserCircle,
+  LockKeyhole,
+  ShieldCheck
 } from "lucide-react";
 import StripePricingTable from "./StripePricingTable";
 import type { ArchivePick, MonthlyPick, QualityPick } from "../lib/picks";
@@ -33,6 +35,7 @@ const monthlyStorageKey = "stockymonth.monthlyPick";
 const qualityStorageKey = "stockymonth.qualityPicks";
 const authUsersStorageKey = "stockymonth.registeredUsers";
 const authSessionStorageKey = "stockymonth.currentUser";
+const subscriptionStorageKey = "stockymonth.subscriptionActive";
 
 type RegisteredUser = {
   firstName: string;
@@ -87,11 +90,13 @@ export default function StockExperience({
   const [qualityPicks, setQualityPicks] = useState(defaultQualityPicks);
   const [authReady, setAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
+  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
 
   useEffect(() => {
     const savedMonthly = readStoredValue<MonthlyPick>(monthlyStorageKey);
     const savedQuality = readStoredValue<QualityPick[]>(qualityStorageKey);
     const savedUser = readStoredValue<RegisteredUser>(authSessionStorageKey);
+    const savedSubscription = window.localStorage.getItem(subscriptionStorageKey);
 
     if (savedMonthly) {
       setMonthlyPick({ ...defaultMonthlyPick, ...savedMonthly });
@@ -103,6 +108,19 @@ export default function StockExperience({
 
     if (savedUser) {
       setCurrentUser(savedUser);
+    }
+
+    setHasPremiumAccess(savedSubscription === "true");
+    if (savedSubscription !== "true") {
+      void fetch("/api/subscription/status", { cache: "no-store" })
+        .then((response) => response.json())
+        .then((payload: { active?: boolean }) => {
+          if (payload.active) {
+            setHasPremiumAccess(true);
+            window.localStorage.setItem(subscriptionStorageKey, "true");
+          }
+        })
+        .catch(() => undefined);
     }
 
     setAuthReady(true);
@@ -149,11 +167,13 @@ export default function StockExperience({
 
   return (
     <main className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
-      <TopNav currentUser={currentUser} currentView={view} onSignOut={signOut} />
-      {view === "monthly" && <MonthlyPickSection monthlyPick={monthlyPick} />}
-      {view === "quality" && <QualityPicksSection picks={qualityPicks} />}
-      {view === "all-picks" && <AllPicksSection picks={archivePicks} />}
-      {view === "subscription" && <SubscriptionSection currentUser={currentUser} />}
+      <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={hasPremiumAccess} onSignOut={signOut} />
+      {view === "monthly" && <MonthlyPickSection hasPremiumAccess={hasPremiumAccess} monthlyPick={monthlyPick} />}
+      {view === "quality" && (
+        hasPremiumAccess ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate title="Top 6 High Quality Stocks" />
+      )}
+      {view === "all-picks" && (hasPremiumAccess ? <AllPicksSection picks={archivePicks} /> : <PremiumGate title="All Picks" />)}
+      {view === "subscription" && <SubscriptionSection currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} />}
       {showPricing && (
         <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
       )}
@@ -772,12 +792,17 @@ function AuthInput({
 function TopNav({
   currentView,
   currentUser,
+  hasPremiumAccess,
   onSignOut
 }: {
   currentView: StockExperienceView;
   currentUser: RegisteredUser;
+  hasPremiumAccess: boolean;
   onSignOut: () => void;
 }) {
+  const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/stock-of-the-month#unlock";
+  const allPicksHref = hasPremiumAccess ? "/all-picks" : "/stock-of-the-month#unlock";
+
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
@@ -796,13 +821,13 @@ function TopNav({
             Stock of the Month
           </Link>
           <Link
-            href="/top-quality-stocks"
+            href={qualityHref}
             className={navLinkClass(currentView === "quality")}
           >
             Top 6 High Quality Stocks
           </Link>
           <Link
-            href="/all-picks"
+            href={allPicksHref}
             className={navLinkClass(currentView === "all-picks")}
           >
             All Picks
@@ -943,7 +968,7 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   );
 }
 
-function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
+function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAccess: boolean; monthlyPick: MonthlyPick }) {
   const backingPoints = [
     {
       icon: <CircleDollarSign className="h-5 w-5" aria-hidden="true" />,
@@ -960,7 +985,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   ];
 
   return (
-    <section id="stock-of-month" className="scroll-mt-24 bg-[#f8fafc] px-4 py-6 md:px-6 lg:min-h-[calc(100vh-5rem)]">
+    <section id="stock-of-month" className="scroll-mt-24 bg-[#f8fafc] px-4 py-6 md:px-6">
       <div className="mx-auto max-w-[1460px]">
         <Reveal className="sr-only mb-7 flex items-center gap-3 text-[#0f172a]">
           <CircleGauge className="h-6 w-6" aria-hidden="true" />
@@ -1027,8 +1052,84 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
             </div>
           </div>
         </Reveal>
+        <DetailedAnalysisSection monthlyPick={monthlyPick} />
+        {!hasPremiumAccess && <PremiumUnlockPanel />}
+        {hasPremiumAccess && (
+          <Reveal className="mt-8 rounded-md border border-emerald-200 bg-emerald-50 p-5 text-emerald-800 shadow-sm">
+            <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.16em]">Premium unlocked</p>
+                <h2 className="mt-1 text-2xl font-black text-[#0f172a]">All three StockyMonth sections are available.</h2>
+              </div>
+              <div className="flex flex-wrap gap-2 text-sm font-black">
+                <Link href="/stock-of-the-month" className="rounded-full bg-white px-4 py-2 text-emerald-700">
+                  Stock of the Month
+                </Link>
+                <Link href="/top-quality-stocks" className="rounded-full bg-white px-4 py-2 text-emerald-700">
+                  Top 6
+                </Link>
+                <Link href="/all-picks" className="rounded-full bg-white px-4 py-2 text-emerald-700">
+                  All Picks
+                </Link>
+              </div>
+            </div>
+          </Reveal>
+        )}
       </div>
     </section>
+  );
+}
+
+function DetailedAnalysisSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
+  const analysisCards = [
+    {
+      title: "The thesis",
+      text: "EQT pairs a low-cost Appalachian gas base with two demand tailwinds: LNG export growth and power demand from AI data center buildouts."
+    },
+    {
+      title: "Vertical integration",
+      text: "The Equitrans acquisition gives EQT more control over gathering and transport, which can reduce friction and improve realized cash flow across cycles."
+    },
+    {
+      title: "Competitive landscape",
+      text: "Against Expand Energy, Range Resources, and Antero, EQT's scale, inventory depth, and operating cost profile give it a strong seat in natural gas."
+    },
+    {
+      title: "Management alignment",
+      text: "CEO Toby Rice owns meaningful stock and receives a symbolic $1 salary, keeping investor attention on performance-linked long-term value creation."
+    }
+  ];
+
+  return (
+    <Reveal className="mt-8 rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Detailed analysis</p>
+          <h2 className="mt-3 text-3xl font-black text-[#0f172a]">
+            Why {monthlyPick.name} is the May 2026 pick
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-slate-600">
+            A deeper look at the setup behind the monthly call: catalysts, cost structure, market positioning, and management alignment.
+          </p>
+          <Link
+            href={`/analysis/${monthlyPick.ticker}`}
+            className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-5 text-sm font-black text-white transition hover:bg-orange-600"
+          >
+            Open full analysis
+            <LineChart className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {analysisCards.map((card) => (
+            <article key={card.title} className="rounded-md border border-slate-200 bg-[#f8fafc] p-5">
+              <h3 className="text-lg font-black text-[#0f172a]">{card.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-600">{card.text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </Reveal>
   );
 }
 
@@ -1225,7 +1326,106 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
   );
 }
 
-function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
+function PremiumGate({ title }: { title: string }) {
+  return (
+    <section className="bg-[#f8fafc] px-6 py-14">
+      <div className="mx-auto max-w-6xl">
+        <Reveal className="mb-8 rounded-md border border-orange-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">
+                <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+                Premium locked
+              </p>
+              <h1 className="mt-3 text-3xl font-black text-[#0f172a]">{title}</h1>
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+                Subscribe once to unlock Stock of the Month, Top 6 High Quality Stocks, and the full All Picks archive.
+              </p>
+            </div>
+            <Link
+              href="/stock-of-the-month#unlock"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+            >
+              Unlock premium
+            </Link>
+          </div>
+        </Reveal>
+        <PremiumUnlockPanel compact />
+      </div>
+    </section>
+  );
+}
+
+function PremiumUnlockPanel({ compact = false }: { compact?: boolean }) {
+  return (
+    <Reveal
+      className={`mt-8 overflow-hidden rounded-md bg-[#22006c] text-white shadow-2xl ${
+        compact ? "p-6 md:p-8" : "p-6 md:p-10"
+      }`}
+    >
+      <div id="unlock" className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ffb29d]">Unlock premium research</p>
+          <h2 className="mt-4 max-w-2xl text-3xl font-black leading-tight text-white md:text-4xl">
+            Unlock all three StockyMonth sections for $1.99/month
+          </h2>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#e5d8f4]">
+            Get the current stock of the month, the Top 6 High Quality Stocks list, and the complete All Picks archive with one recurring subscription.
+          </p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              "Stock of the Month",
+              "Top 6 High Quality Stocks",
+              "All Picks archive"
+            ].map((item) => (
+              <div key={item} className="rounded-md bg-white/10 p-4 ring-1 ring-white/15">
+                <ShieldCheck className="mb-3 h-5 w-5 text-[#22c55e]" aria-hidden="true" />
+                <p className="text-sm font-black">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <form action="/api/checkout" method="POST" className="rounded-md bg-white p-6 text-[#0f172a] shadow-2xl">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Monthly</p>
+              <div className="mt-3 flex items-end gap-2">
+                <span className="text-5xl font-black">$1.99</span>
+                <span className="pb-2 text-base font-bold text-slate-500">/month</span>
+              </div>
+            </div>
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+              Active Buy
+            </span>
+          </div>
+
+          <label className="mt-6 block">
+            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Promo code</span>
+            <input
+              name="promoCode"
+              placeholder="STUDENT or ADMIN01"
+              className="mt-2 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-[#0f172a] outline-none transition focus:border-[#ff4f00] focus:ring-4 focus:ring-orange-100"
+            />
+          </label>
+          <p className="mt-2 text-xs font-semibold text-slate-500">
+            You can also enter a promotion code directly in Stripe Checkout.
+          </p>
+
+          <button
+            type="submit"
+            className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+          >
+            Subscribe and unlock
+          </button>
+        </form>
+      </div>
+    </Reveal>
+  );
+}
+
+function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: RegisteredUser; hasPremiumAccess: boolean }) {
   const fullName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
 
   return (
@@ -1239,7 +1439,9 @@ function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
           </p>
         </Reveal>
 
-        <Reveal className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
+        {!hasPremiumAccess && <PremiumUnlockPanel compact />}
+
+        {hasPremiumAccess && <Reveal className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
           <article className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div className="flex flex-col justify-between gap-6 border-b border-slate-200 pb-6 md:flex-row md:items-start">
               <div>
@@ -1294,7 +1496,7 @@ function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
               The cancel button opens Stripe Billing Portal, where cancellation is handled securely by Stripe.
             </p>
           </aside>
-        </Reveal>
+        </Reveal>}
       </div>
     </section>
   );

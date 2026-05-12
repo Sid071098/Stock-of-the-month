@@ -7,6 +7,8 @@ const appUrlFallback = process.env.NEXT_PUBLIC_APP_URL ?? "https://easecaseinc.c
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin") || new URL(request.url).origin || appUrlFallback;
+  const formData = await request.formData().catch(() => null);
+  const submittedPromoCode = normalizePromoCode(formData?.get("promoCode"));
 
   if (!stripeSecretKey) {
     return redirectToCheckoutError(origin, "missing_secret");
@@ -44,20 +46,29 @@ export async function POST(request: Request) {
       ];
 
   try {
-    const session = await stripe.checkout.sessions.create({
+    const discounts = await getCheckoutDiscounts(stripe, submittedPromoCode);
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: lineItems,
       success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/cancel`,
-      allow_promotion_codes: true,
       subscription_data: {
         metadata: {
           plan: "stock-of-the-month",
-          featuredTicker: "EQT"
+          featuredTicker: "EQT",
+          requestedPromoCode: submittedPromoCode || "none"
         }
       }
-    });
+    };
+
+    if (discounts.length > 0) {
+      sessionParams.discounts = discounts;
+    } else {
+      sessionParams.allow_promotion_codes = true;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     if (!session.url) {
       return redirectToCheckoutError(origin, "missing_checkout_url");
@@ -106,4 +117,27 @@ function getStripeErrorSummary(error: unknown) {
   }
 
   return { message: "Unknown Stripe error" };
+}
+
+function normalizePromoCode(value: FormDataEntryValue | null | undefined) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.trim().slice(0, 64);
+}
+
+async function getCheckoutDiscounts(stripe: Stripe, promoCode: string) {
+  if (!promoCode) {
+    return [];
+  }
+
+  const promotionCodes = await stripe.promotionCodes.list({
+    active: true,
+    code: promoCode,
+    limit: 1
+  });
+  const promotionCode = promotionCodes.data[0];
+
+  return promotionCode ? [{ promotion_code: promotionCode.id }] : [];
 }

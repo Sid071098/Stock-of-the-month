@@ -23,6 +23,7 @@ export async function POST(request: Request) {
   });
   const subscription = session.subscription as Stripe.Subscription | null;
   const status = subscription?.status;
+  const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
 
   if (status !== "active" && status !== "trialing") {
     return NextResponse.json({ error: "subscription_not_active", status }, { status: 403 });
@@ -35,6 +36,16 @@ export async function POST(request: Request) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production"
   });
+
+  if (customerId) {
+    cookies().set("stockymonth_customer", customerId, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 365,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production"
+    });
+  }
 
   return NextResponse.json({ status });
 }
