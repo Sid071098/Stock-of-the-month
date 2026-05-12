@@ -10,7 +10,6 @@ import {
   ChevronDown,
   CircleDollarSign,
   CircleGauge,
-  Crown,
   Database,
   Edit3,
   KeyRound,
@@ -21,7 +20,6 @@ import {
   RefreshCcw,
   Save,
   Search,
-  Settings,
   Sparkles,
   Star,
   TrendingUp,
@@ -81,7 +79,10 @@ type StockExperienceProps = {
   publishableKey: string;
   showAdmin?: boolean;
   showPricing?: boolean;
+  view?: StockExperienceView;
 };
+
+type StockExperienceView = "monthly" | "quality" | "all-picks" | "subscription";
 
 export default function StockExperience({
   archivePicks,
@@ -90,11 +91,11 @@ export default function StockExperience({
   pricingTableId,
   publishableKey,
   showAdmin = false,
-  showPricing = true
+  showPricing = true,
+  view = "monthly"
 }: StockExperienceProps) {
   const [monthlyPick, setMonthlyPick] = useState(defaultMonthlyPick);
   const [qualityPicks, setQualityPicks] = useState(defaultQualityPicks);
-  const [showQualityPicks, setShowQualityPicks] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
 
@@ -138,13 +139,6 @@ export default function StockExperience({
     window.localStorage.removeItem(qualityStorageKey);
   }
 
-  function revealQualityPicks() {
-    setShowQualityPicks(true);
-    window.setTimeout(() => {
-      document.getElementById("quality-picks")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  }
-
   function completeAuthentication(user: RegisteredUser) {
     setCurrentUser(user);
     window.localStorage.setItem(authSessionStorageKey, JSON.stringify(user));
@@ -166,11 +160,11 @@ export default function StockExperience({
 
   return (
     <main className="min-h-screen bg-[#f8fafc] text-slate-950">
-      <TopNav currentUser={currentUser} onShowTopPicks={revealQualityPicks} onSignOut={signOut} />
-      <Hero monthlyPick={monthlyPick} />
-      <MonthlyPickSection monthlyPick={monthlyPick} />
-      <AllPicksSection picks={archivePicks} />
-      {showQualityPicks && <QualityPicksSection picks={qualityPicks} />}
+      <TopNav currentUser={currentUser} currentView={view} onSignOut={signOut} />
+      {view === "monthly" && <MonthlyPickSection monthlyPick={monthlyPick} />}
+      {view === "quality" && <QualityPicksSection picks={qualityPicks} />}
+      {view === "all-picks" && <AllPicksSection picks={archivePicks} />}
+      {view === "subscription" && <SubscriptionSection currentUser={currentUser} />}
       {showPricing && (
         <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
       )}
@@ -838,50 +832,55 @@ function AuthInput({
 }
 
 function TopNav({
+  currentView,
   currentUser,
-  onShowTopPicks,
   onSignOut
 }: {
+  currentView: StockExperienceView;
   currentUser: RegisteredUser;
-  onShowTopPicks: () => void;
   onSignOut: () => void;
 }) {
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-        <Link href="/dashboard" className="flex items-center gap-3">
+        <Link href="/stock-of-the-month" className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#ff4f00] text-white">
             <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
           <span className="text-xl font-black tracking-tight text-slate-950 md:text-2xl">StockyMonth</span>
         </Link>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <a
-            href="#stock-of-month"
-            className="rounded-full bg-orange-50 px-5 py-2.5 text-sm font-black text-[#ff4f00] transition hover:bg-orange-100"
+        <div className="hidden items-center gap-2 md:flex">
+          <Link
+            href="/stock-of-the-month"
+            className={navLinkClass(currentView === "monthly")}
           >
             Stock of the Month
-          </a>
-          <button
-            type="button"
-            onClick={onShowTopPicks}
-            className="rounded-full px-5 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100"
+          </Link>
+          <Link
+            href="/top-quality-stocks"
+            className={navLinkClass(currentView === "quality")}
           >
-            Top 6
-          </button>
-          <a
-            href="#all-picks"
-            className="rounded-full px-5 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100"
+            Top 6 High Quality Stocks
+          </Link>
+          <Link
+            href="/all-picks"
+            className={navLinkClass(currentView === "all-picks")}
           >
             All Picks
-          </a>
+          </Link>
         </div>
 
         <ProfileMenu currentUser={currentUser} onSignOut={onSignOut} />
       </div>
     </nav>
   );
+}
+
+function navLinkClass(isActive: boolean) {
+  return `rounded-full px-4 py-2.5 text-sm font-black transition ${
+    isActive ? "bg-orange-50 text-[#ff4f00]" : "text-slate-700 hover:bg-slate-100"
+  }`;
 }
 
 function ProfileMenu({ currentUser, onSignOut }: { currentUser: RegisteredUser; onSignOut: () => void }) {
@@ -913,24 +912,16 @@ function ProfileMenu({ currentUser, onSignOut }: { currentUser: RegisteredUser; 
             </div>
           </div>
 
-          <div className="mt-4 rounded-md bg-[#fff1ea] p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-black">Archive Access</p>
-              <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-[#ff4f00]">Public</span>
-            </div>
-            <p className="mt-2 text-xs font-semibold leading-5 text-[#6c5d7f]">
-              The complete historical archive is visible for recruiters, clients, and visitors.
-            </p>
-          </div>
-
           <div className="mt-4 grid gap-2">
-            <Link href="/history" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold hover:bg-[#fff1ea]">
-              <Crown className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
-              Pick history
-            </Link>
-            <Link href="/admin" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold hover:bg-[#fff1ea]">
-              <Settings className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
-              Admin editor
+            <Link href="/subscription" className="rounded-md bg-[#fff1ea] p-4 transition hover:bg-orange-100">
+              <div className="flex items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-2 text-sm font-black">
+                  <CircleDollarSign className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
+                  Subscription
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#ff4f00]">$1.99/mo</span>
+              </div>
+              <p className="mt-2 text-xs font-semibold leading-5 text-[#6c5d7f]">View current plan and billing options.</p>
             </Link>
             <button
               type="button"
@@ -964,18 +955,18 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
             open detailed Alpha Vantage charts, and compare six high-quality stocks.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
-              href="#stock-of-month"
+            <Link
+              href="/stock-of-the-month"
               className="inline-flex h-14 items-center justify-center rounded-full bg-[#ff4f00] px-8 text-base font-black text-white transition hover:bg-orange-600"
             >
               View stock of the month
-            </a>
-            <a
-              href="#quality-picks"
+            </Link>
+            <Link
+              href="/top-quality-stocks"
               className="inline-flex h-14 items-center justify-center rounded-full border border-slate-200 bg-white px-8 text-base font-black text-slate-800 transition hover:bg-slate-50"
             >
               See top quality picks
-            </a>
+            </Link>
           </div>
         </Reveal>
 
@@ -1031,7 +1022,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   ];
 
   return (
-    <section id="stock-of-month" className="bg-[#f8fafc] px-4 py-3 md:px-6 lg:min-h-[calc(100vh-5rem)] lg:py-4">
+    <section id="stock-of-month" className="scroll-mt-24 bg-[#f8fafc] px-4 py-6 md:px-6 lg:min-h-[calc(100vh-5rem)]">
       <div className="mx-auto max-w-[1460px]">
         <Reveal className="sr-only mb-7 flex items-center gap-3 text-slate-950">
           <CircleGauge className="h-6 w-6" aria-hidden="true" />
@@ -1107,7 +1098,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section id="all-picks" className="bg-[#f8fafc] px-6 py-14">
+    <section id="all-picks" className="scroll-mt-24 bg-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
@@ -1206,7 +1197,6 @@ function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
         <div className="relative mt-5 rounded-md bg-white/95 p-4 shadow-sm md:p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-sm font-black text-[#210947]">Exclusive Analysis for Subscribers</p>
-            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-[#ff4f00]">AI refreshed</span>
           </div>
           <ul className="grid gap-2.5">
             {(monthlyPick.summaryBullets?.length ? monthlyPick.summaryBullets : [monthlyPick.thesis]).slice(0, 4).map((item) => (
@@ -1256,11 +1246,11 @@ function BackingPoint({
 
 function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
   return (
-    <section id="quality-picks" className="border-y border-slate-200 bg-white px-6 py-16">
+    <section id="quality-picks" className="scroll-mt-24 border-y border-slate-200 bg-white px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top 6 High Quality Picks</p>
-          <h2 className="mt-3 text-2xl font-black text-slate-950 md:text-3xl">Static shortlist you can update from admin</h2>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top 6 High Quality Stocks</p>
+          <h2 className="mt-3 text-2xl font-black text-slate-950 md:text-3xl">Six focused companies for the current watchlist</h2>
         </Reveal>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -1292,6 +1282,81 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
             </Reveal>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
+  const fullName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
+
+  return (
+    <section className="bg-[#f8fafc] px-6 py-14">
+      <div className="mx-auto max-w-5xl">
+        <Reveal className="mb-8">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Subscription</p>
+          <h1 className="mt-3 text-3xl font-black text-slate-950 md:text-4xl">Manage your StockyMonth plan</h1>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+            View your current monthly access and use Stripe billing tools to update or cancel your subscription.
+          </p>
+        </Reveal>
+
+        <Reveal className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
+          <article className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="flex flex-col justify-between gap-6 border-b border-slate-200 pb-6 md:flex-row md:items-start">
+              <div>
+                <p className="text-sm font-black text-slate-500">Current plan</p>
+                <h2 className="mt-2 text-3xl font-black text-slate-950">StockyMonth Monthly</h2>
+                <p className="mt-2 text-sm font-semibold text-slate-500">Signed in as {fullName || currentUser.email}</p>
+              </div>
+              <span className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-black text-emerald-700">
+                <LiveDot />
+                Active
+              </span>
+            </div>
+
+            <div className="mt-7 flex items-end gap-2">
+              <span className="text-5xl font-black text-slate-950">$1.99</span>
+              <span className="pb-2 text-base font-bold text-slate-500">/month</span>
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <form action="/api/customer-portal" method="POST">
+                <button
+                  type="submit"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+                >
+                  Manage billing
+                </button>
+              </form>
+              <form action="/api/customer-portal" method="POST">
+                <button
+                  type="submit"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-full border border-rose-200 bg-white px-6 text-sm font-black text-rose-600 transition hover:bg-rose-50"
+                >
+                  Cancel subscription
+                </button>
+              </form>
+            </div>
+          </article>
+
+          <aside className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <h3 className="text-xl font-black text-slate-950">Plan includes</h3>
+            <div className="mt-5 grid gap-4">
+              {["Stock of the Month", "Top 6 High Quality Stocks", "All Picks archive"].map((item) => (
+                <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-50 text-[#ff4f00]">
+                    <BadgeCheck className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  {item}
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 text-sm leading-relaxed text-slate-500">
+              The cancel button opens Stripe Billing Portal, where cancellation is handled securely by Stripe.
+            </p>
+          </aside>
+        </Reveal>
       </div>
     </section>
   );

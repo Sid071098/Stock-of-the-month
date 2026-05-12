@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${appUrl}/dashboard`
+    return_url: `${appUrl}/subscription`
   });
 
   return NextResponse.redirect(session.url, { status: 303 });

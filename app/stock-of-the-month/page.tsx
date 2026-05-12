@@ -8,7 +8,7 @@ const defaultPricingTableId = "prctbl_1TUwppGgdCjtxcdnqrbSE1lS";
 const defaultPublishableKey =
   "pk_live_51OXc79GgdCjtxcdnXkj1Q1Ntr72QpH8DRR3FVWjsGBAz0wwzvU5xlJG0BQsqxK0ZWVnLJC19XwUHjF1FFJlRy6V500oqCRBuDX";
 
-export default async function DashboardPage() {
+export default async function StockOfTheMonthPage() {
   const summaryBullets = await getMonthlyPickSummary(defaultMonthlyPick);
 
   return (
