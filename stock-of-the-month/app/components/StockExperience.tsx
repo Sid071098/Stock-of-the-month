@@ -22,9 +22,7 @@ import {
   TrendingUp,
   UserCircle
 } from "lucide-react";
-import AnalysisChart from "./AnalysisChart";
 import StripePricingTable from "./StripePricingTable";
-import type { SparklinePoint } from "../lib/marketData";
 import type { ArchivePick, MonthlyPick, QualityPick } from "../lib/picks";
 
 const monthlyStorageKey = "stockymonth.monthlyPick";
@@ -341,20 +339,6 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 
               <p className="mt-5 max-w-5xl text-base font-medium leading-relaxed text-slate-300">{monthlyPick.summary}</p>
 
-              <DashboardLiveChart ticker={monthlyPick.ticker} />
-
-              <div className="mt-6 rounded-md border border-slate-800 bg-[#111827] p-4">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#22c55e]">AI dashboard summary</p>
-                <ul className="mt-3 grid gap-2">
-                  {(monthlyPick.summaryBullets?.length ? monthlyPick.summaryBullets : [monthlyPick.thesis]).map((item) => (
-                    <li key={item} className="flex gap-3 text-sm font-semibold leading-relaxed text-slate-200">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#22c55e]" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
               <div className="mt-9">
                 <div className="mb-6 flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-[#22c55e]">
@@ -502,8 +486,6 @@ function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
           </ul>
           <p className="mt-4 text-xs font-black uppercase tracking-[0.16em] text-[#207d72]">StockyMonth Research Committee</p>
         </div>
-
-        <MiniLiveChart ticker={monthlyPick.ticker} />
       </div>
     </div>
   );
@@ -515,92 +497,6 @@ function EQTLogo() {
       <span className="relative text-xl font-black tracking-[-0.12em]">
         E<span className="text-[#ff5377]">Q</span>T
       </span>
-    </div>
-  );
-}
-
-function DashboardLiveChart({ ticker }: { ticker: string }) {
-  const [sparkline, setSparkline] = useState<SparklinePoint[]>([]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    void fetch(`/api/snapshot/${ticker}`)
-      .then((response) => response.json())
-      .then((payload: { snapshot?: { sparkline?: SparklinePoint[] } }) => {
-        if (isMounted && Array.isArray(payload.snapshot?.sparkline)) {
-          setSparkline(payload.snapshot.sparkline);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setSparkline([]);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [ticker]);
-
-  return (
-    <div className="mt-6 rounded-md border border-slate-800 bg-[#111827] p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Live Alpha Vantage Chart</p>
-        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-black text-[#22c55e]">
-          <LiveDot />
-          Live
-        </span>
-      </div>
-      {sparkline.length > 0 ? (
-        <div>
-          <AnalysisChart data={sparkline} heightClassName="h-56" />
-        </div>
-      ) : (
-        <div className="h-56 animate-pulse rounded-md bg-slate-800/70" />
-      )}
-    </div>
-  );
-}
-
-function MiniLiveChart({ ticker }: { ticker: string }) {
-  const [sparkline, setSparkline] = useState<SparklinePoint[]>([]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    void fetch(`/api/snapshot/${ticker}`)
-      .then((response) => response.json())
-      .then((payload: { snapshot?: { sparkline?: SparklinePoint[] } }) => {
-        if (isMounted && Array.isArray(payload.snapshot?.sparkline)) {
-          setSparkline(payload.snapshot.sparkline);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setSparkline([]);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [ticker]);
-
-  return (
-    <div className="mt-5 rounded-md border border-white/50 bg-[#0f172a]/90 p-4 shadow-xl">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-300">Live price signal</p>
-        <span className="inline-flex items-center gap-2 rounded-full bg-orange-500/15 px-2.5 py-1 text-[11px] font-black text-orange-200">
-          <LiveDot />
-          Alpha
-        </span>
-      </div>
-      {sparkline.length > 0 ? (
-        <AnalysisChart data={sparkline} heightClassName="h-32" strokeColor="#ff4f00" />
-      ) : (
-        <div className="h-32 animate-pulse rounded-md bg-white/10" />
-      )}
     </div>
   );
 }
