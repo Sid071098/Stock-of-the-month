@@ -1,5 +1,5 @@
 import StockExperience from "../components/StockExperience";
-import { defaultMonthlyPick, defaultQualityPicks } from "../lib/picks";
+import { allPicks, defaultMonthlyPick, defaultQualityPicks } from "../lib/picks";
 
 const defaultPricingTableId = "prctbl_1TUwppGgdCjtxcdnqrbSE1lS";
 const defaultPublishableKey =
@@ -8,6 +8,8 @@ const defaultPublishableKey =
 export default function AdminPage() {
   return (
     <StockExperience
+      archivePicks={allPicks}
+      archiveUnlocked
       defaultMonthlyPick={defaultMonthlyPick}
       defaultQualityPicks={defaultQualityPicks}
       pricingTableId={process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID || defaultPricingTableId}

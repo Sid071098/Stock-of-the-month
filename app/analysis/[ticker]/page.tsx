@@ -16,20 +16,20 @@ export default async function AnalysisPage({
   const analysis = await getAIAnalysis(snapshot);
 
   return (
-    <main className="min-h-screen bg-[#0f172a] px-6 py-10 text-slate-100">
+    <main className="min-h-screen bg-[#f8fafc] px-6 py-10 text-slate-950">
       <div className="mx-auto max-w-7xl">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-black text-[#22c55e]">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-black text-[#ff4f00]">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Dashboard
         </Link>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <section className="rounded-md border border-slate-800 bg-[#111827] p-6 shadow-xl">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#22c55e]">AI Analysis</p>
+          <section className="rounded-md border border-slate-200 bg-white p-6 shadow-xl">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">AI Analysis</p>
             <h1 className="mt-3 text-3xl font-black md:text-4xl">
               {snapshot.name} ({snapshot.ticker})
             </h1>
-            <p className="mt-4 text-base leading-relaxed text-slate-300 md:text-lg">{analysis.thesis}</p>
+            <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">{analysis.thesis}</p>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <Stat label="Price" value={snapshot.price} />
@@ -37,10 +37,10 @@ export default async function AnalysisPage({
             </div>
           </section>
 
-          <section className="rounded-md border border-slate-800 bg-[#111827] p-6 shadow-xl">
+          <section className="rounded-md border border-slate-200 bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-black">30-day performance</h2>
-              <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-sm font-black text-[#22c55e]">Alpha Vantage</span>
+              <span className="rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-sm font-black text-[#ff4f00]">Alpha Vantage</span>
             </div>
             <AnalysisChart data={snapshot.sparkline} />
           </section>
@@ -52,7 +52,7 @@ export default async function AnalysisPage({
           <AnalysisCard icon={<ShieldAlert className="h-5 w-5" />} title="Risk" body={analysis.risk} />
         </div>
 
-        <section className="mt-6 rounded-md border border-slate-800 bg-[#111827] p-6 shadow-xl">
+        <section className="mt-6 rounded-md border border-slate-200 bg-white p-6 shadow-xl">
           <h2 className="text-xl font-black">Technical Stats</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="P/E Ratio" value={snapshot.peRatio} light />
@@ -78,21 +78,21 @@ function AnalysisCard({
   title: string;
 }) {
   return (
-    <article className="rounded-md border border-slate-800 bg-[#111827] p-6 shadow-sm">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-emerald-400/10 text-[#22c55e]">
+    <article className="rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-orange-50 text-[#ff4f00]">
         {icon}
       </div>
       <h3 className="text-xl font-black">{title}</h3>
-      <p className="mt-3 text-base leading-relaxed text-slate-300">{body}</p>
+      <p className="mt-3 text-base leading-relaxed text-slate-600">{body}</p>
     </article>
   );
 }
 
 function EQTDeepDive() {
   return (
-    <section className="mt-6 rounded-md border border-slate-800 bg-[#111827] p-6 shadow-xl">
-      <p className="text-sm font-black uppercase tracking-[0.18em] text-[#22c55e]">Analysis Deep-Dive</p>
-      <h2 className="mt-3 text-2xl font-black text-white">Why this is the best pick of the month</h2>
+    <section className="mt-6 rounded-md border border-slate-200 bg-white p-6 shadow-xl">
+      <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Analysis Deep-Dive</p>
+      <h2 className="mt-3 text-2xl font-black text-slate-950">Why this is the best pick of the month</h2>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
         <DeepDiveCard
@@ -113,15 +113,15 @@ function EQTDeepDive() {
         />
       </div>
 
-      <div className="mt-6 rounded-md border border-slate-800 bg-[#0f172a] p-5">
-        <h3 className="text-lg font-black text-white">Competitive Landscape</h3>
+      <div className="mt-6 rounded-md border border-slate-200 bg-[#f8fafc] p-5">
+        <h3 className="text-lg font-black text-slate-950">Competitive Landscape</h3>
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
           {defaultMonthlyPick.competitors.map((competitor) => (
-            <div key={competitor.ticker} className="rounded-md border border-slate-800 bg-[#111827] p-4">
-              <p className="text-sm font-black text-[#22c55e]">
+            <div key={competitor.ticker} className="rounded-md border border-slate-200 bg-white p-4">
+              <p className="text-sm font-black text-[#ff4f00]">
                 {competitor.name} ({competitor.ticker})
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-300">{competitor.edge}</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{competitor.edge}</p>
             </div>
           ))}
         </div>
@@ -132,9 +132,9 @@ function EQTDeepDive() {
 
 function DeepDiveCard({ body, title }: { body: string; title: string }) {
   return (
-    <article className="rounded-md border border-slate-800 bg-[#0f172a] p-5">
-      <h3 className="text-lg font-black text-white">{title}</h3>
-      <p className="mt-3 text-base leading-relaxed text-slate-300">{body}</p>
+    <article className="rounded-md border border-slate-200 bg-[#f8fafc] p-5">
+      <h3 className="text-lg font-black text-slate-950">{title}</h3>
+      <p className="mt-3 text-base leading-relaxed text-slate-600">{body}</p>
     </article>
   );
 }
@@ -151,9 +151,9 @@ function Stat({
   value: string;
 }) {
   return (
-    <div className={`rounded-md p-4 ${light ? "border border-slate-800 bg-[#0f172a]" : "border border-slate-800 bg-[#0f172a]"}`}>
-      <p className="text-xs font-black uppercase tracking-wide text-slate-400">{label}</p>
-      <p className={`mt-1 text-xl font-black ${positive === undefined ? "text-white" : positive ? "text-[#22c55e]" : "text-rose-400"}`}>
+    <div className={`rounded-md border border-slate-200 bg-[#f8fafc] p-4`}>
+      <p className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</p>
+      <p className={`mt-1 text-xl font-black ${positive === undefined ? "text-slate-950" : positive ? "text-emerald-700" : "text-rose-600"}`}>
         {value}
       </p>
     </div>

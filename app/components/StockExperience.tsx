@@ -22,13 +22,17 @@ import {
   TrendingUp,
   UserCircle
 } from "lucide-react";
+import AnalysisChart from "./AnalysisChart";
 import StripePricingTable from "./StripePricingTable";
-import type { MonthlyPick, QualityPick } from "../lib/picks";
+import type { SparklinePoint } from "../lib/marketData";
+import type { ArchivePick, MonthlyPick, QualityPick } from "../lib/picks";
 
 const monthlyStorageKey = "stockymonth.monthlyPick";
 const qualityStorageKey = "stockymonth.qualityPicks";
 
 type StockExperienceProps = {
+  archivePicks: ArchivePick[];
+  archiveUnlocked?: boolean;
   defaultMonthlyPick: MonthlyPick;
   defaultQualityPicks: QualityPick[];
   pricingTableId: string;
@@ -38,6 +42,8 @@ type StockExperienceProps = {
 };
 
 export default function StockExperience({
+  archivePicks,
+  archiveUnlocked = false,
   defaultMonthlyPick,
   defaultQualityPicks,
   pricingTableId,
@@ -47,6 +53,7 @@ export default function StockExperience({
 }: StockExperienceProps) {
   const [monthlyPick, setMonthlyPick] = useState(defaultMonthlyPick);
   const [qualityPicks, setQualityPicks] = useState(defaultQualityPicks);
+  const [showQualityPicks, setShowQualityPicks] = useState(false);
 
   useEffect(() => {
     const savedMonthly = readStoredValue<MonthlyPick>(monthlyStorageKey);
@@ -81,12 +88,20 @@ export default function StockExperience({
     window.localStorage.removeItem(qualityStorageKey);
   }
 
+  function revealQualityPicks() {
+    setShowQualityPicks(true);
+    window.setTimeout(() => {
+      document.getElementById("quality-picks")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }
+
   return (
-    <main className="min-h-screen bg-[#0f172a] text-slate-100">
-      <TopNav />
+    <main className="min-h-screen bg-[#f8fafc] text-slate-950">
+      <TopNav onShowTopPicks={revealQualityPicks} />
       <Hero monthlyPick={monthlyPick} />
       <MonthlyPickSection monthlyPick={monthlyPick} />
-      <QualityPicksSection picks={qualityPicks} />
+      <AllPicksSection isUnlocked={archiveUnlocked} picks={archivePicks} />
+      {showQualityPicks && <QualityPicksSection picks={qualityPicks} />}
       {showPricing && (
         <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
       )}
@@ -104,29 +119,36 @@ export default function StockExperience({
   );
 }
 
-function TopNav() {
+function TopNav({ onShowTopPicks }: { onShowTopPicks: () => void }) {
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-800 bg-[#0f172a]/95 shadow-sm backdrop-blur">
+    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-6">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#22c55e] text-[#0f172a]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#ff4f00] text-white">
             <BarChart3 className="h-7 w-7" aria-hidden="true" />
           </div>
-          <span className="text-2xl font-black tracking-tight text-white">StockyMonth</span>
+          <span className="text-2xl font-black tracking-tight text-slate-950">StockyMonth</span>
         </Link>
 
         <div className="hidden items-center gap-3 md:flex">
           <a
             href="#stock-of-month"
-            className="rounded-full bg-slate-800 px-5 py-3 text-sm font-black text-[#22c55e] transition hover:bg-slate-700"
+            className="rounded-full bg-orange-50 px-5 py-3 text-sm font-black text-[#ff4f00] transition hover:bg-orange-100"
           >
             Stock of the Month
           </a>
-          <a
-            href="#quality-picks"
-            className="rounded-full px-5 py-3 text-sm font-black text-slate-200 transition hover:bg-slate-800"
+          <button
+            type="button"
+            onClick={onShowTopPicks}
+            className="rounded-full px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-100"
           >
-            Top 6 High Quality Picks
+            Top 6
+          </button>
+          <a
+            href="#all-picks"
+            className="rounded-full px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-100"
+          >
+            All Picks
           </a>
         </div>
 
@@ -144,7 +166,7 @@ function ProfileMenu() {
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className="inline-flex h-12 items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 text-sm font-black text-slate-100 shadow-sm transition hover:bg-slate-800"
+        className="inline-flex h-12 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50"
       >
         <UserCircle className="h-7 w-7" aria-hidden="true" />
         <span className="hidden sm:inline">Profile</span>
@@ -159,17 +181,17 @@ function ProfileMenu() {
             </div>
             <div>
               <p className="text-sm font-black">Siddharth Patel</p>
-              <p className="text-xs font-semibold text-[#6c5d7f]">Direct access enabled</p>
+              <p className="text-xs font-semibold text-[#6c5d7f]">StockyMonth member</p>
             </div>
           </div>
 
           <div className="mt-4 rounded-md bg-[#fff1ea] p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-black">Access</p>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">Open</span>
+              <p className="text-sm font-black">Archive Access</p>
+              <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-[#ff4f00]">Preview</span>
             </div>
             <p className="mt-2 text-xs font-semibold leading-5 text-[#6c5d7f]">
-              Stripe subscription is paused. Monthly picks, quality ideas, history, and live ticker analysis are open.
+              Subscribe to unlock the full historical archive. The latest picks remain available for preview.
             </p>
           </div>
 
@@ -198,44 +220,44 @@ function ProfileMenu() {
 
 function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   return (
-    <section className="border-b border-slate-800 bg-[#0f172a] px-6 py-14">
+    <section className="border-b border-slate-200 bg-[#f8fafc] px-6 py-12">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
         <Reveal>
-          <p className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-black text-[#22c55e]">
+          <p className="inline-flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-black text-[#ff4f00]">
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             {monthlyPick.month} Stock of the Month
           </p>
-          <h1 className="mt-7 max-w-4xl text-3xl font-black leading-tight text-white md:text-4xl">
+          <h1 className="mt-7 max-w-4xl text-3xl font-black leading-tight text-slate-950 md:text-4xl">
             Monthly stock picks with focused data, thesis, and quality shortlist.
           </h1>
-          <p className="mt-5 max-w-3xl text-base leading-relaxed text-slate-300 md:text-lg">
+          <p className="mt-5 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
             {monthlyPick.name} ({monthlyPick.ticker}) is the current featured idea. Review the thesis,
             open detailed Alpha Vantage charts, and compare six high-quality stocks.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
               href="#stock-of-month"
-              className="inline-flex h-14 items-center justify-center rounded-full bg-[#22c55e] px-8 text-base font-black text-[#0f172a] transition hover:bg-[#16a34a]"
+              className="inline-flex h-14 items-center justify-center rounded-full bg-[#ff4f00] px-8 text-base font-black text-white transition hover:bg-orange-600"
             >
               View stock of the month
             </a>
             <a
               href="#quality-picks"
-              className="inline-flex h-14 items-center justify-center rounded-full border border-slate-700 bg-slate-900 px-8 text-base font-black text-white transition hover:bg-slate-800"
+              className="inline-flex h-14 items-center justify-center rounded-full border border-slate-200 bg-white px-8 text-base font-black text-slate-800 transition hover:bg-slate-50"
             >
               See top quality picks
             </a>
           </div>
         </Reveal>
 
-        <Reveal className="rounded-md border border-slate-800 bg-slate-900 p-5 shadow-xl">
-          <div className="rounded-md border border-slate-800 bg-[#111827] p-5 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <Reveal className="rounded-md border border-slate-200 bg-white p-5 shadow-xl">
+          <div className="rounded-md border border-slate-200 bg-[#f8fafc] p-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Latest stock pick</p>
-                <h2 className="mt-2 text-2xl font-black text-white">{monthlyPick.ticker}</h2>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Latest stock pick</p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950">{monthlyPick.ticker}</h2>
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/10 px-3 py-1 text-sm font-black text-[#22c55e]">
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-black text-emerald-700">
                 <LiveDot />
                 {monthlyPick.rating}
               </span>
@@ -245,12 +267,12 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
               <MiniStat label="Move" value={monthlyPick.change} positive={monthlyPick.change.startsWith("+")} />
               <MiniStat label="Sector" value={monthlyPick.sector} />
             </div>
-            <div className="mt-6 h-44 rounded-md border border-slate-800 bg-[#0f172a] p-4">
+            <div className="mt-6 h-44 rounded-md border border-slate-200 bg-white p-4">
               <div className="flex h-full items-end gap-2">
                 {[42, 58, 49, 70, 63, 76, 68, 82, 78, 90, 84, 96].map((height, index) => (
                   <div
                     key={`${height}-${index}`}
-                    className="flex-1 rounded-t bg-[#22c55e]"
+                    className="flex-1 rounded-t bg-[#ff4f00]"
                     style={{ height: `${height}%`, opacity: 0.45 + index / 24 }}
                   />
                 ))}
@@ -280,15 +302,15 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   ];
 
   return (
-    <section id="stock-of-month" className="bg-[#0f172a] px-6 py-8 md:py-12">
+    <section id="stock-of-month" className="bg-[#f8fafc] px-6 py-8 md:py-12">
       <div className="mx-auto max-w-[1460px]">
-        <Reveal className="mb-7 flex items-center gap-3 text-white">
+        <Reveal className="mb-7 flex items-center gap-3 text-slate-950">
           <CircleGauge className="h-6 w-6" aria-hidden="true" />
           <h2 className="text-xl font-black tracking-tight md:text-2xl">Our Latest Stock Pick</h2>
         </Reveal>
 
-        <Reveal as="article" className="overflow-hidden rounded-md border border-slate-800 bg-slate-950 p-5 shadow-2xl md:p-7">
-          <div className="grid gap-10 lg:grid-cols-[0.72fr_1fr] lg:items-stretch">
+        <Reveal as="article" className="overflow-hidden rounded-md border border-slate-800 bg-[#0f172a] p-5 shadow-2xl md:p-7">
+          <div className="grid gap-8 lg:grid-cols-[0.62fr_1fr] lg:items-stretch">
             <MonthlyPickArtwork month={monthlyPick.month} />
 
             <div className="flex min-w-0 flex-col justify-center py-2">
@@ -318,7 +340,9 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
                 </span>
               </div>
 
-              <p className="mt-5 max-w-5xl text-base font-medium leading-relaxed text-slate-300 md:text-lg">{monthlyPick.summary}</p>
+              <p className="mt-5 max-w-5xl text-base font-medium leading-relaxed text-slate-300">{monthlyPick.summary}</p>
+
+              <DashboardLiveChart ticker={monthlyPick.ticker} />
 
               <div className="mt-6 rounded-md border border-slate-800 bg-[#111827] p-4">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#22c55e]">AI dashboard summary</p>
@@ -337,7 +361,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-[#22c55e]">
                     <CircleDollarSign className="h-6 w-6" aria-hidden="true" />
                   </span>
-                  <h4 className="text-base font-black uppercase tracking-tight text-white md:text-lg">
+                  <h4 className="text-base font-black uppercase tracking-tight text-white">
                     Why this is the best pick of the month
                   </h4>
                 </div>
@@ -351,7 +375,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 
               <Link
                 href={`/analysis/${monthlyPick.ticker}`}
-                className="mt-9 inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-[#22c55e] px-6 text-sm font-black text-[#0f172a] transition hover:bg-[#16a34a]"
+                className="mt-9 inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
               >
                 Detailed analysis
                 <LineChart className="h-4 w-4" aria-hidden="true" />
@@ -364,9 +388,94 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   );
 }
 
+function AllPicksSection({
+  isUnlocked,
+  picks
+}: {
+  isUnlocked: boolean;
+  picks: ArchivePick[];
+}) {
+  return (
+    <section id="all-picks" className="bg-[#f8fafc] px-6 py-14">
+      <div className="mx-auto max-w-7xl">
+        <Reveal className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Historical Archive</p>
+            <h2 className="mt-3 text-3xl font-black text-slate-950">All Picks</h2>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+              A complete archive of StockyMonth monthly selections with price movement, short summaries, and the three core reasons behind each pick.
+            </p>
+          </div>
+          {!isUnlocked && (
+            <form action="/api/checkout" method="POST">
+              <button className="inline-flex h-12 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white shadow-sm transition hover:bg-orange-600">
+                Join to View Full History
+              </button>
+            </form>
+          )}
+        </Reveal>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {picks.map((pick, index) => {
+            const locked = !isUnlocked && index >= 3;
+
+            return (
+              <Reveal key={`${pick.month}-${pick.ticker}`} delay={(index % 6) * 55}>
+                <article className="relative min-h-full overflow-hidden rounded-md border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className={locked ? "select-none blur-[3px]" : ""}>
+                    <div className="mb-5 flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{pick.month}</p>
+                        <h3 className="mt-2 text-lg font-black leading-snug text-slate-950">
+                          {pick.name} ({pick.ticker})
+                        </h3>
+                      </div>
+                      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
+                        <LiveDot />
+                        Active Buy
+                      </span>
+                    </div>
+
+                    <div className="mb-5 flex items-end justify-between border-y border-slate-200 py-4">
+                      <p className="text-2xl font-black text-slate-950">{pick.price}</p>
+                      <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
+                        {pick.change}
+                      </p>
+                    </div>
+
+                    <p className="text-sm leading-relaxed text-slate-600">{pick.summary}</p>
+                    <div className="mt-5 grid gap-3">
+                      {pick.bullets.map((bullet) => (
+                        <p key={bullet} className="flex gap-3 text-sm leading-relaxed text-slate-700">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff4f00]" />
+                          {bullet}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  {locked && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/70 p-6 backdrop-blur-[1px]">
+                      <form action="/api/checkout" method="POST">
+                        <button className="rounded-full bg-[#ff4f00] px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-orange-600">
+                          Join to View Full History
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function MonthlyPickArtwork({ month }: { month: string }) {
   return (
-    <div className="relative min-h-[420px] overflow-hidden rounded-md bg-[#d6e9e7] p-6 sm:p-10">
+    <div className="relative min-h-[360px] overflow-hidden rounded-md bg-[#d6e9e7] p-5 sm:p-8">
       <div className="absolute -left-20 -top-20 h-48 w-48 rounded-full bg-[#207d72]" />
       <div className="absolute left-20 -top-24 h-56 w-56 rounded-full bg-[#88beb8]" />
       <div className="absolute -left-16 top-24 h-36 w-36 rounded-[42px] bg-[#bce3df]" />
@@ -377,15 +486,15 @@ function MonthlyPickArtwork({ month }: { month: string }) {
       <div className="absolute bottom-0 right-0 h-0 w-0 border-b-[150px] border-l-[150px] border-b-[#207d72] border-l-transparent" />
       <div className="absolute bottom-0 right-20 h-0 w-0 border-b-[120px] border-l-[120px] border-b-[#88beb8] border-l-transparent" />
 
-      <div className="relative z-10 flex h-full min-h-[360px] flex-col justify-center">
-        <div className="mb-12 flex items-center justify-center gap-4">
+      <div className="relative z-10 flex h-full min-h-[320px] flex-col justify-center">
+        <div className="mb-10 flex items-center justify-center gap-4">
           <span className="text-[#210947]">
             <BadgeCheck className="h-12 w-12" aria-hidden="true" />
           </span>
-          <h3 className="text-3xl font-black text-[#210947] md:text-4xl">{month} Pick</h3>
+          <h3 className="text-2xl font-black text-[#210947] md:text-3xl">{month} Pick</h3>
         </div>
 
-        <div className="relative rounded-md bg-white p-7 shadow-sm md:p-9">
+        <div className="relative rounded-md bg-white p-6 shadow-sm md:p-7">
           <div className="absolute -top-6 left-8 flex items-center">
             <div className="h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-[#ffcfbf]">
               <div className="mx-auto mt-2 h-7 w-7 rounded-full bg-[#21104d]" />
@@ -396,11 +505,11 @@ function MonthlyPickArtwork({ month }: { month: string }) {
             </div>
           </div>
 
-          <blockquote className="mt-8 text-xl font-black leading-tight text-[#210947] md:text-2xl md:leading-tight">
+          <blockquote className="mt-8 text-base font-black leading-relaxed text-[#210947] md:text-lg">
             "The components: the lowest-cost position, multiple powerful secular tailwinds, and improving business fundamentals.
             The result: the twin turbines of explosive EPS/FCF growth and a likely re-rating that will send the stock soaring over a multi-year period."
           </blockquote>
-          <p className="mt-6 text-base font-black text-[#210947]">- Anthony Lee, Lead Analyst at StockyMonth</p>
+          <p className="mt-5 text-sm font-black text-[#210947]">- StockyMonth Research Committee</p>
         </div>
       </div>
     </div>
@@ -413,6 +522,50 @@ function EQTLogo() {
       <span className="relative text-xl font-black tracking-[-0.12em]">
         E<span className="text-[#ff5377]">Q</span>T
       </span>
+    </div>
+  );
+}
+
+function DashboardLiveChart({ ticker }: { ticker: string }) {
+  const [sparkline, setSparkline] = useState<SparklinePoint[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void fetch(`/api/snapshot/${ticker}`)
+      .then((response) => response.json())
+      .then((payload: { snapshot?: { sparkline?: SparklinePoint[] } }) => {
+        if (isMounted && Array.isArray(payload.snapshot?.sparkline)) {
+          setSparkline(payload.snapshot.sparkline);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSparkline([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [ticker]);
+
+  return (
+    <div className="mt-6 rounded-md border border-slate-800 bg-[#111827] p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Live Alpha Vantage Chart</p>
+        <span className="inline-flex items-center gap-2 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-black text-[#22c55e]">
+          <LiveDot />
+          Live
+        </span>
+      </div>
+      {sparkline.length > 0 ? (
+        <div>
+          <AnalysisChart data={sparkline} heightClassName="h-56" />
+        </div>
+      ) : (
+        <div className="h-56 animate-pulse rounded-md bg-slate-800/70" />
+      )}
     </div>
   );
 }
@@ -440,11 +593,11 @@ function BackingPoint({
 
 function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
   return (
-    <section id="quality-picks" className="border-y border-slate-800 bg-[#111827] px-6 py-16">
+    <section id="quality-picks" className="border-y border-slate-200 bg-white px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#22c55e]">Top 6 High Quality Picks</p>
-          <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">Static shortlist you can update from admin</h2>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top 6 High Quality Picks</p>
+          <h2 className="mt-3 text-2xl font-black text-slate-950 md:text-3xl">Static shortlist you can update from admin</h2>
         </Reveal>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -452,26 +605,26 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
             <Reveal key={pick.ticker} delay={index * 70}>
               <Link
                 href={`/analysis/${pick.ticker}`}
-                className="group block rounded-md border border-slate-800 bg-[#0f172a] p-6 shadow-sm transition hover:-translate-y-1 hover:border-slate-700 hover:shadow-xl"
+                className="group block rounded-md border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl"
               >
                 <div className="flex items-start justify-between gap-4">
                   <CompanyLogo pick={pick} />
-                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-[#22c55e]">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
                     <LiveDot />
                     {pick.tag}
                   </span>
                 </div>
-                <h3 className="mt-5 text-lg font-black text-white group-hover:text-[#22c55e]">
+                <h3 className="mt-5 text-lg font-black text-slate-950 group-hover:text-[#ff4f00]">
                   {pick.name} ({pick.ticker})
                 </h3>
-                <p className="mt-1 text-sm font-bold text-slate-400">{pick.sector}</p>
+                <p className="mt-1 text-sm font-bold text-slate-500">{pick.sector}</p>
                 <div className="mt-5 flex items-end justify-between">
-                  <p className="text-lg font-black text-white">{pick.price}</p>
+                  <p className="text-lg font-black text-slate-950">{pick.price}</p>
                   <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
                     {pick.change}
                   </p>
                 </div>
-                <p className="mt-5 line-clamp-3 text-sm leading-relaxed text-slate-300">{pick.thesis}</p>
+                <p className="mt-5 line-clamp-3 text-sm leading-relaxed text-slate-600">{pick.thesis}</p>
               </Link>
             </Reveal>
           ))}

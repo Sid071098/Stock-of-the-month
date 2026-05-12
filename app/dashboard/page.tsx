@@ -1,6 +1,7 @@
+import { cookies } from "next/headers";
 import StockExperience from "../components/StockExperience";
 import { getMonthlyPickSummary } from "../lib/monthlySummary";
-import { defaultMonthlyPick, defaultQualityPicks } from "../lib/picks";
+import { allPicks, defaultMonthlyPick, defaultQualityPicks } from "../lib/picks";
 
 const defaultPricingTableId = "prctbl_1TUwppGgdCjtxcdnqrbSE1lS";
 const defaultPublishableKey =
@@ -8,9 +9,13 @@ const defaultPublishableKey =
 
 export default async function DashboardPage() {
   const summaryBullets = await getMonthlyPickSummary(defaultMonthlyPick);
+  const subscription = cookies().get("stockymonth_subscription")?.value;
+  const archiveUnlocked = subscription === "active" || subscription === "trialing";
 
   return (
     <StockExperience
+      archivePicks={allPicks}
+      archiveUnlocked={archiveUnlocked}
       defaultMonthlyPick={{ ...defaultMonthlyPick, summaryBullets }}
       defaultQualityPicks={defaultQualityPicks}
       pricingTableId={process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID || defaultPricingTableId}

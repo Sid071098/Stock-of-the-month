@@ -3,9 +3,15 @@
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { SparklinePoint } from "../lib/marketData";
 
-export default function AnalysisChart({ data }: { data: SparklinePoint[] }) {
+export default function AnalysisChart({
+  data,
+  heightClassName = "h-72"
+}: {
+  data: SparklinePoint[];
+  heightClassName?: string;
+}) {
   return (
-    <div className="h-72 w-full">
+    <div className={`${heightClassName} w-full`}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ bottom: 0, left: 0, right: 0, top: 10 }}>
           <defs>
