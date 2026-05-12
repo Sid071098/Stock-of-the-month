@@ -12,6 +12,7 @@ import {
   Star,
   Trophy
 } from "lucide-react";
+import LiveWatchlist from "./components/LiveWatchlist";
 import StripePricingTable from "./components/StripePricingTable";
 import { getStockOfMonth, type StockOfMonth } from "./lib/stockOfMonth";
 
@@ -110,6 +111,7 @@ export default async function Home() {
     <main className="min-h-screen bg-[#f6f9fc] text-[#0f172a]">
       <TopNav />
       <Hero featuredPick={featuredPick} />
+      <LiveWatchlist />
       <RecentWinningPicks />
       <Differentiators />
       <CheckoutSection featuredPick={featuredPick} />
@@ -137,7 +139,7 @@ function TopNav() {
             <Grid2X2 className="h-5 w-5" aria-hidden="true" />
             Discover
           </a>
-          <a href="#pricing" className="inline-flex items-center gap-2">
+          <a href="#watchlist" className="inline-flex items-center gap-2">
             <Star className="h-5 w-5" aria-hidden="true" />
             Watchlist
           </a>
@@ -148,10 +150,10 @@ function TopNav() {
         </div>
 
         <div className="hidden items-center gap-4 xl:flex">
-          <div className="flex h-12 w-72 items-center gap-3 rounded-full border border-slate-200 px-4 text-slate-400">
+          <a href="#watchlist" className="flex h-12 w-72 items-center gap-3 rounded-full border border-slate-200 px-4 text-slate-400 transition hover:border-teal-200 hover:bg-teal-50">
             <Search className="h-5 w-5" aria-hidden="true" />
             <span className="text-base font-semibold">Search for stocks...</span>
-          </div>
+          </a>
           <a
             href="#pricing"
             className="inline-flex h-12 items-center justify-center rounded-md bg-[#0f766e] px-5 text-center text-sm font-extrabold leading-tight text-white transition hover:bg-[#115e59]"
