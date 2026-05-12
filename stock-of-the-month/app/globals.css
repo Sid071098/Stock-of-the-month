@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -12,10 +12,10 @@
 
 body {
   margin: 0;
-  background: #05070d;
-  color: #f8fafc;
+  background: #fffaf7;
+  color: #210c2c;
 }
 
 ::selection {
-  background: rgba(34, 197, 94, 0.35);
+  background: rgba(255, 107, 69, 0.28);
 }

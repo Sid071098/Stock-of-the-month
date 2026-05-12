@@ -15,24 +15,24 @@ export type StockOfMonth = {
 };
 
 const fallbackPick: StockOfMonth = {
-  ticker: process.env.STOCK_MONTH_TICKER ?? "NFLX",
-  name: process.env.STOCK_MONTH_NAME ?? "Netflix",
-  price: process.env.STOCK_MONTH_PRICE ?? "$92.12",
-  change: process.env.STOCK_MONTH_CHANGE ?? "+18.16% 1Y",
-  rating: "Featured Pick",
+  ticker: process.env.STOCK_MONTH_TICKER ?? "EQT",
+  name: process.env.STOCK_MONTH_NAME ?? "EQT",
+  price: process.env.STOCK_MONTH_PRICE ?? "$56.45",
+  change: process.env.STOCK_MONTH_CHANGE ?? "+0.88%",
+  rating: "Active Buy",
   date: process.env.STOCK_MONTH_DATE ?? "May 2026",
   headline:
     process.env.STOCK_MONTH_HEADLINE ??
-    "Netflix is our Stock of the Month as advertising, live events, and disciplined content spending reshape the earnings story.",
+    "EQT is this month's stock pick, focused on low-cost natural gas production and operating leverage if commodity prices improve.",
   summary:
     process.env.STOCK_MONTH_SUMMARY ??
-    "Our monthly research brief frames NFLX as a premium media platform with expanding monetization surfaces, stronger free cash flow, and a cleaner shareholder return profile.",
+    "EQT operates in the Appalachian Basin and gives subscribers a timely energy infrastructure idea to evaluate through cost position, cash flow sensitivity, balance sheet discipline, and natural gas demand catalysts.",
   source: "Local fallback",
   asOf: new Date().toISOString(),
   scores: [
-    ["Quality", process.env.STOCK_MONTH_QUALITY_SCORE ?? "91"],
-    ["Growth", process.env.STOCK_MONTH_GROWTH_SCORE ?? "84"],
-    ["Momentum", process.env.STOCK_MONTH_MOMENTUM_SCORE ?? "78"]
+    ["Cost Edge", process.env.STOCK_MONTH_QUALITY_SCORE ?? "92"],
+    ["Cash Flow", process.env.STOCK_MONTH_GROWTH_SCORE ?? "86"],
+    ["Catalysts", process.env.STOCK_MONTH_MOMENTUM_SCORE ?? "81"]
   ]
 };
 

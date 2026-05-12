@@ -15,24 +15,24 @@ export type StockOfMonth = {
 };
 
 const fallbackPick: StockOfMonth = {
-  ticker: process.env.STOCK_MONTH_TICKER ?? "NFLX",
-  name: process.env.STOCK_MONTH_NAME ?? "Netflix",
-  price: process.env.STOCK_MONTH_PRICE ?? "$92.12",
-  change: process.env.STOCK_MONTH_CHANGE ?? "+18.16% 1Y",
-  rating: "Featured Pick",
+  ticker: process.env.STOCK_MONTH_TICKER ?? "EQT",
+  name: process.env.STOCK_MONTH_NAME ?? "EQT",
+  price: process.env.STOCK_MONTH_PRICE ?? "$56.45",
+  change: process.env.STOCK_MONTH_CHANGE ?? "+0.88%",
+  rating: "Active Buy",
   date: process.env.STOCK_MONTH_DATE ?? "May 2026",
   headline:
     process.env.STOCK_MONTH_HEADLINE ??
-    "Netflix is our Stock of the Month as advertising, live events, and disciplined content spending reshape the earnings story.",
+    "EQT is this month's stock pick, focused on low-cost natural gas production and operating leverage if commodity prices improve.",
   summary:
     process.env.STOCK_MONTH_SUMMARY ??
-    "Our monthly research brief frames NFLX as a premium media platform with expanding monetization surfaces, stronger free cash flow, and a cleaner shareholder return profile.",
+    "EQT operates in the Appalachian Basin and gives subscribers a timely energy infrastructure idea to evaluate through cost position, cash flow sensitivity, balance sheet discipline, and natural gas demand catalysts.",
   source: "Local fallback",
   asOf: new Date().toISOString(),
   scores: [
-    ["Quality", process.env.STOCK_MONTH_QUALITY_SCORE ?? "91"],
-    ["Growth", process.env.STOCK_MONTH_GROWTH_SCORE ?? "84"],
-    ["Momentum", process.env.STOCK_MONTH_MOMENTUM_SCORE ?? "78"]
+    ["Cost Edge", process.env.STOCK_MONTH_QUALITY_SCORE ?? "92"],
+    ["Cash Flow", process.env.STOCK_MONTH_GROWTH_SCORE ?? "86"],
+    ["Catalysts", process.env.STOCK_MONTH_MOMENTUM_SCORE ?? "81"]
   ]
 };
 
@@ -51,7 +51,7 @@ type SourcePayload = Partial<
 >;
 
 export async function getStockOfMonth(): Promise<StockOfMonth> {
-  const sourceUrl = process.env.STOCK_STORY_PICK_URL;
+  const sourceUrl = normalizeUrl(process.env.STOCK_STORY_PICK_URL);
 
   if (!sourceUrl) {
     return fallbackPick;
@@ -67,6 +67,15 @@ export async function getStockOfMonth(): Promise<StockOfMonth> {
       return {
         ...fallbackPick,
         source: `Fallback: source returned ${response.status}`
+      };
+    }
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (!contentType.includes("application/json")) {
+      return {
+        ...fallbackPick,
+        source: "Fallback: source did not return JSON"
       };
     }
 
@@ -86,13 +95,39 @@ function buildSourceHeaders(): HeadersInit {
   };
 
   const apiKey = process.env.STOCK_STORY_API_KEY;
-  const authHeader = process.env.STOCK_STORY_AUTH_HEADER ?? "Authorization";
+  const authHeader = sanitizeHeaderName(process.env.STOCK_STORY_AUTH_HEADER) ?? "Authorization";
 
   if (apiKey) {
     headers[authHeader] = authHeader.toLowerCase() === "authorization" ? `Bearer ${apiKey}` : apiKey;
   }
 
   return headers;
+}
+
+function normalizeUrl(value: string | undefined): string | undefined {
+  if (!value?.trim()) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+      return undefined;
+    }
+
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function sanitizeHeaderName(value: string | undefined): string | undefined {
+  if (!value?.trim()) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return /^[A-Za-z0-9-]+$/.test(trimmed) ? trimmed : undefined;
 }
 
 function normalizeSourcePayload(payload: SourcePayload): StockOfMonth {

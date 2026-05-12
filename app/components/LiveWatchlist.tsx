@@ -16,7 +16,7 @@ type Quote = {
   volume: number | null;
 };
 
-const initialSymbols = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "NFLX", "TSLA", "META"];
+const initialSymbols = ["EQT", "DASH", "BMI", "MSI", "AJG", "LLY", "YUM", "NFLX"];
 
 export default function LiveWatchlist() {
   const [symbols, setSymbols] = useState(initialSymbols);
