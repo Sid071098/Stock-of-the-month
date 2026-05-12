@@ -13,13 +13,18 @@ import {
   Crown,
   Database,
   Edit3,
+  KeyRound,
   LineChart,
   LogOut,
+  LogIn,
+  Mail,
   RefreshCcw,
   Save,
   Settings,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
+  UserPlus,
   UserCircle
 } from "lucide-react";
 import StripePricingTable from "./StripePricingTable";
@@ -27,6 +32,21 @@ import type { ArchivePick, MonthlyPick, QualityPick } from "../lib/picks";
 
 const monthlyStorageKey = "stockymonth.monthlyPick";
 const qualityStorageKey = "stockymonth.qualityPicks";
+const authUsersStorageKey = "stockymonth.registeredUsers";
+const authSessionStorageKey = "stockymonth.currentUser";
+
+type RegisteredUser = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  passwordHash: string;
+  createdAt: string;
+};
+
+type AuthNotice = {
+  message: string;
+  type: "error" | "success" | "info";
+};
 
 type StockExperienceProps = {
   archivePicks: ArchivePick[];
@@ -50,10 +70,13 @@ export default function StockExperience({
   const [monthlyPick, setMonthlyPick] = useState(defaultMonthlyPick);
   const [qualityPicks, setQualityPicks] = useState(defaultQualityPicks);
   const [showQualityPicks, setShowQualityPicks] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+  const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
 
   useEffect(() => {
     const savedMonthly = readStoredValue<MonthlyPick>(monthlyStorageKey);
     const savedQuality = readStoredValue<QualityPick[]>(qualityStorageKey);
+    const savedUser = readStoredValue<RegisteredUser>(authSessionStorageKey);
 
     if (savedMonthly) {
       setMonthlyPick({ ...defaultMonthlyPick, ...savedMonthly });
@@ -62,6 +85,12 @@ export default function StockExperience({
     if (Array.isArray(savedQuality) && savedQuality.length === 6) {
       setQualityPicks(savedQuality.map((pick, index) => ({ ...defaultQualityPicks[index], ...pick })));
     }
+
+    if (savedUser) {
+      setCurrentUser(savedUser);
+    }
+
+    setAuthReady(true);
   }, []);
 
   function saveMonthlyPick(nextPick: MonthlyPick) {
@@ -91,9 +120,28 @@ export default function StockExperience({
     }, 50);
   }
 
+  function completeAuthentication(user: RegisteredUser) {
+    setCurrentUser(user);
+    window.localStorage.setItem(authSessionStorageKey, JSON.stringify(user));
+  }
+
+  function signOut() {
+    setCurrentUser(null);
+    window.localStorage.removeItem(authSessionStorageKey);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (!authReady) {
+    return <AuthLoadingScreen />;
+  }
+
+  if (!currentUser) {
+    return <AuthLanding onAuthenticated={completeAuthentication} />;
+  }
+
   return (
     <main className="min-h-screen bg-[#f8fafc] text-slate-950">
-      <TopNav onShowTopPicks={revealQualityPicks} />
+      <TopNav currentUser={currentUser} onShowTopPicks={revealQualityPicks} onSignOut={signOut} />
       <Hero monthlyPick={monthlyPick} />
       <MonthlyPickSection monthlyPick={monthlyPick} />
       <AllPicksSection picks={archivePicks} />
@@ -116,7 +164,378 @@ export default function StockExperience({
   );
 }
 
-function TopNav({ onShowTopPicks }: { onShowTopPicks: () => void }) {
+function AuthLoadingScreen() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-6">
+      <div className="rounded-md border border-slate-200 bg-white p-8 text-center shadow-xl">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-[#ff4f00] text-white">
+          <BarChart3 className="h-7 w-7" aria-hidden="true" />
+        </div>
+        <p className="mt-4 text-sm font-black uppercase tracking-[0.18em] text-slate-500">Preparing StockyMonth</p>
+      </div>
+    </main>
+  );
+}
+
+function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUser) => void }) {
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [notice, setNotice] = useState<AuthNotice | null>(null);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function showNotice(nextNotice: AuthNotice) {
+    setNotice(nextNotice);
+    window.setTimeout(() => setNotice((current) => (current?.message === nextNotice.message ? null : current)), 4000);
+  }
+
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const email = normalizeEmail(loginEmail);
+    const users = getRegisteredUsers();
+    const user = users.find((candidate) => candidate.email === email);
+    const passwordHash = await hashPassword(loginPassword);
+
+    if (!user) {
+      showNotice({ message: "No registered user found. Please sign up first.", type: "error" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (user.passwordHash !== passwordHash) {
+      showNotice({ message: "Incorrect password. Use Forgot password if you need a reset.", type: "error" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    showNotice({ message: "Login successful. Welcome back.", type: "success" });
+    onAuthenticated(user);
+    setIsSubmitting(false);
+  }
+
+  async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const email = normalizeEmail(signupEmail);
+    const users = getRegisteredUsers();
+
+    if (!firstName.trim() || !lastName.trim() || !email || !signupPassword) {
+      showNotice({ message: "Please complete first name, last name, email, and password.", type: "error" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (signupPassword.length < 6) {
+      showNotice({ message: "Password must be at least 6 characters.", type: "error" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (users.some((user) => user.email === email)) {
+      showNotice({ message: "User is already registered. Please log in instead.", type: "error" });
+      setMode("login");
+      setLoginEmail(email);
+      setIsSubmitting(false);
+      return;
+    }
+
+    const user: RegisteredUser = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email,
+      passwordHash: await hashPassword(signupPassword),
+      createdAt: new Date().toISOString()
+    };
+
+    window.localStorage.setItem(authUsersStorageKey, JSON.stringify([...users, user]));
+    showNotice({ message: "Account created. You are now signed in.", type: "success" });
+    onAuthenticated(user);
+    setIsSubmitting(false);
+  }
+
+  function handleForgotPassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const email = normalizeEmail(forgotEmail);
+    const user = getRegisteredUsers().find((candidate) => candidate.email === email);
+
+    if (!user) {
+      showNotice({ message: "No account exists for that email address.", type: "error" });
+      return;
+    }
+
+    showNotice({
+      message: "Password reset instructions are ready. Connect an email provider to send the reset link.",
+      type: "success"
+    });
+    setMode("login");
+    setLoginEmail(email);
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f8fafc] px-6 py-8 text-slate-950">
+      {notice && (
+        <div
+          className={`fixed right-5 top-5 z-50 max-w-sm rounded-md border p-4 text-sm font-bold shadow-2xl ${
+            notice.type === "error"
+              ? "border-rose-200 bg-rose-50 text-rose-700"
+              : notice.type === "success"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-orange-200 bg-orange-50 text-[#ff4f00]"
+          }`}
+          role="status"
+        >
+          {notice.message}
+        </div>
+      )}
+
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center">
+        <div className="grid w-full overflow-hidden rounded-md border border-slate-200 bg-white shadow-2xl lg:grid-cols-[0.95fr_1.05fr]">
+          <section className="relative overflow-hidden bg-[#0f172a] p-8 text-white md:p-10">
+            <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#ff4f00]/20" />
+            <div className="absolute bottom-0 right-0 h-0 w-0 border-b-[180px] border-l-[180px] border-b-[#ff4f00]/25 border-l-transparent" />
+            <div className="relative z-10 flex h-full flex-col justify-between gap-12">
+              <div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#ff4f00] text-white">
+                    <BarChart3 className="h-7 w-7" aria-hidden="true" />
+                  </div>
+                  <span className="text-2xl font-black tracking-tight">StockyMonth</span>
+                </div>
+                <h1 className="mt-10 max-w-xl text-3xl font-black leading-tight md:text-4xl">
+                  Sign in to unlock your monthly stock research dashboard.
+                </h1>
+                <p className="mt-5 max-w-lg text-base font-medium leading-relaxed text-slate-300">
+                  Create an account, review the latest Stock of the Month, and explore the public archive from one clean trading workspace.
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                {["Protected dashboard access", "Registered-user detection", "Forgot-password recovery flow"].map((item) => (
+                  <div key={item} className="flex items-center gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+                    <ShieldCheck className="h-5 w-5 text-[#22c55e]" aria-hidden="true" />
+                    <span className="text-sm font-black text-slate-100">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="p-6 md:p-10">
+            <div className="mb-6 inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-black transition ${
+                  mode === "login" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                <LogIn className="h-4 w-4" aria-hidden="true" />
+                Login
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-black transition ${
+                  mode === "signup" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                <UserPlus className="h-4 w-4" aria-hidden="true" />
+                Sign up
+              </button>
+            </div>
+
+            {mode === "login" && (
+              <form onSubmit={handleLogin}>
+                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Member Login</p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">Welcome back</h2>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  Enter the email and password you used when creating your StockyMonth account.
+                </p>
+
+                <div className="mt-7 grid gap-4">
+                  <AuthInput
+                    autoComplete="email"
+                    icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+                    label="Email address"
+                    onChange={setLoginEmail}
+                    placeholder="you@example.com"
+                    type="email"
+                    value={loginEmail}
+                  />
+                  <AuthInput
+                    autoComplete="current-password"
+                    icon={<KeyRound className="h-5 w-5" aria-hidden="true" />}
+                    label="Password"
+                    onChange={setLoginPassword}
+                    placeholder="Enter password"
+                    type="password"
+                    value={loginPassword}
+                  />
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setMode("forgot")}
+                    className="text-sm font-black text-[#ff4f00] hover:text-orange-700"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? "Checking account..." : "Login"}
+                </button>
+              </form>
+            )}
+
+            {mode === "signup" && (
+              <form onSubmit={handleSignup}>
+                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Create Account</p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">Start with StockyMonth</h2>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  Sign up with your first name, last name, and email address. Existing users will be prompted to log in.
+                </p>
+
+                <div className="mt-7 grid gap-4 sm:grid-cols-2">
+                  <AuthInput label="First name" onChange={setFirstName} placeholder="First name" type="text" value={firstName} />
+                  <AuthInput label="Last name" onChange={setLastName} placeholder="Last name" type="text" value={lastName} />
+                  <div className="sm:col-span-2">
+                    <AuthInput
+                      autoComplete="email"
+                      icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+                      label="Email address"
+                      onChange={setSignupEmail}
+                      placeholder="you@example.com"
+                      type="email"
+                      value={signupEmail}
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <AuthInput
+                      autoComplete="new-password"
+                      icon={<KeyRound className="h-5 w-5" aria-hidden="true" />}
+                      label="Create password"
+                      onChange={setSignupPassword}
+                      placeholder="Minimum 6 characters"
+                      type="password"
+                      value={signupPassword}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? "Creating account..." : "Sign up"}
+                </button>
+              </form>
+            )}
+
+            {mode === "forgot" && (
+              <form onSubmit={handleForgotPassword}>
+                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Password Recovery</p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">Forgot password?</h2>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  Enter your registered email address and StockyMonth will prepare the reset flow.
+                </p>
+
+                <div className="mt-7">
+                  <AuthInput
+                    autoComplete="email"
+                    icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+                    label="Registered email"
+                    onChange={setForgotEmail}
+                    placeholder="you@example.com"
+                    type="email"
+                    value={forgotEmail}
+                  />
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="submit"
+                    className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+                  >
+                    Send reset instructions
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Back to login
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function AuthInput({
+  autoComplete,
+  icon,
+  label,
+  onChange,
+  placeholder,
+  type,
+  value
+}: {
+  autoComplete?: string;
+  icon?: React.ReactNode;
+  label: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type: string;
+  value: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-black text-slate-700">{label}</span>
+      <span className="mt-2 flex h-12 items-center gap-3 rounded-md border border-slate-200 bg-white px-4 shadow-sm transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
+        {icon && <span className="text-slate-400">{icon}</span>}
+        <input
+          autoComplete={autoComplete}
+          className="h-full min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-400"
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          required
+          type={type}
+          value={value}
+        />
+      </span>
+    </label>
+  );
+}
+
+function TopNav({
+  currentUser,
+  onShowTopPicks,
+  onSignOut
+}: {
+  currentUser: RegisteredUser;
+  onShowTopPicks: () => void;
+  onSignOut: () => void;
+}) {
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
@@ -149,19 +568,21 @@ function TopNav({ onShowTopPicks }: { onShowTopPicks: () => void }) {
           </a>
         </div>
 
-        <ProfileMenu />
+        <ProfileMenu currentUser={currentUser} onSignOut={onSignOut} />
       </div>
     </nav>
   );
 }
 
-function ProfileMenu() {
+function ProfileMenu({ currentUser, onSignOut }: { currentUser: RegisteredUser; onSignOut: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
+  const fullName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
 
   return (
     <div className="relative">
       <button
         type="button"
+        aria-label="Profile"
         onClick={() => setIsOpen((current) => !current)}
         className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50"
       >
@@ -174,11 +595,11 @@ function ProfileMenu() {
         <div className="absolute right-0 mt-3 w-80 rounded-md border border-[#efe7f7] bg-white p-4 text-[#210947] shadow-2xl">
           <div className="flex items-start gap-3 border-b border-[#efe7f7] pb-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#210947] text-sm font-black text-white">
-              SP
+              {getUserInitials(currentUser)}
             </div>
             <div>
-              <p className="text-sm font-black">Siddharth Patel</p>
-              <p className="text-xs font-semibold text-[#6c5d7f]">StockyMonth member</p>
+              <p className="text-sm font-black">{fullName}</p>
+              <p className="text-xs font-semibold text-[#6c5d7f]">{currentUser.email}</p>
             </div>
           </div>
 
@@ -203,6 +624,7 @@ function ProfileMenu() {
             </Link>
             <button
               type="button"
+              onClick={onSignOut}
               className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-bold text-[#6c5d7f] hover:bg-[#fff1ea]"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
@@ -910,4 +1332,27 @@ function readStoredValue<T>(key: string): T | null {
   } catch {
     return null;
   }
+}
+
+function getRegisteredUsers() {
+  return readStoredValue<RegisteredUser[]>(authUsersStorageKey) ?? [];
+}
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+async function hashPassword(password: string) {
+  const bytes = new TextEncoder().encode(password);
+  const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function getUserInitials(user: RegisteredUser) {
+  const firstInitial = user.firstName.trim().charAt(0);
+  const lastInitial = user.lastName.trim().charAt(0);
+  return `${firstInitial}${lastInitial}`.toUpperCase() || "SM";
 }
