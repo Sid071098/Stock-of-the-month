@@ -153,19 +153,17 @@ function ProfileMenu() {
             </div>
             <div>
               <p className="text-sm font-black">Siddharth Patel</p>
-              <p className="text-xs font-semibold text-[#6c5d7f]">Subscriber access</p>
+              <p className="text-xs font-semibold text-[#6c5d7f]">Direct access enabled</p>
             </div>
           </div>
 
           <div className="mt-4 rounded-md bg-[#fff1ea] p-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-black">Subscription</p>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
-                $1.99/mo
-              </span>
+              <p className="text-sm font-black">Access</p>
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">Open</span>
             </div>
             <p className="mt-2 text-xs font-semibold leading-5 text-[#6c5d7f]">
-              Monthly pick research, six quality ideas, history, and live ticker analysis.
+              Stripe subscription is paused. Monthly picks, quality ideas, history, and live ticker analysis are open.
             </p>
           </div>
 
@@ -174,12 +172,10 @@ function ProfileMenu() {
               <Crown className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
               Pick history
             </Link>
-            <form action="/api/customer-portal" method="POST">
-              <button className="inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-bold hover:bg-[#fff1ea]">
-                <Settings className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
-                Manage subscription
-              </button>
-            </form>
+            <Link href="/admin" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold hover:bg-[#fff1ea]">
+              <Settings className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
+              Admin editor
+            </Link>
             <button
               type="button"
               className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-bold text-[#6c5d7f] hover:bg-[#fff1ea]"
@@ -207,7 +203,7 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
             Monthly stock picks with focused data, thesis, and quality shortlist.
           </h1>
           <p className="mt-5 max-w-3xl text-xl leading-9 text-[#4d3f68]">
-            {monthlyPick.name} ({monthlyPick.ticker}) is the current featured idea. Subscribers can review the thesis,
+            {monthlyPick.name} ({monthlyPick.ticker}) is the current featured idea. Review the thesis,
             open detailed Alpha Vantage charts, and compare six high-quality stocks.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
