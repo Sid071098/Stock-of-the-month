@@ -50,6 +50,21 @@ type AuthNotice = {
   type: "error" | "success" | "info";
 };
 
+type AuthStockSearchResult = {
+  change: number | null;
+  changePercent: number | null;
+  currency: string;
+  exchange: string;
+  latestTradingDay: string | null;
+  matchScore: number;
+  name: string;
+  price: number | null;
+  region: string;
+  symbol: string;
+  type: string;
+  volume: number | null;
+};
+
 const authWinningPicks = [
   { name: "FTAI Aviation", return: "187%", ticker: "FTAI", picked: "July 2024" },
   { name: "Cloudflare", return: "160%", ticker: "NET", picked: "September 2024" },
@@ -322,10 +337,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             <span className="text-2xl font-black tracking-tight">StockyMonth</span>
           </div>
 
-          <div className="hidden h-12 w-full max-w-md items-center gap-3 rounded-full border border-slate-200 px-5 text-slate-400 shadow-sm lg:flex">
-            <Search className="h-5 w-5" aria-hidden="true" />
-            <span className="text-sm font-bold">Search for stocks...</span>
-          </div>
+          <AuthStockSearch />
 
           <div className="flex items-center gap-3">
             <button
@@ -561,6 +573,164 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       )}
     </main>
+  );
+}
+
+function AuthStockSearch() {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<AuthStockSearchResult[]>([]);
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [isOpen, setIsOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+
+    if (!trimmedQuery) {
+      setResults([]);
+      setStatus("idle");
+      setErrorMessage("");
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setStatus("loading");
+      setErrorMessage("");
+
+      try {
+        const response = await fetch(`/api/stock-search?query=${encodeURIComponent(trimmedQuery)}`, {
+          headers: {
+            Accept: "application/json"
+          },
+          signal: controller.signal
+        });
+        const payload = (await response.json()) as {
+          message?: string;
+          results?: AuthStockSearchResult[];
+        };
+
+        if (!response.ok) {
+          throw new Error(payload.message || "Unable to search live stock data.");
+        }
+
+        setResults(payload.results ?? []);
+        setStatus("ready");
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        setResults([]);
+        setStatus("error");
+        setErrorMessage(error instanceof Error ? error.message : "Unable to search live stock data.");
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [query]);
+
+  const shouldShowDropdown = isOpen && Boolean(query.trim());
+
+  return (
+    <div className="relative hidden w-full max-w-md lg:block">
+      <div className="flex h-12 items-center gap-3 rounded-full border border-slate-200 bg-white px-5 text-slate-500 shadow-sm transition focus-within:border-orange-200 focus-within:ring-4 focus-within:ring-orange-100">
+        <Search className="h-5 w-5 shrink-0" aria-hidden="true" />
+        <input
+          aria-label="Search live stock data"
+          autoComplete="off"
+          className="h-full min-w-0 flex-1 bg-transparent text-sm font-bold text-[#210947] outline-none placeholder:text-slate-400"
+          onBlur={() => window.setTimeout(() => setIsOpen(false), 140)}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          placeholder="Search live stocks..."
+          type="search"
+          value={query}
+        />
+        {status === "loading" && (
+          <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-[#ff4f00]" aria-label="Searching" />
+        )}
+      </div>
+
+      {shouldShowDropdown && (
+        <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 overflow-hidden rounded-md border border-slate-200 bg-white text-slate-950 shadow-2xl">
+          <div className="border-b border-slate-100 px-4 py-3">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ff4f00]">Alpha Vantage Live Search</p>
+          </div>
+
+          {status === "loading" ? (
+            <div className="grid gap-3 p-4">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="animate-pulse rounded-md border border-slate-100 p-3">
+                  <div className="h-4 w-24 rounded bg-slate-100" />
+                  <div className="mt-3 h-3 w-44 rounded bg-slate-100" />
+                </div>
+              ))}
+            </div>
+          ) : status === "error" ? (
+            <div className="p-4">
+              <p className="rounded-md bg-rose-50 px-4 py-3 text-sm font-bold leading-relaxed text-rose-700">
+                {errorMessage}
+              </p>
+            </div>
+          ) : results.length > 0 ? (
+            <div className="max-h-[420px] overflow-y-auto p-2">
+              {results.map((stock) => {
+                const isPositive = (stock.changePercent ?? 0) >= 0;
+
+                return (
+                  <button
+                    key={`${stock.symbol}-${stock.region}`}
+                    type="button"
+                    onClick={() => {
+                      setQuery(stock.symbol);
+                      setIsOpen(false);
+                    }}
+                    className="block w-full rounded-md px-3 py-3 text-left transition hover:bg-orange-50 focus:bg-orange-50 focus:outline-none"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-black text-[#210947]">{stock.symbol}</span>
+                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-emerald-700">
+                            Live
+                          </span>
+                        </div>
+                        <p className="mt-1 truncate text-sm font-semibold text-slate-600">{stock.name}</p>
+                        <p className="mt-1 text-xs font-bold text-slate-400">
+                          {stock.type} • {stock.region}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-sm font-black text-slate-950">{formatStockPrice(stock.price, stock.currency)}</p>
+                        <p className={`mt-1 text-xs font-black ${isPositive ? "text-emerald-700" : "text-rose-600"}`}>
+                          {formatStockMove(stock.changePercent)}
+                        </p>
+                        {stock.volume !== null && (
+                          <p className="mt-1 text-[11px] font-bold text-slate-400">Vol {formatCompactNumber(stock.volume)}</p>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-4">
+              <p className="rounded-md bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
+                No matching stocks found yet. Try a ticker like AAPL, EQT, or NFLX.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1490,4 +1660,37 @@ function getUserInitials(user: RegisteredUser) {
   const firstInitial = user.firstName.trim().charAt(0);
   const lastInitial = user.lastName.trim().charAt(0);
   return `${firstInitial}${lastInitial}`.toUpperCase() || "SM";
+}
+
+function formatStockPrice(value: number | null, currency: string) {
+  if (value === null) {
+    return "Quote pending";
+  }
+
+  const safeCurrency = /^[A-Z]{3}$/.test(currency) ? currency : "USD";
+
+  try {
+    return new Intl.NumberFormat("en-US", {
+      currency: safeCurrency,
+      maximumFractionDigits: 2,
+      style: "currency"
+    }).format(value);
+  } catch {
+    return `$${value.toFixed(2)}`;
+  }
+}
+
+function formatStockMove(value: number | null) {
+  if (value === null) {
+    return "Fetching quote";
+  }
+
+  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+function formatCompactNumber(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 1,
+    notation: "compact"
+  }).format(value);
 }
