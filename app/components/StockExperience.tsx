@@ -32,7 +32,6 @@ const qualityStorageKey = "stockymonth.qualityPicks";
 
 type StockExperienceProps = {
   archivePicks: ArchivePick[];
-  archiveUnlocked?: boolean;
   defaultMonthlyPick: MonthlyPick;
   defaultQualityPicks: QualityPick[];
   pricingTableId: string;
@@ -43,7 +42,6 @@ type StockExperienceProps = {
 
 export default function StockExperience({
   archivePicks,
-  archiveUnlocked = false,
   defaultMonthlyPick,
   defaultQualityPicks,
   pricingTableId,
@@ -100,7 +98,7 @@ export default function StockExperience({
       <TopNav onShowTopPicks={revealQualityPicks} />
       <Hero monthlyPick={monthlyPick} />
       <MonthlyPickSection monthlyPick={monthlyPick} />
-      <AllPicksSection isUnlocked={archiveUnlocked} picks={archivePicks} />
+      <AllPicksSection picks={archivePicks} />
       {showQualityPicks && <QualityPicksSection picks={qualityPicks} />}
       {showPricing && (
         <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
@@ -115,6 +113,7 @@ export default function StockExperience({
           onSaveQualityPicks={saveQualityPicks}
         />
       )}
+      <Footer />
     </main>
   );
 }
@@ -188,10 +187,10 @@ function ProfileMenu() {
           <div className="mt-4 rounded-md bg-[#fff1ea] p-4">
             <div className="flex items-center justify-between">
               <p className="text-sm font-black">Archive Access</p>
-              <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-[#ff4f00]">Preview</span>
+              <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-[#ff4f00]">Public</span>
             </div>
             <p className="mt-2 text-xs font-semibold leading-5 text-[#6c5d7f]">
-              Subscribe to unlock the full historical archive. The latest picks remain available for preview.
+              The complete historical archive is visible for recruiters, clients, and visitors.
             </p>
           </div>
 
@@ -388,13 +387,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   );
 }
 
-function AllPicksSection({
-  isUnlocked,
-  picks
-}: {
-  isUnlocked: boolean;
-  picks: ArchivePick[];
-}) {
+function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
   return (
     <section id="all-picks" className="bg-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-7xl">
@@ -406,63 +399,45 @@ function AllPicksSection({
               A complete archive of StockyMonth monthly selections with price movement, short summaries, and the three core reasons behind each pick.
             </p>
           </div>
-          {!isUnlocked && (
-            <form action="/api/checkout" method="POST">
-              <button className="inline-flex h-12 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white shadow-sm transition hover:bg-orange-600">
-                Join to View Full History
-              </button>
-            </form>
-          )}
         </Reveal>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {picks.map((pick, index) => {
-            const locked = !isUnlocked && index >= 3;
-
             return (
               <Reveal key={`${pick.month}-${pick.ticker}`} delay={(index % 6) * 55}>
                 <article className="relative min-h-full overflow-hidden rounded-md border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className={locked ? "select-none blur-[3px]" : ""}>
-                    <div className="mb-5 flex items-start justify-between gap-4">
+                  <div className="mb-5 flex items-start justify-between gap-4">
+                    <div className="flex gap-3">
+                      <ArchiveLogo pick={pick} />
                       <div>
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{pick.month}</p>
-                        <h3 className="mt-2 text-lg font-black leading-snug text-slate-950">
+                        <p className="text-sm font-black text-[#ff4f00]">{pick.month}</p>
+                        <h3 className="mt-1 text-lg font-black leading-snug text-slate-950">
                           {pick.name} ({pick.ticker})
                         </h3>
                       </div>
-                      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
-                        <LiveDot />
-                        Active Buy
-                      </span>
                     </div>
-
-                    <div className="mb-5 flex items-end justify-between border-y border-slate-200 py-4">
-                      <p className="text-2xl font-black text-slate-950">{pick.price}</p>
-                      <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
-                        {pick.change}
-                      </p>
-                    </div>
-
-                    <p className="text-sm leading-relaxed text-slate-600">{pick.summary}</p>
-                    <div className="mt-5 grid gap-3">
-                      {pick.bullets.map((bullet) => (
-                        <p key={bullet} className="flex gap-3 text-sm leading-relaxed text-slate-700">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff4f00]" />
-                          {bullet}
-                        </p>
-                      ))}
-                    </div>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
+                      <LiveDot />
+                      Active Buy
+                    </span>
                   </div>
 
-                  {locked && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/70 p-6 backdrop-blur-[1px]">
-                      <form action="/api/checkout" method="POST">
-                        <button className="rounded-full bg-[#ff4f00] px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-orange-600">
-                          Join to View Full History
-                        </button>
-                      </form>
-                    </div>
-                  )}
+                  <div className="mb-5 flex items-end justify-between border-y border-slate-200 py-4">
+                    <p className="text-2xl font-black text-slate-950">{pick.price}</p>
+                    <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
+                      {pick.change}
+                    </p>
+                  </div>
+
+                  <p className="text-sm leading-relaxed text-slate-600">{pick.summary}</p>
+                  <div className="mt-5 grid gap-3">
+                    {pick.bullets.map((bullet) => (
+                      <p key={bullet} className="flex gap-3 text-sm leading-relaxed text-slate-700">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff4f00]" />
+                        {bullet}
+                      </p>
+                    ))}
+                  </div>
                 </article>
               </Reveal>
             );
@@ -887,12 +862,42 @@ function CompanyLogo({ pick }: { pick: QualityPick }) {
   );
 }
 
+function ArchiveLogo({ pick }: { pick: ArchivePick }) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white p-2 shadow-sm">
+      {failed ? (
+        <span className="text-xs font-black text-slate-950">{pick.ticker.slice(0, 2)}</span>
+      ) : (
+        <img
+          src={`https://logo.clearbit.com/${pick.domain}`}
+          alt={`${pick.name} logo`}
+          className="h-full w-full object-contain"
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
+      )}
+    </div>
+  );
+}
+
 function LiveDot({ dark = false }: { dark?: boolean }) {
   return (
     <span className={`relative flex h-2.5 w-2.5 ${dark ? "text-[#0f172a]" : "text-[#22c55e]"}`}>
       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60" />
       <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-current" />
     </span>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-slate-200 bg-white px-6 py-8">
+      <div className="mx-auto max-w-7xl text-sm font-semibold leading-relaxed text-slate-500">
+        © 2026 Easecase, Inc. All rights reserved. StockyMonth is a high-quality financial research platform powered by AI and human expertise.
+      </div>
+    </footer>
   );
 }
 

@@ -9,7 +9,6 @@ export default function AdminPage() {
   return (
     <StockExperience
       archivePicks={allPicks}
-      archiveUnlocked
       defaultMonthlyPick={defaultMonthlyPick}
       defaultQualityPicks={defaultQualityPicks}
       pricingTableId={process.env.NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID || defaultPricingTableId}

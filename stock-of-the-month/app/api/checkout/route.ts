@@ -3,7 +3,7 @@ import Stripe from "stripe";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripePriceId = process.env.STRIPE_PRICE_ID;
-const appUrlFallback = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const appUrlFallback = process.env.NEXT_PUBLIC_APP_URL ?? "https://easecaseinc.com";
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin") || new URL(request.url).origin || appUrlFallback;
