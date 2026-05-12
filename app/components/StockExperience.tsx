@@ -119,31 +119,31 @@ export default function StockExperience({
 function TopNav({ onShowTopPicks }: { onShowTopPicks: () => void }) {
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-      <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-6">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#ff4f00] text-white">
-            <BarChart3 className="h-7 w-7" aria-hidden="true" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#ff4f00] text-white">
+            <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
-          <span className="text-2xl font-black tracking-tight text-slate-950">StockyMonth</span>
+          <span className="text-xl font-black tracking-tight text-slate-950 md:text-2xl">StockyMonth</span>
         </Link>
 
         <div className="hidden items-center gap-3 md:flex">
           <a
             href="#stock-of-month"
-            className="rounded-full bg-orange-50 px-5 py-3 text-sm font-black text-[#ff4f00] transition hover:bg-orange-100"
+            className="rounded-full bg-orange-50 px-5 py-2.5 text-sm font-black text-[#ff4f00] transition hover:bg-orange-100"
           >
             Stock of the Month
           </a>
           <button
             type="button"
             onClick={onShowTopPicks}
-            className="rounded-full px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-100"
+            className="rounded-full px-5 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100"
           >
             Top 6
           </button>
           <a
             href="#all-picks"
-            className="rounded-full px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-100"
+            className="rounded-full px-5 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100"
           >
             All Picks
           </a>
@@ -163,9 +163,9 @@ function ProfileMenu() {
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className="inline-flex h-12 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50"
+        className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50"
       >
-        <UserCircle className="h-7 w-7" aria-hidden="true" />
+        <UserCircle className="h-6 w-6" aria-hidden="true" />
         <span className="hidden sm:inline">Profile</span>
         <ChevronDown className="h-4 w-4" aria-hidden="true" />
       </button>
@@ -299,37 +299,37 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   ];
 
   return (
-    <section id="stock-of-month" className="bg-[#f8fafc] px-6 py-8 md:py-12">
+    <section id="stock-of-month" className="bg-[#f8fafc] px-4 py-3 md:px-6 lg:min-h-[calc(100vh-5rem)] lg:py-4">
       <div className="mx-auto max-w-[1460px]">
-        <Reveal className="mb-7 flex items-center gap-3 text-slate-950">
+        <Reveal className="sr-only mb-7 flex items-center gap-3 text-slate-950">
           <CircleGauge className="h-6 w-6" aria-hidden="true" />
           <h2 className="text-xl font-black tracking-tight md:text-2xl">Our Latest Stock Pick</h2>
         </Reveal>
 
-        <Reveal as="article" className="overflow-hidden rounded-md border border-slate-800 bg-[#0f172a] p-5 shadow-2xl md:p-7">
-          <div className="grid gap-8 lg:grid-cols-[0.62fr_1fr] lg:items-stretch">
+        <Reveal as="article" className="overflow-hidden rounded-md border border-slate-800 bg-[#0f172a] p-3 shadow-2xl md:p-4">
+          <div className="grid gap-5 lg:grid-cols-[0.56fr_1fr] lg:items-stretch">
             <MonthlyPickArtwork monthlyPick={monthlyPick} />
 
-            <div className="flex min-w-0 flex-col justify-center py-2">
+            <div className="flex min-w-0 flex-col justify-start py-1">
               <div className="flex flex-wrap items-center gap-3">
                 <EQTLogo />
-                <span className="inline-flex items-center gap-2 rounded-full bg-[#22c55e] px-4 py-2 text-sm font-black text-[#0f172a]">
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#22c55e] px-3 py-1.5 text-sm font-black text-[#0f172a]">
                   <LiveDot dark />
                   {monthlyPick.rating}
                 </span>
               </div>
 
-              <h3 className="mt-5 text-3xl font-black leading-tight text-white">
+              <h3 className="mt-4 text-3xl font-black leading-tight text-white">
                 {monthlyPick.name} ({monthlyPick.ticker})
               </h3>
 
-              <div className="mt-5 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm font-black text-slate-400 md:text-base">
+              <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-black text-slate-400">
                 <span className="inline-flex items-center gap-2">
-                  <BriefcaseBusiness className="h-5 w-5 text-slate-500" aria-hidden="true" />
+                  <BriefcaseBusiness className="h-4 w-4 text-slate-500" aria-hidden="true" />
                   {monthlyPick.sector}
                 </span>
                 <span className="inline-flex items-center gap-2">
-                  <Database className="h-5 w-5 text-slate-500" aria-hidden="true" />
+                  <Database className="h-4 w-4 text-slate-500" aria-hidden="true" />
                   {monthlyPick.price}{" "}
                   <span className={monthlyPick.change.startsWith("+") ? "text-emerald-700" : "text-[#df2d74]"}>
                     ({monthlyPick.change})
@@ -337,19 +337,19 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
                 </span>
               </div>
 
-              <p className="mt-5 max-w-5xl text-base font-medium leading-relaxed text-slate-300">{monthlyPick.summary}</p>
+              <p className="mt-4 max-w-5xl text-sm font-medium leading-relaxed text-slate-300 md:text-base">{monthlyPick.summary}</p>
 
-              <div className="mt-9">
-                <div className="mb-6 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-[#22c55e]">
-                    <CircleDollarSign className="h-6 w-6" aria-hidden="true" />
+              <div className="mt-6">
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-[#22c55e]">
+                    <CircleDollarSign className="h-5 w-5" aria-hidden="true" />
                   </span>
-                  <h4 className="text-base font-black uppercase tracking-tight text-white">
+                  <h4 className="text-sm font-black uppercase tracking-tight text-white md:text-base">
                     Why this is the best pick of the month
                   </h4>
                 </div>
 
-                <div className="grid gap-7">
+                <div className="grid gap-4">
                   {backingPoints.map((point, index) => (
                     <BackingPoint key={point.text} accent={index} icon={point.icon} text={point.text} />
                   ))}
@@ -358,7 +358,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 
               <Link
                 href={`/analysis/${monthlyPick.ticker}`}
-                className="mt-9 inline-flex h-12 w-fit items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+                className="mt-5 inline-flex h-10 w-fit items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-5 text-sm font-black text-white transition hover:bg-orange-600"
               >
                 Detailed analysis
                 <LineChart className="h-4 w-4" aria-hidden="true" />
@@ -449,36 +449,36 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
 
 function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   return (
-    <div className="relative min-h-[460px] overflow-hidden rounded-md bg-[#d6e9e7] p-5 sm:p-8">
-      <div className="absolute -left-20 -top-20 h-48 w-48 rounded-full bg-[#207d72]" />
-      <div className="absolute left-20 -top-24 h-56 w-56 rounded-full bg-[#88beb8]" />
-      <div className="absolute -left-16 top-24 h-36 w-36 rounded-[42px] bg-[#bce3df]" />
-      <div className="absolute right-24 top-0 h-24 w-64 bg-[#bde2df]" />
-      <div className="absolute right-12 top-0 h-24 w-28 skew-x-[-24deg] bg-[#7db4ae]" />
-      <div className="absolute -right-10 top-8 h-28 w-28 rounded-[42px] bg-[#207d72] rotate-45" />
-      <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-[#207d72]" />
-      <div className="absolute bottom-0 right-0 h-0 w-0 border-b-[150px] border-l-[150px] border-b-[#207d72] border-l-transparent" />
-      <div className="absolute bottom-0 right-20 h-0 w-0 border-b-[120px] border-l-[120px] border-b-[#88beb8] border-l-transparent" />
+    <div className="relative h-full min-h-[430px] overflow-hidden rounded-md bg-[#d6e9e7] p-4 sm:p-5 lg:min-h-[0]">
+      <div className="absolute -left-20 -top-20 h-44 w-44 rounded-full bg-[#207d72]" />
+      <div className="absolute left-20 -top-24 h-52 w-52 rounded-full bg-[#88beb8]" />
+      <div className="absolute -left-16 top-24 h-32 w-32 rounded-[42px] bg-[#bce3df]" />
+      <div className="absolute right-24 top-0 h-20 w-60 bg-[#bde2df]" />
+      <div className="absolute right-12 top-0 h-20 w-24 skew-x-[-24deg] bg-[#7db4ae]" />
+      <div className="absolute -right-10 top-8 h-24 w-24 rotate-45 rounded-[42px] bg-[#207d72]" />
+      <div className="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-[#207d72]" />
+      <div className="absolute bottom-0 right-0 h-0 w-0 border-b-[120px] border-l-[120px] border-b-[#207d72] border-l-transparent" />
+      <div className="absolute bottom-0 right-20 h-0 w-0 border-b-[96px] border-l-[96px] border-b-[#88beb8] border-l-transparent" />
 
-      <div className="relative z-10 flex min-h-[420px] flex-col">
-        <div className="flex items-center justify-start gap-4">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/75 text-[#210947] shadow-sm">
-            <BadgeCheck className="h-7 w-7" aria-hidden="true" />
+      <div className="relative z-10 flex flex-col">
+        <div className="flex items-center justify-start gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/75 text-[#210947] shadow-sm">
+            <BadgeCheck className="h-6 w-6" aria-hidden="true" />
           </span>
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#207d72]">Dynamic LLM Brief</p>
-            <h3 className="mt-1 text-2xl font-black text-[#210947] md:text-3xl">{monthlyPick.month} Pick</h3>
+            <h3 className="mt-1 text-2xl font-black text-[#210947]">{monthlyPick.month} Pick</h3>
           </div>
         </div>
 
-        <div className="relative mt-6 rounded-md bg-white/95 p-5 shadow-sm md:p-6">
-          <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="relative mt-5 rounded-md bg-white/95 p-4 shadow-sm md:p-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-sm font-black text-[#210947]">Exclusive Analysis for Subscribers</p>
             <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-[#ff4f00]">AI refreshed</span>
           </div>
-          <ul className="grid gap-3">
+          <ul className="grid gap-2.5">
             {(monthlyPick.summaryBullets?.length ? monthlyPick.summaryBullets : [monthlyPick.thesis]).slice(0, 4).map((item) => (
-              <li key={item} className="flex gap-3 text-sm font-bold leading-relaxed text-[#210947]">
+              <li key={item} className="flex gap-3 text-sm font-bold leading-snug text-[#210947]">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#ff4f00]" />
                 {item}
               </li>
@@ -493,8 +493,8 @@ function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 
 function EQTLogo() {
   return (
-    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#04083d] text-white shadow-sm ring-4 ring-white">
-      <span className="relative text-xl font-black tracking-[-0.12em]">
+    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#04083d] text-white shadow-sm ring-4 ring-white">
+      <span className="relative text-lg font-black tracking-[-0.12em]">
         E<span className="text-[#ff5377]">Q</span>T
       </span>
     </div>
@@ -513,11 +513,11 @@ function BackingPoint({
   const colors = ["bg-[#fff1ea] text-[#ff6b4a]", "bg-[#ffe5dc] text-[#ff6b4a]", "bg-[#ffd8cc] text-[#ff6b4a]"];
 
   return (
-    <div className="grid grid-cols-[40px_1fr] gap-4">
-      <span className={`flex h-9 w-9 items-center justify-center rounded-md ${colors[accent]}`}>
+    <div className="grid grid-cols-[36px_1fr] gap-3">
+      <span className={`flex h-8 w-8 items-center justify-center rounded-md ${colors[accent]}`}>
         {icon}
       </span>
-      <p className="text-base font-medium leading-relaxed text-slate-200 md:text-lg">{text}</p>
+      <p className="text-sm font-medium leading-relaxed text-slate-200 md:text-base">{text}</p>
     </div>
   );
 }
