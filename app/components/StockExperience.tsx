@@ -19,7 +19,6 @@ import {
   Mail,
   RefreshCcw,
   Save,
-  Search,
   Sparkles,
   Star,
   TrendingUp,
@@ -48,27 +47,17 @@ type AuthNotice = {
   type: "error" | "success" | "info";
 };
 
-type AuthStockSearchResult = {
-  change: number | null;
-  changePercent: number | null;
-  currency: string;
-  exchange: string;
-  latestTradingDay: string | null;
-  matchScore: number;
-  name: string;
-  price: number | null;
-  region: string;
-  symbol: string;
-  type: string;
-  volume: number | null;
-};
-
 const authWinningPicks = [
   { name: "FTAI Aviation", return: "187%", ticker: "FTAI", picked: "July 2024" },
   { name: "Cloudflare", return: "160%", ticker: "NET", picked: "September 2024" },
   { name: "Howmet", return: "120%", ticker: "HWM", picked: "January 2025" },
   { name: "CrowdStrike", return: "96%", ticker: "CRWD", picked: "August 2024" },
   { name: "Wabtec", return: "52%", ticker: "WAB", picked: "June 2024" }
+];
+
+const googleAccountOptions = [
+  { email: "demo.investor@gmail.com", firstName: "Demo", lastName: "Investor" },
+  { email: "research.viewer@gmail.com", firstName: "Research", lastName: "Viewer" }
 ];
 
 type StockExperienceProps = {
@@ -159,7 +148,7 @@ export default function StockExperience({
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] text-slate-950">
+    <main className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
       <TopNav currentUser={currentUser} currentView={view} onSignOut={signOut} />
       {view === "monthly" && <MonthlyPickSection monthlyPick={monthlyPick} />}
       {view === "quality" && <QualityPicksSection picks={qualityPicks} />}
@@ -208,6 +197,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   const [signupPassword, setSignupPassword] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [googleChooserOpen, setGoogleChooserOpen] = useState(false);
 
   function showNotice(nextNotice: AuthNotice) {
     setNotice(nextNotice);
@@ -217,6 +207,28 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   function openAuthPanel(nextMode: "login" | "signup" | "forgot") {
     setMode(nextMode);
     setAuthPanelOpen(true);
+  }
+
+  async function handleGoogleAccount(account: { email: string; firstName: string; lastName: string }) {
+    const email = normalizeEmail(account.email);
+    const users = getRegisteredUsers();
+    let user = users.find((candidate) => candidate.email === email);
+
+    if (!user) {
+      user = {
+        firstName: account.firstName,
+        lastName: account.lastName,
+        email,
+        passwordHash: await hashPassword(`google:${email}`),
+        createdAt: new Date().toISOString()
+      };
+      window.localStorage.setItem(authUsersStorageKey, JSON.stringify([...users, user]));
+    }
+
+    setGoogleChooserOpen(false);
+    setAuthPanelOpen(false);
+    showNotice({ message: "Google login successful. Welcome to StockyMonth.", type: "success" });
+    onAuthenticated(user);
   }
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
@@ -306,7 +318,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   }
 
   return (
-    <main className="min-h-screen bg-white text-[#210947]">
+    <main className="min-h-screen bg-white text-[#0f172a]">
       {notice && (
         <div
           className={`fixed right-5 top-5 z-[70] max-w-sm rounded-md border p-4 text-sm font-bold shadow-2xl ${
@@ -328,16 +340,14 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             <div className="flex h-11 w-11 items-center justify-center rounded-md bg-[#ff4f00] text-white">
               <BarChart3 className="h-7 w-7" aria-hidden="true" />
             </div>
-            <span className="text-2xl font-black tracking-tight">StockyMonth</span>
+            <span className="text-2xl font-black tracking-tight text-[#0f172a]">StockyMonth</span>
           </div>
-
-          <AuthStockSearch />
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => openAuthPanel("login")}
-              className="h-12 rounded-full border border-[#210947] bg-white px-6 text-sm font-black uppercase tracking-wide text-[#210947] transition hover:bg-[#fff1ea]"
+              className="h-12 rounded-full border border-[#0f172a] bg-white px-6 text-sm font-black uppercase tracking-wide text-[#0f172a] transition hover:bg-[#fff1ea]"
             >
               Log in
             </button>
@@ -355,7 +365,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
       <section className="px-6 py-12 md:py-16">
         <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.88fr_1.12fr]">
           <div>
-            <h1 className="max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-[#210947] md:text-5xl">
+            <h1 className="max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-[#0f172a] md:text-5xl">
               Get Investing Superpowers With StockyMonth
             </h1>
             <p className="mt-7 max-w-2xl text-lg font-semibold leading-8 text-[#3f2d64]">
@@ -384,7 +394,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       </section>
 
-      <section className="bg-[#22006c] px-6 py-14 text-white">
+      <section className="bg-[#f8fafc] px-6 py-14 text-[#0f172a]">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-center text-3xl font-black tracking-tight md:text-4xl">Recent Winning Picks</h2>
           <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
@@ -397,11 +407,11 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
 
       {authPanelOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#210947]/40 px-4 py-8 backdrop-blur-sm">
-          <section className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-md border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl md:p-8">
+          <section className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-md border border-slate-200 bg-white p-6 text-[#0f172a] shadow-2xl md:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">StockyMonth Access</p>
-                <h2 className="mt-2 text-2xl font-black text-[#210947]">
+                <h2 className="mt-2 text-2xl font-black text-[#0f172a]">
                   {mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : "Recover your password"}
                 </h2>
               </div>
@@ -409,7 +419,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
                 type="button"
                 aria-label="Close authentication panel"
                 onClick={() => setAuthPanelOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-[#0f172a]"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -420,7 +430,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
                 type="button"
                 onClick={() => setMode("login")}
                 className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-black transition ${
-                  mode === "login" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-slate-950"
+                  mode === "login" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-[#0f172a]"
                 }`}
               >
                 <LogIn className="h-4 w-4" aria-hidden="true" />
@@ -430,7 +440,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
                 type="button"
                 onClick={() => setMode("signup")}
                 className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-black transition ${
-                  mode === "signup" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-slate-950"
+                  mode === "signup" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-[#0f172a]"
                 }`}
               >
                 <UserPlus className="h-4 w-4" aria-hidden="true" />
@@ -440,6 +450,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
 
             {mode === "login" && (
               <form className="mt-6" onSubmit={handleLogin}>
+                <AuthMethodOptions onGoogle={() => setGoogleChooserOpen(true)} />
                 <p className="text-sm leading-relaxed text-slate-600">
                   Enter your email and password.
                 </p>
@@ -487,6 +498,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
 
             {mode === "signup" && (
               <form className="mt-6" onSubmit={handleSignup}>
+                <AuthMethodOptions onGoogle={() => setGoogleChooserOpen(true)} />
                 <p className="text-sm leading-relaxed text-slate-600">
                   Sign up with your first name, last name, and email address.
                 </p>
@@ -566,169 +578,95 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
           </section>
         </div>
       )}
+
+      {googleChooserOpen && (
+        <GoogleAccountChooser
+          accounts={getGoogleAccountOptions(mode, loginEmail, signupEmail, firstName, lastName)}
+          onClose={() => setGoogleChooserOpen(false)}
+          onSelect={handleGoogleAccount}
+        />
+      )}
     </main>
   );
 }
 
-function AuthStockSearch() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<AuthStockSearchResult[]>([]);
-  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
-  const [isOpen, setIsOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    const trimmedQuery = query.trim();
-
-    if (!trimmedQuery) {
-      setResults([]);
-      setStatus("idle");
-      setErrorMessage("");
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeout = window.setTimeout(async () => {
-      setStatus("loading");
-      setErrorMessage("");
-
-      try {
-        const response = await fetch(`/api/stock-search?query=${encodeURIComponent(trimmedQuery)}`, {
-          headers: {
-            Accept: "application/json"
-          },
-          signal: controller.signal
-        });
-        const payload = (await response.json()) as {
-          message?: string;
-          results?: AuthStockSearchResult[];
-        };
-
-        if (!response.ok) {
-          throw new Error(payload.message || "Unable to search live stock data.");
-        }
-
-        setResults(payload.results ?? []);
-        setStatus("ready");
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-
-        setResults([]);
-        setStatus("error");
-        setErrorMessage(error instanceof Error ? error.message : "Unable to search live stock data.");
-      }
-    }, 350);
-
-    return () => {
-      controller.abort();
-      window.clearTimeout(timeout);
-    };
-  }, [query]);
-
-  const shouldShowDropdown = isOpen && Boolean(query.trim());
-
+function AuthMethodOptions({ onGoogle }: { onGoogle: () => void }) {
   return (
-    <div className="relative hidden w-full max-w-md lg:block">
-      <div className="flex h-12 items-center gap-3 rounded-full border border-slate-200 bg-white px-5 text-slate-500 shadow-sm transition focus-within:border-orange-200 focus-within:ring-4 focus-within:ring-orange-100">
-        <Search className="h-5 w-5 shrink-0" aria-hidden="true" />
-        <input
-          aria-label="Search live stock data"
-          autoComplete="off"
-          className="h-full min-w-0 flex-1 bg-transparent text-sm font-bold text-[#210947] outline-none placeholder:text-slate-400"
-          onBlur={() => window.setTimeout(() => setIsOpen(false), 140)}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setIsOpen(true);
-          }}
-          onFocus={() => setIsOpen(true)}
-          placeholder="Search live stocks..."
-          type="search"
-          value={query}
-        />
-        {status === "loading" && (
-          <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-[#ff4f00]" aria-label="Searching" />
-        )}
+    <div className="mb-6 grid gap-3 sm:grid-cols-2">
+      <div className="flex h-12 items-center justify-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 text-sm font-black text-[#ff4f00]">
+        <Mail className="h-4 w-4" aria-hidden="true" />
+        Continue with email
       </div>
+      <button
+        type="button"
+        onClick={onGoogle}
+        className="flex h-12 items-center justify-center gap-3 rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-[#0f172a] shadow-sm transition hover:border-orange-200 hover:bg-[#fff7ed]"
+      >
+        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-black text-[#4285f4]">
+          G
+        </span>
+        Continue with Google
+      </button>
+    </div>
+  );
+}
 
-      {shouldShowDropdown && (
-        <div className="absolute left-0 right-0 top-[calc(100%+0.75rem)] z-40 overflow-hidden rounded-md border border-slate-200 bg-white text-slate-950 shadow-2xl">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#ff4f00]">Alpha Vantage Live Search</p>
+function GoogleAccountChooser({
+  accounts,
+  onClose,
+  onSelect
+}: {
+  accounts: Array<{ email: string; firstName: string; lastName: string }>;
+  onClose: () => void;
+  onSelect: (account: { email: string; firstName: string; lastName: string }) => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/40 px-4 py-8 backdrop-blur-sm">
+      <section className="w-full max-w-md rounded-md border border-slate-200 bg-white p-6 text-[#0f172a] shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Google</p>
+            <h2 className="mt-2 text-2xl font-black text-[#0f172a]">Choose an account</h2>
           </div>
-
-          {status === "loading" ? (
-            <div className="grid gap-3 p-4">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="animate-pulse rounded-md border border-slate-100 p-3">
-                  <div className="h-4 w-24 rounded bg-slate-100" />
-                  <div className="mt-3 h-3 w-44 rounded bg-slate-100" />
-                </div>
-              ))}
-            </div>
-          ) : status === "error" ? (
-            <div className="p-4">
-              <p className="rounded-md bg-rose-50 px-4 py-3 text-sm font-bold leading-relaxed text-rose-700">
-                {errorMessage}
-              </p>
-            </div>
-          ) : results.length > 0 ? (
-            <div className="max-h-[420px] overflow-y-auto p-2">
-              {results.map((stock) => {
-                const isPositive = (stock.changePercent ?? 0) >= 0;
-                const hasLiveQuote = stock.price !== null;
-
-                return (
-                  <button
-                    key={`${stock.symbol}-${stock.region}`}
-                    type="button"
-                    onClick={() => {
-                      setQuery(stock.symbol);
-                      setIsOpen(false);
-                    }}
-                    className="block w-full rounded-md px-3 py-3 text-left transition hover:bg-orange-50 focus:bg-orange-50 focus:outline-none"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base font-black text-[#210947]">{stock.symbol}</span>
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
-                              hasLiveQuote ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-[#ff4f00]"
-                            }`}
-                          >
-                            {hasLiveQuote ? "Live" : "Match"}
-                          </span>
-                        </div>
-                        <p className="mt-1 truncate text-sm font-semibold text-slate-600">{stock.name}</p>
-                        <p className="mt-1 text-xs font-bold text-slate-400">
-                          {stock.type} • {stock.region}
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-sm font-black text-slate-950">{formatStockPrice(stock.price, stock.currency)}</p>
-                        <p className={`mt-1 text-xs font-black ${isPositive ? "text-emerald-700" : "text-rose-600"}`}>
-                          {formatStockMove(stock.changePercent)}
-                        </p>
-                        {stock.volume !== null && (
-                          <p className="mt-1 text-[11px] font-bold text-slate-400">Vol {formatCompactNumber(stock.volume)}</p>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="p-4">
-              <p className="rounded-md bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
-                No matching stocks found yet. Try a ticker like AAPL, EQT, or NFLX.
-              </p>
-            </div>
-          )}
+          <button
+            type="button"
+            aria-label="Close Google account chooser"
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-[#0f172a]"
+          >
+            <X className="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
-      )}
+
+        <div className="mt-4 grid gap-2">
+          {accounts.map((account) => {
+            const initials = `${account.firstName.charAt(0)}${account.lastName.charAt(0)}`.toUpperCase();
+
+            return (
+              <button
+                key={account.email}
+                type="button"
+                onClick={() => onSelect(account)}
+                className="flex items-center gap-3 rounded-md border border-slate-100 p-3 text-left transition hover:border-orange-200 hover:bg-orange-50"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0f172a] text-sm font-black text-white">
+                  {initials}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-black text-[#0f172a]">
+                    {account.firstName} {account.lastName}
+                  </span>
+                  <span className="block truncate text-xs font-semibold text-slate-500">{account.email}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="mt-4 text-xs font-semibold leading-relaxed text-slate-500">
+          Choose an account to continue securely to StockyMonth.
+        </p>
+      </section>
     </div>
   );
 }
@@ -775,7 +713,7 @@ function InvestorHeroIllustration() {
 
 function AuthWinningPickCard({ pick }: { pick: (typeof authWinningPicks)[number] }) {
   return (
-    <article className="rounded-md bg-white p-5 text-[#210947] shadow-xl">
+    <article className="rounded-md bg-white p-5 text-[#0f172a] shadow-xl">
       <div className="flex items-start gap-3">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#fff1ea] text-sm font-black text-[#ff4f00] ring-1 ring-orange-100">
           {pick.ticker.slice(0, 2)}
@@ -819,7 +757,7 @@ function AuthInput({
         {icon && <span className="text-slate-400">{icon}</span>}
         <input
           autoComplete={autoComplete}
-          className="h-full min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-400"
+          className="h-full min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#0f172a] outline-none placeholder:text-slate-400"
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           required
@@ -847,7 +785,7 @@ function TopNav({
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#ff4f00] text-white">
             <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
-          <span className="text-xl font-black tracking-tight text-slate-950 md:text-2xl">StockyMonth</span>
+          <span className="text-xl font-black tracking-tight text-[#0f172a] md:text-2xl">StockyMonth</span>
         </Link>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -901,7 +839,7 @@ function ProfileMenu({ currentUser, onSignOut }: { currentUser: RegisteredUser; 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 rounded-md border border-[#efe7f7] bg-white p-4 text-[#210947] shadow-2xl">
+        <div className="absolute right-0 mt-3 w-80 rounded-md border border-[#efe7f7] bg-white p-4 text-[#0f172a] shadow-2xl">
           <div className="flex items-start gap-3 border-b border-[#efe7f7] pb-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#210947] text-sm font-black text-white">
               {getUserInitials(currentUser)}
@@ -947,7 +885,7 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
             <Sparkles className="h-4 w-4" aria-hidden="true" />
             {monthlyPick.month} Stock of the Month
           </p>
-          <h1 className="mt-7 max-w-4xl text-3xl font-black leading-tight text-slate-950 md:text-4xl">
+          <h1 className="mt-7 max-w-4xl text-3xl font-black leading-tight text-[#0f172a] md:text-4xl">
             Monthly stock picks with focused data, thesis, and quality shortlist.
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
@@ -975,7 +913,7 @@ function Hero({ monthlyPick }: { monthlyPick: MonthlyPick }) {
             <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Latest stock pick</p>
-                <h2 className="mt-2 text-2xl font-black text-slate-950">{monthlyPick.ticker}</h2>
+                <h2 className="mt-2 text-2xl font-black text-[#0f172a]">{monthlyPick.ticker}</h2>
               </div>
               <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-black text-emerald-700">
                 <LiveDot />
@@ -1024,7 +962,7 @@ function MonthlyPickSection({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   return (
     <section id="stock-of-month" className="scroll-mt-24 bg-[#f8fafc] px-4 py-6 md:px-6 lg:min-h-[calc(100vh-5rem)]">
       <div className="mx-auto max-w-[1460px]">
-        <Reveal className="sr-only mb-7 flex items-center gap-3 text-slate-950">
+        <Reveal className="sr-only mb-7 flex items-center gap-3 text-[#0f172a]">
           <CircleGauge className="h-6 w-6" aria-hidden="true" />
           <h2 className="text-xl font-black tracking-tight md:text-2xl">Our Latest Stock Pick</h2>
         </Reveal>
@@ -1103,7 +1041,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
         <Reveal className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Historical Archive</p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">All Picks</h2>
+            <h2 className="mt-3 text-3xl font-black text-[#0f172a]">All Picks</h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
               A complete archive of StockyMonth monthly selections with price movement, short summaries, and the three core reasons behind each pick.
             </p>
@@ -1133,7 +1071,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                       <ArchiveLogo pick={pick} />
                       <div>
                         <p className="text-sm font-black text-[#ff4f00]">{pick.month}</p>
-                        <h3 className="mt-1 text-lg font-black leading-snug text-slate-950">
+                        <h3 className="mt-1 text-lg font-black leading-snug text-[#0f172a]">
                           {pick.name} ({pick.ticker})
                         </h3>
                       </div>
@@ -1145,7 +1083,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                   </div>
 
                   <div className="mb-5 flex items-end justify-between border-y border-slate-200 py-4">
-                    <p className="text-2xl font-black text-slate-950">{pick.price}</p>
+                    <p className="text-2xl font-black text-[#0f172a]">{pick.price}</p>
                     <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
                       {pick.change}
                     </p>
@@ -1185,22 +1123,22 @@ function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
 
       <div className="relative z-10 flex flex-col">
         <div className="flex items-center justify-start gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/75 text-[#210947] shadow-sm">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/75 text-[#0f172a] shadow-sm">
             <BadgeCheck className="h-6 w-6" aria-hidden="true" />
           </span>
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#207d72]">Dynamic LLM Brief</p>
-            <h3 className="mt-1 text-2xl font-black text-[#210947]">{monthlyPick.month} Pick</h3>
+            <h3 className="mt-1 text-2xl font-black text-[#0f172a]">{monthlyPick.month} Pick</h3>
           </div>
         </div>
 
         <div className="relative mt-5 rounded-md bg-white/95 p-4 shadow-sm md:p-5">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="text-sm font-black text-[#210947]">Exclusive Analysis for Subscribers</p>
+            <p className="text-sm font-black text-[#0f172a]">Exclusive Analysis for Subscribers</p>
           </div>
           <ul className="grid gap-2.5">
             {(monthlyPick.summaryBullets?.length ? monthlyPick.summaryBullets : [monthlyPick.thesis]).slice(0, 4).map((item) => (
-              <li key={item} className="flex gap-3 text-sm font-bold leading-snug text-[#210947]">
+              <li key={item} className="flex gap-3 text-sm font-bold leading-snug text-[#0f172a]">
                 <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#ff4f00]" />
                 {item}
               </li>
@@ -1250,7 +1188,7 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top 6 High Quality Stocks</p>
-          <h2 className="mt-3 text-2xl font-black text-slate-950 md:text-3xl">Six focused companies for the current watchlist</h2>
+          <h2 className="mt-3 text-2xl font-black text-[#0f172a] md:text-3xl">Six focused companies for the current watchlist</h2>
         </Reveal>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -1267,12 +1205,12 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
                     {pick.tag}
                   </span>
                 </div>
-                <h3 className="mt-5 text-lg font-black text-slate-950 group-hover:text-[#ff4f00]">
+                <h3 className="mt-5 text-lg font-black text-[#0f172a] group-hover:text-[#ff4f00]">
                   {pick.name} ({pick.ticker})
                 </h3>
                 <p className="mt-1 text-sm font-bold text-slate-500">{pick.sector}</p>
                 <div className="mt-5 flex items-end justify-between">
-                  <p className="text-lg font-black text-slate-950">{pick.price}</p>
+                  <p className="text-lg font-black text-[#0f172a]">{pick.price}</p>
                   <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
                     {pick.change}
                   </p>
@@ -1295,7 +1233,7 @@ function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
       <div className="mx-auto max-w-5xl">
         <Reveal className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Subscription</p>
-          <h1 className="mt-3 text-3xl font-black text-slate-950 md:text-4xl">Manage your StockyMonth plan</h1>
+          <h1 className="mt-3 text-3xl font-black text-[#0f172a] md:text-4xl">Manage your StockyMonth plan</h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
             View your current monthly access and use Stripe billing tools to update or cancel your subscription.
           </p>
@@ -1306,7 +1244,7 @@ function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
             <div className="flex flex-col justify-between gap-6 border-b border-slate-200 pb-6 md:flex-row md:items-start">
               <div>
                 <p className="text-sm font-black text-slate-500">Current plan</p>
-                <h2 className="mt-2 text-3xl font-black text-slate-950">StockyMonth Monthly</h2>
+                <h2 className="mt-2 text-3xl font-black text-[#0f172a]">StockyMonth Monthly</h2>
                 <p className="mt-2 text-sm font-semibold text-slate-500">Signed in as {fullName || currentUser.email}</p>
               </div>
               <span className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-black text-emerald-700">
@@ -1316,7 +1254,7 @@ function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
             </div>
 
             <div className="mt-7 flex items-end gap-2">
-              <span className="text-5xl font-black text-slate-950">$1.99</span>
+              <span className="text-5xl font-black text-[#0f172a]">$1.99</span>
               <span className="pb-2 text-base font-bold text-slate-500">/month</span>
             </div>
 
@@ -1341,7 +1279,7 @@ function SubscriptionSection({ currentUser }: { currentUser: RegisteredUser }) {
           </article>
 
           <aside className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            <h3 className="text-xl font-black text-slate-950">Plan includes</h3>
+            <h3 className="text-xl font-black text-[#0f172a]">Plan includes</h3>
             <div className="mt-5 grid gap-4">
               {["Stock of the Month", "Top 6 High Quality Stocks", "All Picks archive"].map((item) => (
                 <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
@@ -1391,7 +1329,7 @@ function PricingSection({
             ))}
           </div>
         </div>
-        <div className="rounded-md bg-white p-6 text-[#210947] shadow-2xl md:p-10">
+        <div className="rounded-md bg-white p-6 text-[#0f172a] shadow-2xl md:p-10">
           {pricingTableId && publishableKey ? (
             <StripePricingTable pricingTableId={pricingTableId} publishableKey={publishableKey} />
           ) : (
@@ -1451,14 +1389,14 @@ function AdminPanel({
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Admin</p>
-          <h2 className="mt-3 text-3xl font-black text-[#210947]">Manage monthly and quality picks</h2>
+          <h2 className="mt-3 text-3xl font-black text-[#0f172a]">Manage monthly and quality picks</h2>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           <div className="rounded-md border border-[#efe7f7] bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center gap-3">
               <Edit3 className="h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
-              <h3 className="text-2xl font-black text-[#210947]">Add one stock per month</h3>
+              <h3 className="text-2xl font-black text-[#0f172a]">Add one stock per month</h3>
             </div>
             <div className="grid gap-4">
               <TextInput label="Ticker" value={monthlyDraft.ticker} onChange={(value) => updateMonthlyField("ticker", value.toUpperCase())} />
@@ -1480,7 +1418,7 @@ function AdminPanel({
               <button
                 type="button"
                 onClick={onResetMonthlyPick}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#210947]"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#0f172a]"
               >
                 <RefreshCcw className="h-4 w-4" aria-hidden="true" />
                 Reset
@@ -1491,7 +1429,7 @@ function AdminPanel({
           <div className="rounded-md border border-[#efe7f7] bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center gap-3">
               <BadgeCheck className="h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
-              <h3 className="text-2xl font-black text-[#210947]">Add or modify top 6 stocks</h3>
+              <h3 className="text-2xl font-black text-[#0f172a]">Add or modify top 6 stocks</h3>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {qualityDrafts.map((pick, index) => (
@@ -1518,7 +1456,7 @@ function AdminPanel({
               <button
                 type="button"
                 onClick={onResetQualityPicks}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#210947]"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#0f172a]"
               >
                 <RefreshCcw className="h-4 w-4" aria-hidden="true" />
                 Reset
@@ -1548,7 +1486,7 @@ function TextInput({
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className={`${compact ? "h-10" : "h-12"} w-full rounded-md border border-[#efe7f7] bg-white px-3 text-sm font-bold text-[#210947] outline-none transition focus:border-[#ff6b4a]`}
+        className={`${compact ? "h-10" : "h-12"} w-full rounded-md border border-[#efe7f7] bg-white px-3 text-sm font-bold text-[#0f172a] outline-none transition focus:border-[#ff6b4a]`}
       />
     </label>
   );
@@ -1570,7 +1508,7 @@ function TextArea({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={4}
-        className="w-full rounded-md border border-[#efe7f7] bg-white px-3 py-3 text-sm font-bold leading-6 text-[#210947] outline-none transition focus:border-[#ff6b4a]"
+        className="w-full rounded-md border border-[#efe7f7] bg-white px-3 py-3 text-sm font-bold leading-6 text-[#0f172a] outline-none transition focus:border-[#ff6b4a]"
       />
     </label>
   );
@@ -1588,7 +1526,7 @@ function MiniStat({
   return (
     <div className="rounded-md border border-[#efe7f7] bg-white p-4">
       <p className="text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</p>
-      <p className={`mt-1 text-xl font-black ${positive === undefined ? "text-[#210947]" : positive ? "text-emerald-700" : "text-rose-600"}`}>
+      <p className={`mt-1 text-xl font-black ${positive === undefined ? "text-[#0f172a]" : positive ? "text-emerald-700" : "text-rose-600"}`}>
         {value}
       </p>
     </div>
@@ -1621,7 +1559,7 @@ function ArchiveLogo({ pick }: { pick: ArchivePick }) {
   return (
     <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white p-2 shadow-sm">
       {failed ? (
-        <span className="text-xs font-black text-slate-950">{pick.ticker.slice(0, 2)}</span>
+        <span className="text-xs font-black text-[#0f172a]">{pick.ticker.slice(0, 2)}</span>
       ) : (
         <img
           src={`https://logo.clearbit.com/${pick.domain}`}
@@ -1717,6 +1655,36 @@ function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
+function getGoogleAccountOptions(
+  mode: "login" | "signup" | "forgot",
+  loginEmail: string,
+  signupEmail: string,
+  firstName: string,
+  lastName: string
+) {
+  const email = normalizeEmail(mode === "signup" ? signupEmail : loginEmail);
+  const typedAccount =
+    email && email.includes("@")
+      ? [
+          {
+            email,
+            firstName: firstName.trim() || email.split("@")[0],
+            lastName: lastName.trim() || "Google"
+          }
+        ]
+      : [];
+  const merged = [...typedAccount, ...googleAccountOptions];
+  const seen = new Set<string>();
+
+  return merged.filter((account) => {
+    if (seen.has(account.email)) {
+      return false;
+    }
+    seen.add(account.email);
+    return true;
+  });
+}
+
 async function hashPassword(password: string) {
   const bytes = new TextEncoder().encode(password);
   const digest = await window.crypto.subtle.digest("SHA-256", bytes);
@@ -1730,37 +1698,4 @@ function getUserInitials(user: RegisteredUser) {
   const firstInitial = user.firstName.trim().charAt(0);
   const lastInitial = user.lastName.trim().charAt(0);
   return `${firstInitial}${lastInitial}`.toUpperCase() || "SM";
-}
-
-function formatStockPrice(value: number | null, currency: string) {
-  if (value === null) {
-    return "Quote pending";
-  }
-
-  const safeCurrency = /^[A-Z]{3}$/.test(currency) ? currency : "USD";
-
-  try {
-    return new Intl.NumberFormat("en-US", {
-      currency: safeCurrency,
-      maximumFractionDigits: 2,
-      style: "currency"
-    }).format(value);
-  } catch {
-    return `$${value.toFixed(2)}`;
-  }
-}
-
-function formatStockMove(value: number | null) {
-  if (value === null) {
-    return "Fetching quote";
-  }
-
-  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
-}
-
-function formatCompactNumber(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 1,
-    notation: "compact"
-  }).format(value);
 }
