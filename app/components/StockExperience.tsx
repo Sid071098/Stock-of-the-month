@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -91,6 +92,7 @@ export default function StockExperience({
   const [authReady, setAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const savedMonthly = readStoredValue<MonthlyPick>(monthlyStorageKey);
@@ -149,6 +151,10 @@ export default function StockExperience({
   function completeAuthentication(user: RegisteredUser) {
     setCurrentUser(user);
     window.localStorage.setItem(authSessionStorageKey, JSON.stringify(user));
+
+    if (!hasPremiumAccess) {
+      router.push("/subscription");
+    }
   }
 
   function signOut() {
@@ -165,15 +171,24 @@ export default function StockExperience({
     return <AuthLanding onAuthenticated={completeAuthentication} />;
   }
 
+  const shouldShowSubscriptionFirst = !hasPremiumAccess && view !== "subscription";
+
   return (
     <main className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
       <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={hasPremiumAccess} onSignOut={signOut} />
-      {view === "monthly" && <MonthlyPickSection hasPremiumAccess={hasPremiumAccess} monthlyPick={monthlyPick} />}
-      {view === "quality" && (
+      {shouldShowSubscriptionFirst && <SubscriptionSection currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} />}
+      {!shouldShowSubscriptionFirst && view === "monthly" && (
+        <MonthlyPickSection hasPremiumAccess={hasPremiumAccess} monthlyPick={monthlyPick} />
+      )}
+      {!shouldShowSubscriptionFirst && view === "quality" && (
         hasPremiumAccess ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate title="Top 6 High Quality Stocks" />
       )}
-      {view === "all-picks" && (hasPremiumAccess ? <AllPicksSection picks={archivePicks} /> : <PremiumGate title="All Picks" />)}
-      {view === "subscription" && <SubscriptionSection currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} />}
+      {!shouldShowSubscriptionFirst && view === "all-picks" && (
+        hasPremiumAccess ? <AllPicksSection picks={archivePicks} /> : <PremiumGate title="All Picks" />
+      )}
+      {!shouldShowSubscriptionFirst && view === "subscription" && (
+        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} />
+      )}
       {showPricing && (
         <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
       )}
@@ -807,13 +822,14 @@ function TopNav({
   hasPremiumAccess: boolean;
   onSignOut: () => void;
 }) {
-  const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/stock-of-the-month#unlock";
-  const allPicksHref = hasPremiumAccess ? "/all-picks" : "/stock-of-the-month#unlock";
+  const monthlyHref = hasPremiumAccess ? "/stock-of-the-month" : "/subscription";
+  const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/subscription";
+  const allPicksHref = hasPremiumAccess ? "/all-picks" : "/subscription";
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-        <Link href="/stock-of-the-month" className="flex items-center gap-3">
+        <Link href={monthlyHref} className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#ff4f00] text-white">
             <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
@@ -822,7 +838,7 @@ function TopNav({
 
         <div className="hidden items-center gap-2 md:flex">
           <Link
-            href="/stock-of-the-month"
+            href={monthlyHref}
             className={navLinkClass(currentView === "monthly")}
           >
             Stock of the Month
@@ -1350,7 +1366,7 @@ function PremiumGate({ title }: { title: string }) {
               </p>
             </div>
             <Link
-              href="/stock-of-the-month#unlock"
+              href="/subscription"
               className="inline-flex h-12 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
             >
               Unlock premium
@@ -1364,6 +1380,21 @@ function PremiumGate({ title }: { title: string }) {
 }
 
 function PremiumUnlockPanel({ compact = false }: { compact?: boolean }) {
+  const planFeatures = [
+    {
+      title: "The Featured Pick",
+      description: "This month's high-potential stock."
+    },
+    {
+      title: "The Elite List",
+      description: "Our Top 6 high-quality rankings."
+    },
+    {
+      title: "The Vault",
+      description: "Full access to the All-Picks archive."
+    }
+  ];
+
   return (
     <Reveal
       className={`mt-8 overflow-hidden rounded-md bg-[#22006c] text-white shadow-2xl ${
@@ -1374,21 +1405,18 @@ function PremiumUnlockPanel({ compact = false }: { compact?: boolean }) {
         <div>
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ffb29d]">Unlock premium research</p>
           <h2 className="mt-4 max-w-2xl text-3xl font-black leading-tight text-white md:text-4xl">
-            Unlock all three StockyMonth sections for $1.99/month
+            Unlock the Full StockyMonth Suite for Just $1.99
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#e5d8f4]">
-            Get the current stock of the month, the Top 6 High Quality Stocks list, and the complete All Picks archive with one recurring subscription.
+            Get instant access to our highest-conviction research and historical data in one simple monthly plan.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              "Stock of the Month",
-              "Top 6 High Quality Stocks",
-              "All Picks archive"
-            ].map((item) => (
-              <div key={item} className="rounded-md bg-white/10 p-4 ring-1 ring-white/15">
+            {planFeatures.map((item) => (
+              <div key={item.title} className="rounded-md bg-white/10 p-4 ring-1 ring-white/15">
                 <ShieldCheck className="mb-3 h-5 w-5 text-[#22c55e]" aria-hidden="true" />
-                <p className="text-sm font-black">{item}</p>
+                <p className="text-sm font-black">{item.title}</p>
+                <p className="mt-2 text-xs font-semibold leading-relaxed text-[#e5d8f4]">{item.description}</p>
               </div>
             ))}
           </div>
@@ -1408,23 +1436,11 @@ function PremiumUnlockPanel({ compact = false }: { compact?: boolean }) {
             </span>
           </div>
 
-          <label className="mt-6 block">
-            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Promo code</span>
-            <input
-              name="promoCode"
-              placeholder="STUDENT or ADMIN01"
-              className="mt-2 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-[#0f172a] outline-none transition focus:border-[#ff4f00] focus:ring-4 focus:ring-orange-100"
-            />
-          </label>
-          <p className="mt-2 text-xs font-semibold text-slate-500">
-            You can also enter a promotion code directly in Stripe Checkout.
-          </p>
-
           <button
             type="submit"
             className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
           >
-            Subscribe and unlock
+            Continue to payment
           </button>
         </form>
       </div>
@@ -1525,7 +1541,7 @@ function PricingSection({
           <p className="text-lg font-black text-[#ffb29d]">Subscribe to StockyMonth</p>
           <h2 className="mt-3 text-3xl font-black">Get monthly picks for $1.99</h2>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-[#e5d8f4]">
-            Unlock {monthlyPick.ticker}, top quality ideas, detailed analysis, and pick history. Student promo codes are supported at checkout.
+            Unlock {monthlyPick.ticker}, top quality ideas, detailed analysis, and pick history in one simple monthly plan.
           </p>
           <div className="mt-8 grid gap-4">
             {["Stock of the month", "Top 6 quality stocks", "Alpha Vantage chart analysis"].map((item) => (
