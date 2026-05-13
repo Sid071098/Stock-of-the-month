@@ -255,67 +255,74 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
     event.preventDefault();
     setIsSubmitting(true);
 
-    const email = normalizeEmail(loginEmail);
-    const users = getRegisteredUsers();
-    const user = users.find((candidate) => candidate.email === email);
-    const passwordHash = await hashPassword(loginPassword);
+    try {
+      const email = normalizeEmail(loginEmail);
+      const users = getRegisteredUsers();
+      const user = users.find((candidate) => candidate.email === email);
+      const passwordHash = await hashPassword(loginPassword);
 
-    if (!user) {
-      showNotice({ message: "No registered user found. Please sign up first.", type: "error" });
+      if (!user) {
+        showNotice({ message: "No registered user found. Please sign up first.", type: "error" });
+        return;
+      }
+
+      if (user.passwordHash !== passwordHash) {
+        showNotice({ message: "Incorrect password. Use Forgot password if you need a reset.", type: "error" });
+        return;
+      }
+
+      showNotice({ message: "Login successful. Welcome back.", type: "success" });
+      onAuthenticated(user);
+    } catch (error) {
+      console.error("Local login failed", error);
+      showNotice({ message: "Login failed locally. Please refresh and try again.", type: "error" });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    if (user.passwordHash !== passwordHash) {
-      showNotice({ message: "Incorrect password. Use Forgot password if you need a reset.", type: "error" });
-      setIsSubmitting(false);
-      return;
-    }
-
-    showNotice({ message: "Login successful. Welcome back.", type: "success" });
-    onAuthenticated(user);
-    setIsSubmitting(false);
   }
 
   async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
 
-    const email = normalizeEmail(signupEmail);
-    const users = getRegisteredUsers();
+    try {
+      const email = normalizeEmail(signupEmail);
+      const users = getRegisteredUsers();
 
-    if (!firstName.trim() || !lastName.trim() || !email || !signupPassword) {
-      showNotice({ message: "Please complete first name, last name, email, and password.", type: "error" });
+      if (!firstName.trim() || !lastName.trim() || !email || !signupPassword) {
+        showNotice({ message: "Please complete first name, last name, email, and password.", type: "error" });
+        return;
+      }
+
+      if (signupPassword.length < 6) {
+        showNotice({ message: "Password must be at least 6 characters.", type: "error" });
+        return;
+      }
+
+      if (users.some((user) => user.email === email)) {
+        showNotice({ message: "User is already registered. Please log in instead.", type: "error" });
+        setMode("login");
+        setLoginEmail(email);
+        return;
+      }
+
+      const user: RegisteredUser = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email,
+        passwordHash: await hashPassword(signupPassword),
+        createdAt: new Date().toISOString()
+      };
+
+      window.localStorage.setItem(authUsersStorageKey, JSON.stringify([...users, user]));
+      showNotice({ message: "Account created. You are now signed in.", type: "success" });
+      onAuthenticated(user);
+    } catch (error) {
+      console.error("Local signup failed", error);
+      showNotice({ message: "Signup failed locally. Please refresh and try again.", type: "error" });
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    if (signupPassword.length < 6) {
-      showNotice({ message: "Password must be at least 6 characters.", type: "error" });
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (users.some((user) => user.email === email)) {
-      showNotice({ message: "User is already registered. Please log in instead.", type: "error" });
-      setMode("login");
-      setLoginEmail(email);
-      setIsSubmitting(false);
-      return;
-    }
-
-    const user: RegisteredUser = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      email,
-      passwordHash: await hashPassword(signupPassword),
-      createdAt: new Date().toISOString()
-    };
-
-    window.localStorage.setItem(authUsersStorageKey, JSON.stringify([...users, user]));
-    showNotice({ message: "Account created. You are now signed in.", type: "success" });
-    onAuthenticated(user);
-    setIsSubmitting(false);
   }
 
   function handleForgotPassword(event: React.FormEvent<HTMLFormElement>) {
@@ -1889,11 +1896,25 @@ function getGoogleAccountOptions(
 
 async function hashPassword(password: string) {
   const bytes = new TextEncoder().encode(password);
-  const digest = await window.crypto.subtle.digest("SHA-256", bytes);
 
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  if (window.crypto?.subtle) {
+    try {
+      const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+
+      return Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+    } catch {
+      // Some local browser contexts disable Web Crypto. Fall back to a stable local-only hash.
+    }
+  }
+
+  let hash = 5381;
+  for (let index = 0; index < password.length; index += 1) {
+    hash = (hash * 33) ^ password.charCodeAt(index);
+  }
+
+  return `local-${hash >>> 0}`;
 }
 
 function getUserInitials(user: RegisteredUser) {
