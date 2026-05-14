@@ -275,7 +275,9 @@ export default function StockExperience({
   const lockedFeature = subscriptionContext ?? featureKeyForView(view);
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#f4f0fb] text-[#0f172a]">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-full bg-orange-100/40 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-violet-100/40 blur-3xl" />
       <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
       {shouldShowSubscriptionFirst && (
         <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
@@ -536,7 +538,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#08031c] via-[#1a0a4a] to-[#2d0e62] text-white">
+    <main className="animate-gradient-pan relative min-h-screen overflow-hidden bg-[linear-gradient(125deg,#050314_0%,#0c0631_28%,#1a0a52_55%,#22074d_78%,#0a1a3f_100%)] text-white">
       <LoginBackdrop />
 
       {notice && (
@@ -585,13 +587,13 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
           </div>
 
           <h1
-            className="animate-title-glow mt-6 bg-gradient-to-r from-white via-[#ffb29d] to-[#ff4f00] bg-clip-text text-[64px] font-black leading-none tracking-tight text-transparent md:text-[112px] lg:text-[140px]"
-            style={{ letterSpacing: "-0.04em" }}
+            className="animate-title-glow mt-5 bg-gradient-to-r from-white via-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-4xl font-black leading-none tracking-tight text-transparent md:text-5xl lg:text-6xl"
+            style={{ letterSpacing: "-0.02em" }}
           >
             StockyMonth
           </h1>
 
-          <p className="mx-auto mt-5 max-w-xl text-sm font-bold text-white/70 md:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm font-bold text-white/65 md:text-base">
             High-conviction monthly picks. Live market data. A vault of every thesis we&apos;ve ever published.
           </p>
         </div>
@@ -780,6 +782,9 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             )}
           </div>
         </div>
+
+        {/* Stock trading animation below the login card */}
+        <TradingAnimation />
       </section>
 
       {googleChooserOpen && (
@@ -790,6 +795,143 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         />
       )}
     </main>
+  );
+}
+
+function TradingAnimation() {
+  const candles = [
+    { h: 38, up: true,  body: 22, wick: "top" },
+    { h: 52, up: true,  body: 30, wick: "both" },
+    { h: 46, up: false, body: 24, wick: "bottom" },
+    { h: 64, up: true,  body: 38, wick: "both" },
+    { h: 58, up: true,  body: 32, wick: "top" },
+    { h: 44, up: false, body: 22, wick: "bottom" },
+    { h: 72, up: true,  body: 44, wick: "both" },
+    { h: 80, up: true,  body: 52, wick: "top" },
+    { h: 66, up: false, body: 34, wick: "both" },
+    { h: 86, up: true,  body: 56, wick: "both" },
+    { h: 94, up: true,  body: 62, wick: "top" }
+  ];
+
+  return (
+    <div className="mt-14 w-full max-w-5xl">
+      <div className="mb-5 flex items-center justify-between text-white/80">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
+          <span className="text-[11px] font-black uppercase tracking-[0.28em]">Live Market Pulse</span>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em]">
+          <span className="text-emerald-300">+24.6%</span>
+          <span className="text-white/40">·</span>
+          <span className="text-white/60">30D</span>
+        </div>
+      </div>
+
+      <div className="glass relative overflow-hidden rounded-2xl p-5 shadow-2xl md:p-7">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-emerald-400/15 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-[#ff4f00]/15 blur-3xl" />
+
+        {/* Chart area */}
+        <div className="relative h-[260px] w-full overflow-hidden rounded-xl bg-gradient-to-b from-white/[0.03] to-transparent">
+          {/* horizontal grid lines */}
+          <div aria-hidden="true" className="absolute inset-0 flex flex-col justify-between py-4">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-px w-full bg-white/[0.06]" />
+            ))}
+          </div>
+
+          {/* Animated trend SVG */}
+          <svg
+            viewBox="0 0 600 240"
+            preserveAspectRatio="none"
+            className="absolute inset-0 h-full w-full"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="ta-line" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%"   stopColor="#34d399" />
+                <stop offset="50%"  stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#ff8a3d" />
+              </linearGradient>
+              <linearGradient id="ta-fill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%"   stopColor="#22d3ee" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0,180 C60,170 100,140 160,150 C220,160 260,90 320,110 C380,130 420,60 480,72 C540,82 580,40 600,30 L600,240 L0,240 Z"
+              fill="url(#ta-fill)"
+            />
+            <path
+              d="M0,180 C60,170 100,140 160,150 C220,160 260,90 320,110 C380,130 420,60 480,72 C540,82 580,40 600,30"
+              fill="none"
+              stroke="url(#ta-line)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              className="animate-draw-line"
+            />
+            {/* moving dot at end */}
+            <circle cx="600" cy="30" r="5" fill="#ff8a3d" className="animate-pulse-glow" />
+            <circle cx="600" cy="30" r="10" fill="#ff8a3d" opacity="0.25" />
+          </svg>
+
+          {/* Candlesticks overlay */}
+          <div className="absolute inset-x-0 bottom-0 flex h-full items-end justify-between gap-2 px-6 pb-3 pt-8">
+            {candles.map((c, i) => {
+              const color = c.up ? "bg-emerald-400" : "bg-rose-400";
+              const wickColor = c.up ? "bg-emerald-400/60" : "bg-rose-400/60";
+              return (
+                <div
+                  key={i}
+                  className="relative flex h-full w-full flex-col items-center justify-end"
+                  style={{ animation: `float-slow ${5 + i * 0.25}s ease-in-out infinite`, animationDelay: `${i * 0.18}s` }}
+                >
+                  {(c.wick === "top" || c.wick === "both") && (
+                    <span className={`mb-[-1px] w-[1.5px] ${wickColor}`} style={{ height: `${Math.max(8, c.h * 0.18)}px` }} />
+                  )}
+                  <span className={`w-2.5 rounded-[2px] ${color} shadow-[0_0_12px_rgba(52,211,153,0.4)]`} style={{ height: `${c.body}%` }} />
+                  {(c.wick === "bottom" || c.wick === "both") && (
+                    <span className={`mt-[-1px] w-[1.5px] ${wickColor}`} style={{ height: `${Math.max(8, c.h * 0.18)}px` }} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Floating Buy / Sell markers */}
+          <div className="animate-float-medium absolute left-[18%] top-[55%]">
+            <div className="rounded-full bg-emerald-500/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg shadow-emerald-500/40">
+              Buy
+            </div>
+          </div>
+          <div className="animate-float-slow absolute right-[28%] top-[28%]">
+            <div className="rounded-full bg-rose-500/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg shadow-rose-500/40">
+              Sell
+            </div>
+          </div>
+          <div className="animate-float-fast absolute right-[8%] top-[14%]">
+            <div className="rounded-full bg-[#ff4f00] px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-lg shadow-orange-500/40">
+              Target +18%
+            </div>
+          </div>
+        </div>
+
+        {/* Stat strip below chart */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: "Open",   value: "$184.20", tone: "text-white" },
+            { label: "High",   value: "$192.46", tone: "text-emerald-300" },
+            { label: "Low",    value: "$181.10", tone: "text-rose-300" },
+            { label: "Volume", value: "8.42M",   tone: "text-cyan-300" }
+          ].map((s) => (
+            <div key={s.label} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 backdrop-blur-md">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">{s.label}</p>
+              <p className={`mt-1 text-sm font-black ${s.tone}`}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -805,11 +947,12 @@ function LoginBackdrop() {
 
   return (
     <>
-      {/* Animated radial orbs */}
+      {/* Aurora gradient orbs */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="animate-drift absolute -top-32 left-1/4 h-[420px] w-[420px] rounded-full bg-[#ff4f00]/20 blur-3xl" />
-        <div className="animate-drift absolute top-1/3 right-1/4 h-[480px] w-[480px] rounded-full bg-[#7c3aed]/25 blur-3xl" style={{ animationDelay: "2s" }} />
-        <div className="animate-drift absolute bottom-0 left-1/3 h-[360px] w-[360px] rounded-full bg-[#ef0068]/20 blur-3xl" style={{ animationDelay: "4s" }} />
+        <div className="animate-drift absolute -top-32 left-1/4 h-[420px] w-[420px] rounded-full bg-[#ff8a3d]/25 blur-3xl" />
+        <div className="animate-drift absolute top-1/3 right-1/4 h-[480px] w-[480px] rounded-full bg-[#22d3ee]/20 blur-3xl" style={{ animationDelay: "2s" }} />
+        <div className="animate-drift absolute bottom-0 left-1/3 h-[360px] w-[360px] rounded-full bg-[#a855f7]/22 blur-3xl" style={{ animationDelay: "4s" }} />
+        <div className="animate-drift absolute top-1/2 left-0 h-[320px] w-[320px] rounded-full bg-[#10b981]/18 blur-3xl" style={{ animationDelay: "6s" }} />
       </div>
 
       {/* Dot grid */}
@@ -1772,21 +1915,27 @@ function PremiumUnlockPanel({
 function WinningPicksShowcase() {
   return (
     <div className="mt-12">
-      <h3 className="text-lg font-black text-white mb-6">Recent Winning Picks with Live Data</h3>
+      <h3 className="mb-6 text-lg font-black text-white">Recent Winning Picks</h3>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {authWinningPicks.map((pick) => (
-          <div key={pick.ticker} className="rounded-md bg-white/5 p-4 ring-1 ring-white/10">
-            <div className="flex items-center justify-between mb-2">
+          <div
+            key={pick.ticker}
+            className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-md transition hover:border-white/25 hover:bg-white/10"
+          >
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400" />
+            <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-black text-white">{pick.name}</span>
-              <span className="text-xs font-bold text-[#ffb29d]">{pick.ticker}</span>
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-[#ffb29d]">
+                {pick.ticker}
+              </span>
             </div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-lg font-black text-white">Fetch from API</span>
-              <span className="text-sm font-bold text-slate-400">Live</span>
+            <div className="mb-3 flex items-end gap-2">
+              <span className="bg-gradient-to-r from-emerald-300 to-emerald-400 bg-clip-text text-2xl font-black text-transparent">
+                {pick.return}
+              </span>
+              <span className="pb-1 text-xs font-bold text-emerald-300">return</span>
             </div>
-            <div className="text-xs text-[#e5d8f4]">
-              Picked: {pick.picked} • Return: {pick.return}
-            </div>
+            <div className="text-xs font-semibold text-[#cdbcea]">Picked {pick.picked}</div>
           </div>
         ))}
       </div>
@@ -2173,9 +2322,21 @@ function LiveDot({ dark = false }: { dark?: boolean }) {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white px-6 py-8">
-      <div className="mx-auto max-w-7xl text-sm font-semibold leading-relaxed text-slate-500">
-        © 2026 Easecase, Inc. All rights reserved. StockyMonth is a high-quality financial research platform powered by AI and human expertise.
+    <footer className="relative overflow-hidden border-t border-slate-200 bg-gradient-to-b from-white to-slate-50 px-6 py-10">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-16 left-1/2 h-32 w-[60%] -translate-x-1/2 rounded-full bg-orange-200/25 blur-3xl" />
+      <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-[#ff8a3d] to-[#ff4f00] text-white shadow-md">
+            <BarChart3 className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="text-sm font-black tracking-tight text-[#0f172a]">StockyMonth</p>
+            <p className="text-[11px] font-bold text-slate-500">High-conviction monthly research</p>
+          </div>
+        </div>
+        <p className="max-w-xl text-xs font-semibold leading-relaxed text-slate-500">
+          © 2026 Easecase, Inc. All rights reserved. AI-assisted and human-reviewed financial research.
+        </p>
       </div>
     </footer>
   );
