@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CheckCircle2, FileText, Gauge } from "lucide-react";
 
+type RegisteredUser = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  passwordHash: string;
+  createdAt: string;
+};
+
 export default function SuccessPage({
   searchParams
 }: {
@@ -13,7 +21,25 @@ export default function SuccessPage({
 
   useEffect(() => {
     function unlockPremiumAccess() {
-      window.localStorage.setItem("stockymonth.subscriptionActive", "true");
+      // Get the current user from localStorage
+      const currentUserJson = window.localStorage.getItem("stockymonth.currentUser");
+      const currentUser = currentUserJson ? JSON.parse(currentUserJson) as RegisteredUser : null;
+      
+      if (currentUser) {
+        // Store subscription per user using their email
+        const userSubscriptionKey = `stockymonth.subscription.${currentUser.email}`;
+        window.localStorage.setItem(userSubscriptionKey, "true");
+        void fetch("/api/subscription/mark-active", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email: currentUser.email,
+            status: "active"
+          })
+        }).catch(() => undefined);
+      }
     }
 
     if (!searchParams?.session_id) {

@@ -9,6 +9,7 @@ export async function POST(request: Request) {
   const origin = request.headers.get("origin") || new URL(request.url).origin || appUrlFallback;
   const formData = await request.formData().catch(() => null);
   const submittedPromoCode = normalizePromoCode(formData?.get("promoCode"));
+  const userEmail = normalizeEmail(formData?.get("userEmail"));
 
   if (!stripeSecretKey) {
     return redirectToCheckoutError(origin, "missing_secret");
@@ -57,10 +58,15 @@ export async function POST(request: Request) {
         metadata: {
           plan: "stock-of-the-month",
           featuredTicker: "EQT",
+          appUserEmail: userEmail || "none",
           requestedPromoCode: submittedPromoCode || "none"
         }
       }
     };
+
+    if (userEmail) {
+      sessionParams.customer_email = userEmail;
+    }
 
     if (discounts.length > 0) {
       sessionParams.discounts = discounts;
@@ -125,6 +131,15 @@ function normalizePromoCode(value: FormDataEntryValue | null | undefined) {
   }
 
   return value.trim().slice(0, 64);
+}
+
+function normalizeEmail(value: FormDataEntryValue | null | undefined) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  const email = value.trim().toLowerCase();
+  return email.includes("@") ? email.slice(0, 180) : "";
 }
 
 async function getCheckoutDiscounts(stripe: Stripe, promoCode: string) {

@@ -36,7 +36,11 @@ const monthlyStorageKey = "stockymonth.monthlyPick";
 const qualityStorageKey = "stockymonth.qualityPicks";
 const authUsersStorageKey = "stockymonth.registeredUsers";
 const authSessionStorageKey = "stockymonth.currentUser";
-const subscriptionStorageKey = "stockymonth.subscriptionActive";
+const subscriptionGateDisabled = true;
+
+function getSubscriptionStorageKey(email: string): string {
+  return `stockymonth.subscription.${email}`;
+}
 
 type RegisteredUser = {
   firstName: string;
@@ -63,6 +67,14 @@ const googleAccountOptions = [
   { email: "demo.investor@gmail.com", firstName: "Demo", lastName: "Investor" },
   { email: "research.viewer@gmail.com", firstName: "Research", lastName: "Viewer" }
 ];
+
+const guestUser: RegisteredUser = {
+  firstName: "Guest",
+  lastName: "Access",
+  email: "guest@stockymonth.local",
+  passwordHash: "",
+  createdAt: ""
+};
 
 type StockExperienceProps = {
   archivePicks: ArchivePick[];
@@ -98,7 +110,6 @@ export default function StockExperience({
     const savedMonthly = readStoredValue<MonthlyPick>(monthlyStorageKey);
     const savedQuality = readStoredValue<QualityPick[]>(qualityStorageKey);
     const savedUser = readStoredValue<RegisteredUser>(authSessionStorageKey);
-    const savedSubscription = window.localStorage.getItem(subscriptionStorageKey);
 
     if (savedMonthly) {
       setMonthlyPick({ ...defaultMonthlyPick, ...savedMonthly });
@@ -110,19 +121,26 @@ export default function StockExperience({
 
     if (savedUser) {
       setCurrentUser(savedUser);
-    }
-
-    setHasPremiumAccess(savedSubscription === "true");
-    if (savedSubscription !== "true") {
-      void fetch("/api/subscription/status", { cache: "no-store" })
-        .then((response) => response.json())
-        .then((payload: { active?: boolean }) => {
-          if (payload.active) {
-            setHasPremiumAccess(true);
-            window.localStorage.setItem(subscriptionStorageKey, "true");
-          }
-        })
-        .catch(() => undefined);
+      // Check subscription status for this specific user
+      const userSubscriptionKey = getSubscriptionStorageKey(savedUser.email);
+      const savedSubscription = window.localStorage.getItem(userSubscriptionKey);
+      setHasPremiumAccess(savedSubscription === "true");
+      
+      // Also check with API if local storage doesn't have subscription
+      if (savedSubscription !== "true") {
+        void fetch(`/api/subscription/status?email=${encodeURIComponent(savedUser.email)}`, { cache: "no-store" })
+          .then((response) => response.json())
+          .then((payload: { active?: boolean }) => {
+            if (payload.active) {
+              setHasPremiumAccess(true);
+              window.localStorage.setItem(userSubscriptionKey, "true");
+            }
+          })
+          .catch(() => undefined);
+      }
+    } else {
+      // No user logged in
+      setHasPremiumAccess(false);
     }
 
     setAuthReady(true);
@@ -152,13 +170,25 @@ export default function StockExperience({
     setCurrentUser(user);
     window.localStorage.setItem(authSessionStorageKey, JSON.stringify(user));
 
-    if (!hasPremiumAccess) {
+    if (subscriptionGateDisabled) {
+      setHasPremiumAccess(true);
+      return;
+    }
+
+    // Check if this user has a subscription
+    const userSubscriptionKey = getSubscriptionStorageKey(user.email);
+    const userSubscription = window.localStorage.getItem(userSubscriptionKey);
+    
+    if (userSubscription !== "true") {
       router.push("/subscription");
+    } else {
+      setHasPremiumAccess(true);
     }
   }
 
   function signOut() {
     setCurrentUser(null);
+    setHasPremiumAccess(false);
     window.localStorage.removeItem(authSessionStorageKey);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -167,27 +197,28 @@ export default function StockExperience({
     return <AuthLoadingScreen />;
   }
 
-  if (!currentUser) {
-    return <AuthLanding onAuthenticated={completeAuthentication} />;
-  }
-
-  const shouldShowSubscriptionFirst = !hasPremiumAccess && view !== "subscription";
+  // Allow direct access to main page - no auth required
+  // hasPremiumAccess will be determined by subscription status
+  const canAccessPremiumFeatures = subscriptionGateDisabled || hasPremiumAccess;
 
   return (
     <main className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
-      <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={hasPremiumAccess} onSignOut={signOut} />
-      {shouldShowSubscriptionFirst && <SubscriptionSection currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} />}
-      {!shouldShowSubscriptionFirst && view === "monthly" && (
-        <MonthlyPickSection hasPremiumAccess={hasPremiumAccess} monthlyPick={monthlyPick} />
+      <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
+      {view === "monthly" && (
+        canAccessPremiumFeatures ? (
+          <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
+        ) : (
+          <PremiumGate title="Stock of the Month" />
+        )
       )}
-      {!shouldShowSubscriptionFirst && view === "quality" && (
-        hasPremiumAccess ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate title="Top 6 High Quality Stocks" />
+      {view === "quality" && (
+        canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate title="Top 6 High Quality Stocks" />
       )}
-      {!shouldShowSubscriptionFirst && view === "all-picks" && (
-        hasPremiumAccess ? <AllPicksSection picks={archivePicks} /> : <PremiumGate title="All Picks" />
+      {view === "all-picks" && (
+        canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate title="All Picks" />
       )}
-      {!shouldShowSubscriptionFirst && view === "subscription" && (
-        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} />
+      {view === "subscription" && (
+        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} />
       )}
       {showPricing && (
         <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
@@ -246,19 +277,23 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
 
   async function handleGoogleAccount(account: { email: string; firstName: string; lastName: string }) {
     const email = normalizeEmail(account.email);
+    const passwordHash = await hashPassword(`google:${email}`);
+    const googleUser: RegisteredUser = {
+      firstName: account.firstName,
+      lastName: account.lastName,
+      email,
+      passwordHash,
+      createdAt: new Date().toISOString()
+    };
+    const persistedUser = await syncGooglePersistentUser(googleUser);
     const users = getRegisteredUsers();
-    let user = users.find((candidate) => candidate.email === email);
+    let user = persistedUser ?? users.find((candidate) => candidate.email === email);
 
     if (!user) {
-      user = {
-        firstName: account.firstName,
-        lastName: account.lastName,
-        email,
-        passwordHash: await hashPassword(`google:${email}`),
-        createdAt: new Date().toISOString()
-      };
-      window.localStorage.setItem(authUsersStorageKey, JSON.stringify([...users, user]));
+      user = googleUser;
     }
+
+    upsertRegisteredUser({ ...user, passwordHash });
 
     setGoogleChooserOpen(false);
     setAuthPanelOpen(false);
@@ -275,6 +310,27 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
       const users = getRegisteredUsers();
       const user = users.find((candidate) => candidate.email === email);
       const passwordHash = await hashPassword(loginPassword);
+      const persistentLogin = await loginPersistentUser(email, passwordHash);
+
+      if (persistentLogin.status === "ok" && persistentLogin.user) {
+        const authenticatedUser = { ...persistentLogin.user, passwordHash };
+        upsertRegisteredUser(authenticatedUser);
+        showNotice({ message: "Login successful. Welcome back.", type: "success" });
+        onAuthenticated(authenticatedUser);
+        return;
+      }
+
+      if (persistentLogin.status === "invalid") {
+        showNotice({ message: "Incorrect password. Use Forgot password if you need a reset.", type: "error" });
+        return;
+      }
+
+      if (persistentLogin.status === "not_found" && user?.passwordHash === passwordHash) {
+        await registerPersistentUser(user);
+        showNotice({ message: "Login successful. Welcome back.", type: "success" });
+        onAuthenticated(user);
+        return;
+      }
 
       if (!user) {
         showNotice({ message: "No registered user found. Please sign up first.", type: "error" });
@@ -328,8 +384,21 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         passwordHash: await hashPassword(signupPassword),
         createdAt: new Date().toISOString()
       };
+      const persistentSignup = await registerPersistentUser(user);
 
-      window.localStorage.setItem(authUsersStorageKey, JSON.stringify([...users, user]));
+      if (persistentSignup.status === "already_registered") {
+        showNotice({ message: "User is already registered. Please log in instead.", type: "error" });
+        setMode("login");
+        setLoginEmail(email);
+        return;
+      }
+
+      if (persistentSignup.status === "error") {
+        showNotice({ message: "Account could not be saved. Check the persistent storage environment variables.", type: "error" });
+        return;
+      }
+
+      upsertRegisteredUser(user);
       showNotice({ message: "Account created. You are now signed in.", type: "success" });
       onAuthenticated(user);
     } catch (error) {
@@ -818,7 +887,7 @@ function TopNav({
   onSignOut
 }: {
   currentView: StockExperienceView;
-  currentUser: RegisteredUser;
+  currentUser: RegisteredUser | null;
   hasPremiumAccess: boolean;
   onSignOut: () => void;
 }) {
@@ -857,7 +926,7 @@ function TopNav({
           </Link>
         </div>
 
-        <ProfileMenu currentUser={currentUser} onSignOut={onSignOut} />
+        <ProfileMenu currentUser={currentUser ?? guestUser} onSignOut={onSignOut} />
       </div>
     </nav>
   );
@@ -899,16 +968,6 @@ function ProfileMenu({ currentUser, onSignOut }: { currentUser: RegisteredUser; 
           </div>
 
           <div className="mt-4 grid gap-2">
-            <Link href="/subscription" className="rounded-md bg-[#fff1ea] p-4 transition hover:bg-orange-100">
-              <div className="flex items-center justify-between gap-3">
-                <span className="inline-flex items-center gap-2 text-sm font-black">
-                  <CircleDollarSign className="h-4 w-4 text-[#ff6b4a]" aria-hidden="true" />
-                  Subscription
-                </span>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#ff4f00]">$1.99/mo</span>
-              </div>
-              <p className="mt-2 text-xs font-semibold leading-5 text-[#6c5d7f]">View current plan and billing options.</p>
-            </Link>
             <button
               type="button"
               onClick={onSignOut}
@@ -1322,17 +1381,21 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
                 href={`/analysis/${pick.ticker}`}
                 className="group block rounded-md border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <CompanyLogo pick={pick} />
+                <div className="flex items-start justify-end">
                   <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
                     <LiveDot />
                     {pick.tag}
                   </span>
                 </div>
-                <h3 className="mt-5 text-lg font-black text-[#0f172a] group-hover:text-[#ff4f00]">
-                  {pick.name} ({pick.ticker})
-                </h3>
-                <p className="mt-1 text-sm font-bold text-slate-500">{pick.sector}</p>
+                <div className="mt-5 flex items-center gap-3">
+                  <CompanyLogo pick={pick} />
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-black text-[#0f172a] group-hover:text-[#ff4f00]">
+                      {pick.name} ({pick.ticker})
+                    </h3>
+                    <p className="mt-1 text-sm font-bold text-slate-500">{pick.sector}</p>
+                  </div>
+                </div>
                 <div className="mt-5 flex items-end justify-between">
                   <p className="text-lg font-black text-[#0f172a]">{pick.price}</p>
                   <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
@@ -1379,7 +1442,13 @@ function PremiumGate({ title }: { title: string }) {
   );
 }
 
-function PremiumUnlockPanel({ compact = false }: { compact?: boolean }) {
+function PremiumUnlockPanel({
+  compact = false,
+  currentUser = null
+}: {
+  compact?: boolean;
+  currentUser?: RegisteredUser | null;
+}) {
   const planFeatures = [
     {
       title: "The Featured Pick",
@@ -1420,9 +1489,12 @@ function PremiumUnlockPanel({ compact = false }: { compact?: boolean }) {
               </div>
             ))}
           </div>
+
+          <WinningPicksShowcase />
         </div>
 
         <form action="/api/checkout" method="POST" className="rounded-md bg-white p-6 text-[#0f172a] shadow-2xl">
+          {currentUser?.email && <input name="userEmail" type="hidden" value={currentUser.email} />}
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Monthly</p>
@@ -1448,23 +1520,53 @@ function PremiumUnlockPanel({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: RegisteredUser; hasPremiumAccess: boolean }) {
-  const fullName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
+function WinningPicksShowcase() {
+  return (
+    <div className="mt-12">
+      <h3 className="text-lg font-black text-white mb-6">Recent Winning Picks with Live Data</h3>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {authWinningPicks.map((pick) => (
+          <div key={pick.ticker} className="rounded-md bg-white/5 p-4 ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-black text-white">{pick.name}</span>
+              <span className="text-xs font-bold text-[#ffb29d]">{pick.ticker}</span>
+            </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-lg font-black text-white">Fetch from API</span>
+              <span className="text-sm font-bold text-slate-400">Live</span>
+            </div>
+            <div className="text-xs text-[#e5d8f4]">
+              Picked: {pick.picked} • Return: {pick.return}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: RegisteredUser | null; hasPremiumAccess: boolean }) {
+  const fullName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : "";
 
   return (
     <section className="bg-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-5xl">
         <Reveal className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Subscription</p>
-          <h1 className="mt-3 text-3xl font-black text-[#0f172a] md:text-4xl">Manage your StockyMonth plan</h1>
+          <h1 className="mt-3 text-3xl font-black text-[#0f172a] md:text-4xl">
+            {hasPremiumAccess ? "Manage your StockyMonth plan" : "Unlock Premium Features"}
+          </h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
-            View your current monthly access and use Stripe billing tools to update or cancel your subscription.
+            {hasPremiumAccess
+              ? "View your current monthly access and use Stripe billing tools to update or cancel your subscription."
+              : "Subscribe to access all premium stock research, historical picks, and advanced analytics."
+            }
           </p>
         </Reveal>
 
-        {!hasPremiumAccess && <PremiumUnlockPanel compact />}
+        {!hasPremiumAccess && <PremiumUnlockPanel compact currentUser={currentUser} />}
 
-        {hasPremiumAccess && <Reveal className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
+        {hasPremiumAccess && currentUser && <Reveal className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
           <article className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div className="flex flex-col justify-between gap-6 border-b border-slate-200 pb-6 md:flex-row md:items-start">
               <div>
@@ -1876,8 +1978,99 @@ function getRegisteredUsers() {
   return readStoredValue<RegisteredUser[]>(authUsersStorageKey) ?? [];
 }
 
+function upsertRegisteredUser(user: RegisteredUser) {
+  const users = getRegisteredUsers();
+  const nextUsers = users.some((candidate) => candidate.email === user.email)
+    ? users.map((candidate) => (candidate.email === user.email ? { ...candidate, ...user } : candidate))
+    : [...users, user];
+
+  window.localStorage.setItem(authUsersStorageKey, JSON.stringify(nextUsers));
+}
+
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+async function loginPersistentUser(email: string, passwordHash: string) {
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, passwordHash })
+    });
+
+    if (response.status === 503) {
+      return { status: "fallback" as const };
+    }
+
+    if (response.status === 401) {
+      return { status: "invalid" as const };
+    }
+
+    if (response.status === 404) {
+      return { status: "not_found" as const };
+    }
+
+    if (!response.ok) {
+      return { status: "error" as const };
+    }
+
+    const payload = (await response.json()) as { user?: RegisteredUser };
+    return payload.user ? { status: "ok" as const, user: payload.user } : { status: "error" as const };
+  } catch {
+    return { status: "fallback" as const };
+  }
+}
+
+async function registerPersistentUser(user: RegisteredUser) {
+  try {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(user)
+    });
+
+    if (response.status === 503) {
+      return { status: "fallback" as const };
+    }
+
+    if (response.status === 409) {
+      return { status: "already_registered" as const };
+    }
+
+    if (!response.ok) {
+      return { status: "error" as const };
+    }
+
+    return { status: "saved" as const };
+  } catch {
+    return { status: "fallback" as const };
+  }
+}
+
+async function syncGooglePersistentUser(user: RegisteredUser) {
+  try {
+    const response = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(user)
+    });
+
+    if (response.status === 503 || !response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as { user?: RegisteredUser };
+    return payload.user ? { ...payload.user, passwordHash: user.passwordHash } : null;
+  } catch {
+    return null;
+  }
 }
 
 function getGoogleAccountOptions(
