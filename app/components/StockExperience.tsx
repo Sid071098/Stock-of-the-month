@@ -36,7 +36,7 @@ const monthlyStorageKey = "stockymonth.monthlyPick";
 const qualityStorageKey = "stockymonth.qualityPicks";
 const authUsersStorageKey = "stockymonth.registeredUsers";
 const authSessionStorageKey = "stockymonth.currentUser";
-const subscriptionGateDisabled = true;
+const subscriptionGateDisabled = false;
 
 function getSubscriptionStorageKey(email: string): string {
   return `stockymonth.subscription.${email}`;
@@ -67,14 +67,6 @@ const googleAccountOptions = [
   { email: "demo.investor@gmail.com", firstName: "Demo", lastName: "Investor" },
   { email: "research.viewer@gmail.com", firstName: "Research", lastName: "Viewer" }
 ];
-
-const guestUser: RegisteredUser = {
-  firstName: "Guest",
-  lastName: "Access",
-  email: "guest@stockymonth.local",
-  passwordHash: "",
-  createdAt: ""
-};
 
 type StockExperienceProps = {
   archivePicks: ArchivePick[];
@@ -175,15 +167,30 @@ export default function StockExperience({
       return;
     }
 
-    // Check if this user has a subscription
     const userSubscriptionKey = getSubscriptionStorageKey(user.email);
     const userSubscription = window.localStorage.getItem(userSubscriptionKey);
-    
-    if (userSubscription !== "true") {
-      router.push("/subscription");
-    } else {
+
+    if (userSubscription === "true") {
       setHasPremiumAccess(true);
+      return;
     }
+
+    void fetch(`/api/subscription/status?email=${encodeURIComponent(user.email)}`, { cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { active?: boolean }) => {
+        if (payload.active) {
+          setHasPremiumAccess(true);
+          window.localStorage.setItem(userSubscriptionKey, "true");
+          return;
+        }
+
+        setHasPremiumAccess(false);
+        router.push("/subscription");
+      })
+      .catch(() => {
+        setHasPremiumAccess(false);
+        router.push("/subscription");
+      });
   }
 
   function signOut() {
@@ -197,27 +204,33 @@ export default function StockExperience({
     return <AuthLoadingScreen />;
   }
 
-  // Allow direct access to main page - no auth required
-  // hasPremiumAccess will be determined by subscription status
-  const canAccessPremiumFeatures = subscriptionGateDisabled || hasPremiumAccess;
+  if (!currentUser) {
+    return <AuthLanding onAuthenticated={completeAuthentication} />;
+  }
+
+  const canAccessPremiumFeatures = hasPremiumAccess;
+  const shouldShowSubscriptionFirst = !canAccessPremiumFeatures && view !== "subscription";
 
   return (
     <main className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
       <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
-      {view === "monthly" && (
+      {shouldShowSubscriptionFirst && (
+        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} />
+      )}
+      {!shouldShowSubscriptionFirst && view === "monthly" && (
         canAccessPremiumFeatures ? (
           <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
         ) : (
           <PremiumGate title="Stock of the Month" />
         )
       )}
-      {view === "quality" && (
+      {!shouldShowSubscriptionFirst && view === "quality" && (
         canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate title="Top 6 High Quality Stocks" />
       )}
-      {view === "all-picks" && (
+      {!shouldShowSubscriptionFirst && view === "all-picks" && (
         canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate title="All Picks" />
       )}
-      {view === "subscription" && (
+      {!shouldShowSubscriptionFirst && view === "subscription" && (
         <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} />
       )}
       {showPricing && (
@@ -887,7 +900,7 @@ function TopNav({
   onSignOut
 }: {
   currentView: StockExperienceView;
-  currentUser: RegisteredUser | null;
+  currentUser: RegisteredUser;
   hasPremiumAccess: boolean;
   onSignOut: () => void;
 }) {
@@ -926,7 +939,7 @@ function TopNav({
           </Link>
         </div>
 
-        <ProfileMenu currentUser={currentUser ?? guestUser} onSignOut={onSignOut} />
+        <ProfileMenu currentUser={currentUser} onSignOut={onSignOut} />
       </div>
     </nav>
   );
