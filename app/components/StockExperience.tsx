@@ -8,9 +8,11 @@ import {
   BadgeCheck,
   BarChart3,
   BriefcaseBusiness,
+  Calendar,
   ChevronDown,
   CircleDollarSign,
   CircleGauge,
+  CreditCard,
   Database,
   Edit3,
   KeyRound,
@@ -21,6 +23,7 @@ import {
   Save,
   Sparkles,
   TrendingUp,
+  User,
   X,
   UserCircle,
   LockKeyhole,
@@ -988,84 +991,273 @@ function TopNav({
   const allPicksHref = hasPremiumAccess ? "/all-picks" : "/subscription?feature=all-picks";
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+    <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/96 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-        <Link href={monthlyHref} className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#ff4f00] text-white">
+        <Link href={monthlyHref} className="group flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#ff4f00] text-white shadow-sm transition-transform duration-200 group-hover:scale-105">
             <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
-          <span className="text-xl font-black tracking-tight text-[#0f172a] md:text-2xl">StockyMonth</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-black tracking-tight text-[#0f172a] md:text-2xl">StockyMonth</span>
+            {hasPremiumAccess && (
+              <span className="hidden text-[9px] font-black uppercase tracking-[0.2em] text-[#ff4f00] md:block">Premium</span>
+            )}
+          </div>
         </Link>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <Link
-            href={monthlyHref}
-            className={navLinkClass(currentView === "monthly")}
-          >
+        <div className="hidden items-center gap-1 md:flex">
+          <Link href={monthlyHref} className={navLinkClass(currentView === "monthly")}>
             Stock of the Month
           </Link>
-          <Link
-            href={qualityHref}
-            className={navLinkClass(currentView === "quality")}
-          >
+          <Link href={qualityHref} className={navLinkClass(currentView === "quality")}>
             Top High Quality Stocks
           </Link>
-          <Link
-            href={allPicksHref}
-            className={navLinkClass(currentView === "all-picks")}
-          >
+          <Link href={allPicksHref} className={navLinkClass(currentView === "all-picks")}>
             All Picks
           </Link>
         </div>
 
-        <ProfileMenu currentUser={currentUser} onSignOut={onSignOut} />
+        <ProfileMenu currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} onSignOut={onSignOut} />
       </div>
     </nav>
   );
 }
 
 function navLinkClass(isActive: boolean) {
-  return `rounded-full px-4 py-2.5 text-sm font-black transition ${
-    isActive ? "bg-orange-50 text-[#ff4f00]" : "text-slate-700 hover:bg-slate-100"
+  return `relative rounded-full px-4 py-2.5 text-sm font-black transition-all duration-200 ${
+    isActive
+      ? "bg-gradient-to-r from-orange-50 to-orange-100/60 text-[#ff4f00] shadow-sm ring-1 ring-orange-200/60"
+      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
   }`;
 }
 
-function ProfileMenu({ currentUser, onSignOut }: { currentUser: RegisteredUser; onSignOut: () => void }) {
+function ProfileMenu({
+  currentUser,
+  hasPremiumAccess,
+  onSignOut
+}: {
+  currentUser: RegisteredUser;
+  hasPremiumAccess: boolean;
+  onSignOut: () => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState<null | "account" | "subscription">(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const fullName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
+  const memberSince = currentUser.createdAt
+    ? new Date(currentUser.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : "—";
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setActivePanel(null);
+      }
+    }
+    if (isOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  function togglePanel(panel: "account" | "subscription") {
+    setActivePanel((current) => (current === panel ? null : panel));
+  }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         type="button"
         aria-label="Profile"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
-        className="inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-black text-slate-800 shadow-sm transition hover:bg-slate-50"
+        className={`inline-flex h-10 items-center gap-2 rounded-full border px-3 text-sm font-black shadow-sm transition-all duration-200 ${
+          isOpen
+            ? "border-[#210947] bg-[#210947] text-white"
+            : "border-slate-200 bg-white text-slate-800 hover:border-[#210947] hover:bg-[#f5f0ff]"
+        }`}
       >
-        <UserCircle className="h-6 w-6" aria-hidden="true" />
-        <span className="hidden sm:inline">Profile</span>
-        <ChevronDown className="h-4 w-4" aria-hidden="true" />
+        <div
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
+            isOpen ? "bg-white/20 text-white" : "bg-[#210947] text-white"
+          }`}
+        >
+          {getUserInitials(currentUser)}
+        </div>
+        <span className="hidden sm:inline">{currentUser.firstName}</span>
+        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 rounded-md border border-[#efe7f7] bg-white p-4 text-[#0f172a] shadow-2xl">
-          <div className="flex items-start gap-3 border-b border-[#efe7f7] pb-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#210947] text-sm font-black text-white">
+        <div className="animate-fade-slide-down absolute right-0 mt-3 w-80 overflow-hidden rounded-xl border border-[#efe7f7] bg-white text-[#0f172a] shadow-2xl">
+          {/* Gradient header */}
+          <div className="flex items-start gap-3 bg-gradient-to-br from-[#210947] to-[#3d1278] p-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-black text-white ring-2 ring-white/30">
               {getUserInitials(currentUser)}
             </div>
-            <div>
-              <p className="text-sm font-black">{fullName}</p>
-              <p className="text-xs font-semibold text-[#6c5d7f]">{currentUser.email}</p>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-black text-white">{fullName}</p>
+              <p className="truncate text-xs font-semibold text-purple-200">{currentUser.email}</p>
+              {hasPremiumAccess && (
+                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-black text-emerald-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Premium Active
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="mt-4 grid gap-2">
+          {/* Menu items */}
+          <div className="p-2">
+            {/* Account Details */}
             <button
               type="button"
-              onClick={onSignOut}
-              className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-bold text-[#6c5d7f] hover:bg-[#fff1ea]"
+              onClick={() => togglePanel("account")}
+              className={`inline-flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors ${
+                activePanel === "account"
+                  ? "bg-violet-50 text-[#210947]"
+                  : "text-slate-700 hover:bg-slate-50 hover:text-[#210947]"
+              }`}
             >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <span className="flex items-center gap-2.5">
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+                    activePanel === "account" ? "bg-violet-100 text-[#210947]" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  <User className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                Account details
+              </span>
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform duration-200 ${activePanel === "account" ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              />
+            </button>
+
+            {activePanel === "account" && (
+              <div className="mx-1 mb-1 mt-1 rounded-lg border border-violet-100 bg-violet-50/60 p-3 text-xs">
+                <div className="grid gap-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-slate-500">Full name</span>
+                    <span className="font-black text-[#210947]">{fullName || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-slate-500">Email</span>
+                    <span className="max-w-[160px] truncate text-right font-black text-[#210947]">{currentUser.email}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-1 font-bold text-slate-500">
+                      <Calendar className="h-3 w-3" aria-hidden="true" />
+                      Member since
+                    </span>
+                    <span className="font-black text-[#210947]">{memberSince}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-slate-500">Account type</span>
+                    <span className={`font-black ${hasPremiumAccess ? "text-emerald-600" : "text-slate-600"}`}>
+                      {hasPremiumAccess ? "Premium" : "Free"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Subscription & Billing */}
+            <button
+              type="button"
+              onClick={() => togglePanel("subscription")}
+              className={`inline-flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors ${
+                activePanel === "subscription"
+                  ? "bg-orange-50 text-[#ff4f00]"
+                  : "text-slate-700 hover:bg-slate-50 hover:text-[#ff4f00]"
+              }`}
+            >
+              <span className="flex items-center gap-2.5">
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+                    activePanel === "subscription" ? "bg-orange-100 text-[#ff4f00]" : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  <CreditCard className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                Subscription &amp; billing
+              </span>
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform duration-200 ${activePanel === "subscription" ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              />
+            </button>
+
+            {activePanel === "subscription" && (
+              <div className="mx-1 mb-1 mt-1 rounded-lg border border-orange-100 bg-orange-50/60 p-3 text-xs">
+                <div className="grid gap-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-slate-500">Plan</span>
+                    <span className="font-black text-[#0f172a]">StockyMonth Monthly</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-slate-500">Price</span>
+                    <span className="font-black text-[#0f172a]">$1.99 / month</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-slate-500">Status</span>
+                    {hasPremiumAccess ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-black text-emerald-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-black text-slate-600">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {hasPremiumAccess ? (
+                  <div className="mt-3 grid gap-2">
+                    <form action="/api/customer-portal" method="POST">
+                      <input name="userEmail" type="hidden" value={currentUser.email} />
+                      <button
+                        type="submit"
+                        className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-[#ff4f00] px-4 text-xs font-black text-white transition hover:bg-orange-600"
+                      >
+                        Manage billing
+                      </button>
+                    </form>
+                    <form action="/api/subscription/cancel" method="POST">
+                      <input name="userEmail" type="hidden" value={currentUser.email} />
+                      <button
+                        type="submit"
+                        className="inline-flex h-8 w-full items-center justify-center rounded-lg border border-rose-200 bg-white px-4 text-xs font-black text-rose-600 transition hover:bg-rose-50"
+                      >
+                        Cancel subscription
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <div className="mt-3">
+                    <a
+                      href="/subscription"
+                      className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-[#210947] px-4 text-xs font-black text-white transition hover:bg-[#310a68]"
+                    >
+                      Upgrade to Premium
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="my-1.5 border-t border-slate-100" />
+
+            {/* Sign out */}
+            <button
+              type="button"
+              onClick={() => { onSignOut(); setIsOpen(false); }}
+              className="inline-flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-bold text-slate-600 transition-colors hover:bg-rose-50 hover:text-rose-600"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 transition-colors group-hover:bg-rose-100">
+                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
               Sign out
             </button>
           </div>
@@ -1311,7 +1503,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section id="all-picks" className="scroll-mt-24 bg-[#f8fafc] px-6 py-14">
+    <section id="all-picks" className="scroll-mt-24 bg-gradient-to-b from-[#f8fafc] to-slate-100/50 px-6 py-14">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
@@ -1337,10 +1529,15 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                       setActiveIndex(index);
                     }
                   }}
-                  className={`relative min-h-full cursor-pointer overflow-hidden rounded-md border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-orange-200 hover:bg-orange-50/40 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-100 ${
-                    activeIndex === index ? "border-[#ff4f00] bg-orange-50 shadow-xl ring-2 ring-orange-100" : "border-slate-200"
+                  className={`relative min-h-full cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-100 ${
+                    activeIndex === index
+                      ? "border-[#ff4f00] bg-gradient-to-br from-orange-50 to-white shadow-xl ring-2 ring-orange-100"
+                      : "border-slate-200 hover:border-orange-200 hover:bg-orange-50/30"
                   }`}
                 >
+                  {activeIndex === index && (
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff4f00] to-orange-400" />
+                  )}
                   <div className="mb-5 flex items-start justify-between gap-4">
                     <div className="flex gap-3">
                       <ArchiveLogo pick={pick} />
@@ -1457,9 +1654,18 @@ function BackingPoint({
   );
 }
 
+const cardAccents = [
+  "from-orange-400 to-rose-400",
+  "from-violet-400 to-purple-500",
+  "from-emerald-400 to-teal-500",
+  "from-sky-400 to-blue-500",
+  "from-amber-400 to-orange-400",
+  "from-pink-400 to-rose-500"
+];
+
 function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
   return (
-    <section id="quality-picks" className="scroll-mt-24 border-y border-slate-200 bg-white px-6 py-16">
+    <section id="quality-picks" className="scroll-mt-24 border-y border-slate-200 bg-gradient-to-b from-white to-slate-50/60 px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top High Quality Stocks</p>
@@ -1471,30 +1677,33 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
             <Reveal key={pick.ticker} delay={index * 70}>
               <Link
                 href={`/analysis/${pick.ticker}`}
-                className="group block rounded-md border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl"
+                className="group relative block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1.5 hover:border-transparent hover:shadow-xl"
               >
-                <div className="flex items-start justify-end">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
-                    <LiveDot />
-                    {pick.tag}
-                  </span>
-                </div>
-                <div className="mt-5 flex items-center gap-3">
-                  <CompanyLogo pick={pick} />
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-black text-[#0f172a] group-hover:text-[#ff4f00]">
-                      {pick.name} ({pick.ticker})
-                    </h3>
-                    <p className="mt-1 text-sm font-bold text-slate-500">{pick.sector}</p>
+                <div className={`h-1 w-full bg-gradient-to-r ${cardAccents[index % cardAccents.length]}`} />
+                <div className="p-6">
+                  <div className="flex items-start justify-end">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
+                      <LiveDot />
+                      {pick.tag}
+                    </span>
                   </div>
+                  <div className="mt-5 flex items-center gap-3">
+                    <CompanyLogo pick={pick} />
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-black text-[#0f172a] transition-colors group-hover:text-[#ff4f00]">
+                        {pick.name} ({pick.ticker})
+                      </h3>
+                      <p className="mt-1 text-sm font-bold text-slate-500">{pick.sector}</p>
+                    </div>
+                  </div>
+                  <div className="mt-5 flex items-end justify-between">
+                    <p className="text-lg font-black text-[#0f172a]">{pick.price}</p>
+                    <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
+                      {pick.change}
+                    </p>
+                  </div>
+                  <p className="mt-5 line-clamp-3 text-sm leading-relaxed text-slate-600">{pick.thesis}</p>
                 </div>
-                <div className="mt-5 flex items-end justify-between">
-                  <p className="text-lg font-black text-[#0f172a]">{pick.price}</p>
-                  <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
-                    {pick.change}
-                  </p>
-                </div>
-                <p className="mt-5 line-clamp-3 text-sm leading-relaxed text-slate-600">{pick.thesis}</p>
               </Link>
             </Reveal>
           ))}
