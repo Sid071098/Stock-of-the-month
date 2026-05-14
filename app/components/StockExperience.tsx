@@ -275,9 +275,9 @@ export default function StockExperience({
   const lockedFeature = subscriptionContext ?? featureKeyForView(view);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#f4f0fb] text-[#0f172a]">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#ecfeff] text-[#0f172a]">
       <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-full bg-orange-100/40 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-violet-100/40 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-cyan-100/40 blur-3xl" />
       <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
       {shouldShowSubscriptionFirst && (
         <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
@@ -538,7 +538,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   }
 
   return (
-    <main className="animate-gradient-pan relative min-h-screen overflow-hidden bg-[linear-gradient(125deg,#050314_0%,#0c0631_28%,#1a0a52_55%,#22074d_78%,#0a1a3f_100%)] text-white">
+    <main className="animate-gradient-pan relative min-h-screen overflow-hidden bg-[linear-gradient(125deg,#04081a_0%,#081024_28%,#0f1a40_55%,#0f1729_78%,#0a2540_100%)] text-white">
       <LoginBackdrop />
 
       {notice && (
@@ -582,7 +582,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
       <section className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-center px-6 pb-12 pt-4">
         {/* MEGA hero title */}
         <div className="text-center">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#ef0068] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#06b6d4] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
             <BarChart3 className="h-9 w-9 text-white" aria-hidden="true" />
           </div>
 
@@ -602,7 +602,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         <div className="mt-10 w-full max-w-[460px]">
           <div className="glass relative overflow-hidden rounded-2xl p-6 shadow-2xl md:p-8">
             <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#ff4f00]/35 blur-3xl" />
-            <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-[#7c3aed]/35 blur-3xl" />
+            <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-[#06b6d4]/35 blur-3xl" />
 
             <div className="relative">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/90 backdrop-blur-md">
@@ -629,7 +629,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               <button
                 type="button"
                 onClick={() => setGoogleChooserOpen(true)}
-                className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/95 px-5 text-sm font-black text-[#210947] shadow-lg transition hover:bg-white"
+                className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/95 px-5 text-sm font-black text-[#0f1729] shadow-lg transition hover:bg-white"
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#4285f4] ring-1 ring-slate-200">
                   G
@@ -653,7 +653,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
 
           {mode === "login" && emailFormOpen && (
             <form className="mt-6 rounded-xl border border-white/30 bg-white/95 p-4 text-left shadow-2xl backdrop-blur-md" onSubmit={handleLogin}>
-              <p className="text-sm font-bold leading-relaxed text-[#6d5a85]">Enter your email and password.</p>
+              <p className="text-sm font-bold leading-relaxed text-[#475569]">Enter your email and password.</p>
               <div className="mt-4 grid gap-4">
                 <AuthInput
                   autoComplete="email"
@@ -686,7 +686,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#0f1729] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#1e293b] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Checking account..." : "Login"}
               </button>
@@ -694,8 +694,8 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
           )}
 
           {mode === "signup" && emailFormOpen && (
-            <form className="mt-6 rounded-md border border-[#ece4f6] bg-white/85 p-4 text-left shadow-sm" onSubmit={handleSignup}>
-              <p className="text-sm font-bold leading-relaxed text-[#6d5a85]">
+            <form className="mt-6 rounded-md border border-[#e2e8f0] bg-white/85 p-4 text-left shadow-sm" onSubmit={handleSignup}>
+              <p className="text-sm font-bold leading-relaxed text-[#475569]">
                 Sign up with your first name, last name, and email address.
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -727,7 +727,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#0f1729] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#1e293b] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Creating account..." : "Get started"}
               </button>
@@ -748,7 +748,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#0f1729] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#1e293b] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Sending..." : "Send reset instructions"}
               </button>
@@ -951,7 +951,7 @@ function LoginBackdrop() {
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="animate-drift absolute -top-32 left-1/4 h-[420px] w-[420px] rounded-full bg-[#ff8a3d]/25 blur-3xl" />
         <div className="animate-drift absolute top-1/3 right-1/4 h-[480px] w-[480px] rounded-full bg-[#22d3ee]/20 blur-3xl" style={{ animationDelay: "2s" }} />
-        <div className="animate-drift absolute bottom-0 left-1/3 h-[360px] w-[360px] rounded-full bg-[#a855f7]/22 blur-3xl" style={{ animationDelay: "4s" }} />
+        <div className="animate-drift absolute bottom-0 left-1/3 h-[360px] w-[360px] rounded-full bg-[#22d3ee]/22 blur-3xl" style={{ animationDelay: "4s" }} />
         <div className="animate-drift absolute top-1/2 left-0 h-[320px] w-[320px] rounded-full bg-[#10b981]/18 blur-3xl" style={{ animationDelay: "6s" }} />
       </div>
 
@@ -972,7 +972,7 @@ function LoginBackdrop() {
           <linearGradient id="chartLine" x1="0" x2="1" y1="0" y2="0">
             <stop offset="0%"   stopColor="#ff4f00" stopOpacity="0" />
             <stop offset="50%"  stopColor="#ff8a3d" stopOpacity="1" />
-            <stop offset="100%" stopColor="#ef0068" stopOpacity="0" />
+            <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%"   stopColor="#ff4f00" stopOpacity="0.35" />
@@ -1072,9 +1072,9 @@ function AuthInfoCard({ mode }: { mode: "login" | "signup" | "forgot" }) {
           };
 
   return (
-    <div className="mt-8 rounded-md border border-[#e6d8f5] bg-white/70 p-4 text-left shadow-sm">
-      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#7a5ca8]">{copy.label}</p>
-      <p className="mt-3 text-sm font-semibold leading-6 text-[#6d5a85]">{copy.body}</p>
+    <div className="mt-8 rounded-md border border-[#e2e8f0] bg-white/70 p-4 text-left shadow-sm">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#0e7490]">{copy.label}</p>
+      <p className="mt-3 text-sm font-semibold leading-6 text-[#475569]">{copy.body}</p>
       <div className="mt-4 flex flex-wrap gap-2">
         {copy.chips.map((chip, index) => (
           <span
@@ -1084,7 +1084,7 @@ function AuthInfoCard({ mode }: { mode: "login" | "signup" | "forgot" }) {
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : index === 1
                   ? "border-orange-200 bg-orange-50 text-[#ff4f00]"
-                  : "border-[#e6d8f5] bg-[#fbf7ff] text-[#210947]"
+                  : "border-[#e2e8f0] bg-[#ecfeff] text-[#0f1729]"
             }`}
           >
             {chip}
@@ -1169,28 +1169,28 @@ function InvestorHeroIllustration() {
       </div>
 
       <div className="absolute right-20 top-20 h-52 w-64 rounded-[40px] bg-[#07031d] shadow-2xl" />
-      <div className="absolute right-24 top-2 h-48 w-52 rotate-[-14deg] rounded-[48px] bg-[#ef0068]" />
-      <div className="absolute right-28 top-24 h-44 w-44 rounded-[40px] bg-gradient-to-br from-[#ff8a3d] to-[#ef0068]" />
+      <div className="absolute right-24 top-2 h-48 w-52 rotate-[-14deg] rounded-[48px] bg-[#06b6d4]" />
+      <div className="absolute right-28 top-24 h-44 w-44 rounded-[40px] bg-gradient-to-br from-[#ff8a3d] to-[#06b6d4]" />
       <div className="absolute right-40 top-36 text-[96px] font-black leading-none text-white">$</div>
       <div className="absolute right-44 top-14 h-20 w-24 rounded-b-[46px] rounded-t-[24px] bg-[#090421]" />
-      <div className="absolute right-56 top-16 h-10 w-10 rounded-full bg-[#d8dcf5]" />
-      <div className="absolute right-[100px] top-16 h-10 w-10 rounded-full bg-[#d8dcf5]" />
+      <div className="absolute right-56 top-16 h-10 w-10 rounded-full bg-[#e0f2fe]" />
+      <div className="absolute right-[100px] top-16 h-10 w-10 rounded-full bg-[#e0f2fe]" />
 
-      <div className="absolute bottom-4 right-28 h-28 w-64 rotate-6 rounded-md bg-[#cbd3ee] shadow-xl">
+      <div className="absolute bottom-4 right-28 h-28 w-64 rotate-6 rounded-md bg-[#cffafe] shadow-xl">
         <div className="mx-auto mt-4 h-16 w-48 rounded bg-white p-3">
           <div className="flex h-full items-end gap-2">
             {[42, 64, 35, 72, 58, 88].map((height, index) => (
-              <span key={`${height}-${index}`} className="flex-1 rounded-t bg-[#210947]" style={{ height: `${height}%` }} />
+              <span key={`${height}-${index}`} className="flex-1 rounded-t bg-[#0f1729]" style={{ height: `${height}%` }} />
             ))}
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-12 right-0 h-20 w-28 rotate-[-20deg] rounded-tl-[48px] bg-[#ef0068]" />
+      <div className="absolute bottom-12 right-0 h-20 w-28 rotate-[-20deg] rounded-tl-[48px] bg-[#06b6d4]" />
       <div className="absolute right-14 top-0 h-20 w-10 rotate-[24deg] border-2 border-[#090421]" />
       <div className="absolute bottom-14 left-24 h-8 w-16 rotate-[-12deg] rounded-md bg-[#ff6b4a]" />
       <div className="absolute bottom-20 right-24 h-8 w-16 rotate-[15deg] rounded-md bg-[#ff6b4a]" />
-      <TrendingUp className="absolute bottom-12 right-4 h-32 w-32 text-[#ef0068]" strokeWidth={5} />
+      <TrendingUp className="absolute bottom-12 right-4 h-32 w-32 text-[#06b6d4]" strokeWidth={5} />
     </div>
   );
 }
@@ -1206,8 +1206,8 @@ function AuthWinningPickCard({ pick }: { pick: (typeof authWinningPicks)[number]
           <h3 className="text-lg font-black leading-tight">
             {pick.name} ({pick.ticker})
           </h3>
-          <p className="mt-1 text-sm font-bold leading-5 text-[#6c5d7f]">Picked: {pick.picked}</p>
-          <p className="text-sm font-bold leading-5 text-[#6c5d7f]">Returns as of: December 2025</p>
+          <p className="mt-1 text-sm font-bold leading-5 text-[#475569]">Picked: {pick.picked}</p>
+          <p className="text-sm font-bold leading-5 text-[#475569]">Returns as of: December 2025</p>
         </div>
       </div>
       <div className="mt-7 rounded-md bg-emerald-100 px-4 py-4 text-center text-lg font-black text-emerald-700">
@@ -1321,9 +1321,9 @@ function ProfileMenu({
     <Link
       href="/profile"
       aria-label="Open profile"
-      className="group inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 pr-3 text-sm font-black text-slate-800 shadow-sm transition-all duration-200 hover:border-[#210947] hover:bg-[#f5f0ff] hover:shadow"
+      className="group inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 pr-3 text-sm font-black text-slate-800 shadow-sm transition-all duration-200 hover:border-[#0f1729] hover:bg-[#ecfeff] hover:shadow"
     >
-      <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#210947] to-[#3d1278] text-[10px] font-black text-white shadow-sm">
+      <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0f1729] to-[#1e293b] text-[10px] font-black text-white shadow-sm">
         {getUserInitials(currentUser)}
         {hasPremiumAccess && (
           <span
@@ -1453,7 +1453,7 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
                 <span className="inline-flex items-center gap-2">
                   <Database className="h-4 w-4 text-slate-500" aria-hidden="true" />
                   {monthlyPick.price}{" "}
-                  <span className={monthlyPick.change.startsWith("+") ? "text-emerald-700" : "text-[#df2d74]"}>
+                  <span className={monthlyPick.change.startsWith("+") ? "text-emerald-700" : "text-[#f43f5e]"}>
                     ({monthlyPick.change})
                   </span>
                 </span>
@@ -1726,7 +1726,7 @@ function BackingPoint({
 
 const cardAccents = [
   "from-orange-400 to-rose-400",
-  "from-violet-400 to-purple-500",
+  "from-cyan-400 to-sky-500",
   "from-emerald-400 to-teal-500",
   "from-sky-400 to-blue-500",
   "from-amber-400 to-orange-400",
@@ -1797,7 +1797,7 @@ function PremiumGate({ lockedFeature }: { lockedFeature: LockedFeatureKey }) {
                 <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
                 Premium locked
               </p>
-              <h1 className="mt-3 bg-gradient-to-r from-[#0f172a] via-[#210947] to-[#ff4f00] bg-clip-text text-3xl font-black text-transparent">{copy.headline}</h1>
+              <h1 className="mt-3 bg-gradient-to-r from-[#0f172a] via-[#0f1729] to-[#ff4f00] bg-clip-text text-3xl font-black text-transparent">{copy.headline}</h1>
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
                 {copy.description} One $1.99 monthly plan unlocks all three premium sections.
               </p>
@@ -1844,12 +1844,12 @@ function PremiumUnlockPanel({
 
   return (
     <Reveal
-      className={`relative mt-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#22006c] via-[#310a68] to-[#3d1278] text-white shadow-2xl ${
+      className={`relative mt-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f1729] via-[#1e293b] to-[#1e293b] text-white shadow-2xl ${
         compact ? "p-6 md:p-8" : "p-6 md:p-10"
       }`}
     >
       <div aria-hidden="true" className="pointer-events-none absolute -right-32 -top-32 h-72 w-72 rounded-full bg-[#ff4f00]/25 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#ef0068]/25 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#06b6d4]/25 blur-3xl" />
 
       <div id="unlock" className="relative grid gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
         <div>
@@ -1860,19 +1860,19 @@ function PremiumUnlockPanel({
           <h2 className="mt-4 max-w-2xl bg-gradient-to-r from-white via-[#ffd4c2] to-[#ffb29d] bg-clip-text text-3xl font-black leading-tight text-transparent md:text-4xl">
             {copy.headline}
           </h2>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#e5d8f4]">
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#e0f2fe]">
             {copy.description} Subscribe once for $1.99/month and unlock the complete StockyMonth suite.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {planFeatures.map((item, index) => {
-              const accents = ["from-orange-400 to-rose-400", "from-violet-400 to-purple-500", "from-emerald-400 to-teal-500"];
+              const accents = ["from-orange-400 to-rose-400", "from-cyan-400 to-sky-500", "from-emerald-400 to-teal-500"];
               return (
                 <div key={item.title} className="group relative overflow-hidden rounded-xl border border-white/15 bg-white/10 p-4 backdrop-blur-md transition hover:border-white/30 hover:bg-white/15">
                   <div className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${accents[index]}`} />
                   <ShieldCheck className="mb-3 h-5 w-5 text-[#22c55e]" aria-hidden="true" />
                   <p className="text-sm font-black">{item.title}</p>
-                  <p className="mt-2 text-xs font-semibold leading-relaxed text-[#e5d8f4]">{item.description}</p>
+                  <p className="mt-2 text-xs font-semibold leading-relaxed text-[#e0f2fe]">{item.description}</p>
                 </div>
               );
             })}
@@ -1935,7 +1935,7 @@ function WinningPicksShowcase() {
               </span>
               <span className="pb-1 text-xs font-bold text-emerald-300">return</span>
             </div>
-            <div className="text-xs font-semibold text-[#cdbcea]">Picked {pick.picked}</div>
+            <div className="text-xs font-semibold text-[#cbd5e1]">Picked {pick.picked}</div>
           </div>
         ))}
       </div>
@@ -2048,12 +2048,12 @@ function PricingSection({
   publishableKey: string;
 }) {
   return (
-    <section id="pricing" className="bg-[#210947] px-6 py-16 text-white">
+    <section id="pricing" className="bg-[#0f1729] px-6 py-16 text-white">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div>
           <p className="text-lg font-black text-[#ffb29d]">Subscribe to StockyMonth</p>
           <h2 className="mt-3 text-3xl font-black">Get monthly picks for $1.99</h2>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#e5d8f4]">
+          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#e0f2fe]">
             Unlock {monthlyPick.ticker}, top quality ideas, detailed analysis, and pick history in one simple monthly plan.
           </p>
           <div className="mt-8 grid gap-4">
@@ -2071,11 +2071,11 @@ function PricingSection({
           {pricingTableId && publishableKey ? (
             <StripePricingTable pricingTableId={pricingTableId} publishableKey={publishableKey} />
           ) : (
-            <form action="/api/checkout" method="POST" className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-6">
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-[#8d7ca3]">Monthly</p>
+            <form action="/api/checkout" method="POST" className="rounded-md border border-[#e2e8f0] bg-[#f8fafc] p-6">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-[#64748b]">Monthly</p>
               <div className="mt-4 flex items-end gap-2">
                 <span className="text-4xl font-black">$1.99</span>
-                <span className="pb-2 text-lg font-bold text-[#6c5d7f]">/month</span>
+                <span className="pb-2 text-lg font-bold text-[#475569]">/month</span>
               </div>
               <button className="mt-6 inline-flex h-14 w-full items-center justify-center rounded-full bg-[#ff6b4a] text-base font-black text-white transition hover:bg-[#f45d3c]">
                 Subscribe now
@@ -2123,7 +2123,7 @@ function AdminPanel({
   }
 
   return (
-    <section id="admin" className="bg-[#fffaf7] px-6 py-16">
+    <section id="admin" className="bg-[#f8fafc] px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Admin</p>
@@ -2131,7 +2131,7 @@ function AdminPanel({
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="rounded-md border border-[#efe7f7] bg-white p-6 shadow-sm">
+          <div className="rounded-md border border-[#e2e8f0] bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center gap-3">
               <Edit3 className="h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
               <h3 className="text-2xl font-black text-[#0f172a]">Add one stock per month</h3>
@@ -2156,7 +2156,7 @@ function AdminPanel({
               <button
                 type="button"
                 onClick={onResetMonthlyPick}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#0f172a]"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#e2e8f0] px-5 text-sm font-black text-[#0f172a]"
               >
                 <RefreshCcw className="h-4 w-4" aria-hidden="true" />
                 Reset
@@ -2164,14 +2164,14 @@ function AdminPanel({
             </div>
           </div>
 
-          <div className="rounded-md border border-[#efe7f7] bg-white p-6 shadow-sm">
+          <div className="rounded-md border border-[#e2e8f0] bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center gap-3">
               <BadgeCheck className="h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
               <h3 className="text-2xl font-black text-[#0f172a]">Add or modify top 6 stocks</h3>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {qualityDrafts.map((pick, index) => (
-                <div key={`${pick.ticker}-${index}`} className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
+                <div key={`${pick.ticker}-${index}`} className="rounded-md border border-[#e2e8f0] bg-[#f8fafc] p-4">
                   <p className="mb-3 text-xs font-black uppercase tracking-wide text-[#ff6b4a]">Quality pick {index + 1}</p>
                   <div className="grid gap-3">
                     <TextInput compact label="Ticker" value={pick.ticker} onChange={(value) => updateQualityField(index, "ticker", value.toUpperCase())} />
@@ -2194,7 +2194,7 @@ function AdminPanel({
               <button
                 type="button"
                 onClick={onResetQualityPicks}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#efe7f7] px-5 text-sm font-black text-[#0f172a]"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#e2e8f0] px-5 text-sm font-black text-[#0f172a]"
               >
                 <RefreshCcw className="h-4 w-4" aria-hidden="true" />
                 Reset
@@ -2220,11 +2220,11 @@ function TextInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</span>
+      <span className="mb-2 block text-xs font-black uppercase tracking-wide text-[#64748b]">{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className={`${compact ? "h-10" : "h-12"} w-full rounded-md border border-[#efe7f7] bg-white px-3 text-sm font-bold text-[#0f172a] outline-none transition focus:border-[#ff6b4a]`}
+        className={`${compact ? "h-10" : "h-12"} w-full rounded-md border border-[#e2e8f0] bg-white px-3 text-sm font-bold text-[#0f172a] outline-none transition focus:border-[#ff6b4a]`}
       />
     </label>
   );
@@ -2241,12 +2241,12 @@ function TextArea({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</span>
+      <span className="mb-2 block text-xs font-black uppercase tracking-wide text-[#64748b]">{label}</span>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={4}
-        className="w-full rounded-md border border-[#efe7f7] bg-white px-3 py-3 text-sm font-bold leading-6 text-[#0f172a] outline-none transition focus:border-[#ff6b4a]"
+        className="w-full rounded-md border border-[#e2e8f0] bg-white px-3 py-3 text-sm font-bold leading-6 text-[#0f172a] outline-none transition focus:border-[#ff6b4a]"
       />
     </label>
   );
@@ -2262,8 +2262,8 @@ function MiniStat({
   value: string;
 }) {
   return (
-    <div className="rounded-md border border-[#efe7f7] bg-white p-4">
-      <p className="text-xs font-black uppercase tracking-wide text-[#8d7ca3]">{label}</p>
+    <div className="rounded-md border border-[#e2e8f0] bg-white p-4">
+      <p className="text-xs font-black uppercase tracking-wide text-[#64748b]">{label}</p>
       <p className={`mt-1 text-xl font-black ${positive === undefined ? "text-[#0f172a]" : positive ? "text-emerald-700" : "text-rose-600"}`}>
         {value}
       </p>

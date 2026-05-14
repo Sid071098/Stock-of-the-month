@@ -3,8 +3,8 @@ import { ArrowLeft, XCircle } from "lucide-react";
 
 export default function CancelPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#fffaf7] px-6 text-[#210947]">
-      <section className="w-full max-w-xl rounded-md border border-[#efe7f7] bg-white p-8 shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-6 text-[#0f1729]">
+      <section className="w-full max-w-xl rounded-md border border-[#e2e8f0] bg-white p-8 shadow-2xl">
         <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-rose-50 text-rose-500">
           <XCircle className="h-8 w-8" aria-hidden="true" />
         </div>

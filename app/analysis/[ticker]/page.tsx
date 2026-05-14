@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import AnalysisDeepDive from "../../components/AnalysisDeepDive";
 import AnalysisChart from "../../components/AnalysisChart";
+import TradingViewChart from "../../components/TradingViewChart";
 import { getAIAnalysis, getStockSnapshot } from "../../lib/marketData";
 import { defaultMonthlyPick } from "../../lib/picks";
 
@@ -27,10 +28,10 @@ export default async function AnalysisPage({
   const isPositive = snapshot.changePercent.startsWith("+");
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#f4f0fb] px-6 py-10 text-slate-950">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#ecfeff] px-6 py-10 text-slate-950">
       {/* Decorative aurora orbs */}
       <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-full bg-orange-100/40 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-violet-100/45 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-cyan-100/45 blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none absolute bottom-0 -right-32 h-72 w-72 rounded-full bg-emerald-100/40 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl">
@@ -50,7 +51,7 @@ export default async function AnalysisPage({
         </div>
 
         {/* Hero card */}
-        <section className="relative mt-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1a1244] to-[#22074d] p-8 text-white shadow-2xl">
+        <section className="relative mt-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#0f1a40] to-[#0f1729] p-8 text-white shadow-2xl">
           <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#ff4f00]/25 blur-3xl animate-drift" />
           <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#22d3ee]/20 blur-3xl animate-drift" style={{ animationDelay: "3s" }} />
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-[0.16] [background-image:radial-gradient(rgba(255,255,255,0.4)_1px,transparent_1px)] [background-size:28px_28px]" />
@@ -81,6 +82,11 @@ export default async function AnalysisPage({
           </div>
         </section>
 
+        {/* Trading view */}
+        <div className="mt-6">
+          <TradingViewChart defaultPair={`${snapshot.ticker}/USD`} />
+        </div>
+
         {/* Chart + KPI cards */}
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
@@ -104,9 +110,9 @@ export default async function AnalysisPage({
           </section>
 
           <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-400 to-purple-500" />
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-400 to-sky-500" />
             <div className="mb-5 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
                 <BarChart3 className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
@@ -170,11 +176,11 @@ export default async function AnalysisPage({
 
 const cardAccentStyles = {
   emerald: { ring: "from-emerald-400 to-teal-500", iconBg: "bg-emerald-50", iconText: "text-emerald-600" },
-  violet:  { ring: "from-violet-400 to-purple-500", iconBg: "bg-violet-50", iconText: "text-violet-600"   },
+  violet:  { ring: "from-cyan-400 to-sky-500", iconBg: "bg-cyan-50", iconText: "text-cyan-600"   },
   rose:    { ring: "from-rose-400 to-pink-500",     iconBg: "bg-rose-50",   iconText: "text-rose-600"     },
   amber:   { ring: "from-amber-400 to-orange-400",  iconBg: "bg-amber-50",  iconText: "text-amber-600"    },
   cyan:    { ring: "from-cyan-400 to-sky-500",      iconBg: "bg-cyan-50",   iconText: "text-cyan-600"     },
-  indigo:  { ring: "from-indigo-400 to-violet-500", iconBg: "bg-indigo-50", iconText: "text-indigo-600"   }
+  indigo:  { ring: "from-indigo-400 to-cyan-500", iconBg: "bg-indigo-50", iconText: "text-indigo-600"   }
 } as const;
 
 type AccentKey = keyof typeof cardAccentStyles;

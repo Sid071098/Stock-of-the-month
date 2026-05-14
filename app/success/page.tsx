@@ -74,8 +74,8 @@ export default function SuccessPage({
   }, [searchParams?.session_id]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#fffaf7] px-6 text-[#210947]">
-      <section className="w-full max-w-2xl rounded-md border border-[#efe7f7] bg-white p-8 shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-6 text-[#0f1729]">
+      <section className="w-full max-w-2xl rounded-md border border-[#e2e8f0] bg-white p-8 shadow-2xl">
         <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
           <CheckCircle2 className="h-8 w-8" aria-hidden="true" />
         </div>
@@ -83,15 +83,15 @@ export default function SuccessPage({
         <h1 className="mt-3 text-4xl font-black">Welcome to StockyMonth</h1>
         <p className="mt-4 leading-7 text-[#4d3f68]">{status}</p>
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
+          <div className="rounded-md border border-[#e2e8f0] bg-[#f8fafc] p-4">
             <FileText className="mb-3 h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
             <p className="text-sm font-black">Premium research unlocked</p>
-            <p className="mt-1 text-sm text-[#6c5d7f]">Stock of the Month and detailed analysis</p>
+            <p className="mt-1 text-sm text-[#475569]">Stock of the Month and detailed analysis</p>
           </div>
-          <div className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
+          <div className="rounded-md border border-[#e2e8f0] bg-[#f8fafc] p-4">
             <Gauge className="mb-3 h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
             <p className="text-sm font-black">All sections available</p>
-            <p className="mt-1 text-sm text-[#6c5d7f]">Top High Quality Stocks and All Picks archive</p>
+            <p className="mt-1 text-sm text-[#475569]">Top High Quality Stocks and All Picks archive</p>
           </div>
         </div>
         <Link

@@ -109,14 +109,14 @@ export default function ProfilePage() {
     : "—";
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-violet-50/30 to-[#f8fafc] text-[#0f172a]">
+    <main className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-cyan-50/30 to-[#f8fafc] text-[#0f172a]">
       {/* Top bar */}
       <nav className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/96 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:border-[#210947] hover:bg-[#f5f0ff] hover:text-[#210947]"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:border-[#0f1729] hover:bg-[#ecfeff] hover:text-[#0f1729]"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Back to dashboard
@@ -140,15 +140,15 @@ export default function ProfilePage() {
 
       <section className="mx-auto max-w-5xl px-6 py-12">
         {/* Header card */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#210947] via-[#3d1278] to-[#5a1aa3] p-8 text-white shadow-xl">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f1729] via-[#1e293b] to-[#0891b2] p-8 text-white shadow-xl">
           <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#ff4f00]/30 blur-3xl" />
-          <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#ef0068]/25 blur-3xl" />
+          <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#06b6d4]/25 blur-3xl" />
           <div className="relative flex items-center gap-5">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/15 text-2xl font-black ring-4 ring-white/25 backdrop-blur-md">
               {getUserInitials(currentUser)}
             </div>
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-purple-200">My account</p>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan-200">My account</p>
               <h1 className="mt-1 text-3xl font-black md:text-4xl">{fullName || currentUser.email}</h1>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-black backdrop-blur-md">
@@ -173,10 +173,10 @@ export default function ProfilePage() {
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           {/* Account details */}
           <article className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="h-1 w-full bg-gradient-to-r from-violet-400 to-purple-500" />
+            <div className="h-1 w-full bg-gradient-to-r from-cyan-400 to-sky-500" />
             <div className="p-6 md:p-8">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-[#210947]">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-[#0f1729]">
                   <User className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <h2 className="text-lg font-black text-[#0f172a]">Account details</h2>
