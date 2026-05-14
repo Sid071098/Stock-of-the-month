@@ -16,15 +16,12 @@ import {
   KeyRound,
   LineChart,
   LogOut,
-  LogIn,
   Mail,
   RefreshCcw,
   Save,
   Sparkles,
-  Star,
   TrendingUp,
   X,
-  UserPlus,
   UserCircle,
   LockKeyhole,
   ShieldCheck
@@ -72,6 +69,7 @@ type StockExperienceProps = {
   archivePicks: ArchivePick[];
   defaultMonthlyPick: MonthlyPick;
   defaultQualityPicks: QualityPick[];
+  subscriptionContext?: LockedFeatureKey;
   pricingTableId: string;
   publishableKey: string;
   showAdmin?: boolean;
@@ -80,11 +78,62 @@ type StockExperienceProps = {
 };
 
 type StockExperienceView = "monthly" | "quality" | "all-picks" | "subscription";
+type LockedFeatureKey = "monthly" | "quality" | "all-picks";
+
+const featureUnlockCopy: Record<
+  LockedFeatureKey,
+  {
+    eyebrow: string;
+    headline: string;
+    navLabel: string;
+    title: string;
+    description: string;
+    panelAccent: string;
+  }
+> = {
+  monthly: {
+    eyebrow: "Stock of the Month",
+    headline: "Unlock this month's highest-conviction pick",
+    navLabel: "Stock of the Month",
+    title: "The Featured Pick",
+    description: "Get the May 2026 StockyMonth thesis, detailed EQT analysis, and subscriber-only research notes.",
+    panelAccent: "Featured monthly research"
+  },
+  quality: {
+    eyebrow: "Top High Quality Stocks",
+    headline: "Unlock the current Top High Quality Stocks list",
+    navLabel: "Top High Quality Stocks",
+    title: "The Elite List",
+    description: "See the ranked high-quality stock list with company data, active-buy tags, and detailed analysis links.",
+    panelAccent: "Quality screen access"
+  },
+  "all-picks": {
+    eyebrow: "All Picks Archive",
+    headline: "Unlock the complete StockyMonth pick vault",
+    navLabel: "All Picks",
+    title: "The Vault",
+    description: "Browse every monthly pick, historical thesis, three-point rationale, pricing, and company logo archive.",
+    panelAccent: "Historical archive access"
+  }
+};
+
+function featureKeyForView(view: StockExperienceView): LockedFeatureKey {
+  if (view === "quality") {
+    return "quality";
+  }
+
+  if (view === "all-picks") {
+    return "all-picks";
+  }
+
+  return "monthly";
+}
 
 export default function StockExperience({
   archivePicks,
   defaultMonthlyPick,
   defaultQualityPicks,
+  subscriptionContext,
   pricingTableId,
   publishableKey,
   showAdmin = false,
@@ -113,23 +162,29 @@ export default function StockExperience({
 
     if (savedUser) {
       setCurrentUser(savedUser);
-      // Check subscription status for this specific user
       const userSubscriptionKey = getSubscriptionStorageKey(savedUser.email);
-      const savedSubscription = window.localStorage.getItem(userSubscriptionKey);
-      setHasPremiumAccess(savedSubscription === "true");
-      
-      // Also check with API if local storage doesn't have subscription
-      if (savedSubscription !== "true") {
-        void fetch(`/api/subscription/status?email=${encodeURIComponent(savedUser.email)}`, { cache: "no-store" })
-          .then((response) => response.json())
-          .then((payload: { active?: boolean }) => {
-            if (payload.active) {
-              setHasPremiumAccess(true);
-              window.localStorage.setItem(userSubscriptionKey, "true");
-            }
-          })
-          .catch(() => undefined);
+      const subscriptionWasCancelled = new URLSearchParams(window.location.search).get("cancelled") === "1";
+
+      if (subscriptionWasCancelled) {
+        window.localStorage.removeItem(userSubscriptionKey);
       }
+
+      const savedSubscription = subscriptionWasCancelled ? null : window.localStorage.getItem(userSubscriptionKey);
+      setHasPremiumAccess(savedSubscription === "true");
+
+      void fetch(`/api/subscription/status?email=${encodeURIComponent(savedUser.email)}`, { cache: "no-store" })
+        .then((response) => response.json())
+        .then((payload: { active?: boolean }) => {
+          if (payload.active) {
+            setHasPremiumAccess(true);
+            window.localStorage.setItem(userSubscriptionKey, "true");
+            return;
+          }
+
+          setHasPremiumAccess(false);
+          window.localStorage.removeItem(userSubscriptionKey);
+        })
+        .catch(() => undefined);
     } else {
       // No user logged in
       setHasPremiumAccess(false);
@@ -172,7 +227,6 @@ export default function StockExperience({
 
     if (userSubscription === "true") {
       setHasPremiumAccess(true);
-      return;
     }
 
     void fetch(`/api/subscription/status?email=${encodeURIComponent(user.email)}`, { cache: "no-store" })
@@ -185,9 +239,14 @@ export default function StockExperience({
         }
 
         setHasPremiumAccess(false);
+        window.localStorage.removeItem(userSubscriptionKey);
         router.push("/subscription");
       })
       .catch(() => {
+        if (userSubscription === "true") {
+          return;
+        }
+
         setHasPremiumAccess(false);
         router.push("/subscription");
       });
@@ -210,28 +269,29 @@ export default function StockExperience({
 
   const canAccessPremiumFeatures = hasPremiumAccess;
   const shouldShowSubscriptionFirst = !canAccessPremiumFeatures && view !== "subscription";
+  const lockedFeature = subscriptionContext ?? featureKeyForView(view);
 
   return (
     <main className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
       <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
       {shouldShowSubscriptionFirst && (
-        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} />
+        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
       )}
       {!shouldShowSubscriptionFirst && view === "monthly" && (
         canAccessPremiumFeatures ? (
           <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
         ) : (
-          <PremiumGate title="Stock of the Month" />
+          <PremiumGate lockedFeature="monthly" />
         )
       )}
       {!shouldShowSubscriptionFirst && view === "quality" && (
-        canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate title="Top 6 High Quality Stocks" />
+        canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate lockedFeature="quality" />
       )}
       {!shouldShowSubscriptionFirst && view === "all-picks" && (
-        canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate title="All Picks" />
+        canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate lockedFeature="all-picks" />
       )}
       {!shouldShowSubscriptionFirst && view === "subscription" && (
-        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} />
+        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
       )}
       {showPricing && (
         <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
@@ -266,7 +326,7 @@ function AuthLoadingScreen() {
 
 function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUser) => void }) {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
-  const [authPanelOpen, setAuthPanelOpen] = useState(false);
+  const [emailFormOpen, setEmailFormOpen] = useState(false);
   const [notice, setNotice] = useState<AuthNotice | null>(null);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -283,9 +343,9 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
     window.setTimeout(() => setNotice((current) => (current?.message === nextNotice.message ? null : current)), 4000);
   }
 
-  function openAuthPanel(nextMode: "login" | "signup" | "forgot") {
+  function switchAuthMode(nextMode: "login" | "signup" | "forgot") {
     setMode(nextMode);
-    setAuthPanelOpen(true);
+    setEmailFormOpen(false);
   }
 
   async function handleGoogleAccount(account: { email: string; firstName: string; lastName: string }) {
@@ -309,7 +369,6 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
     upsertRegisteredUser({ ...user, passwordHash });
 
     setGoogleChooserOpen(false);
-    setAuthPanelOpen(false);
     showNotice({ message: "Google login successful. Welcome to StockyMonth.", type: "success" });
     onAuthenticated(user);
   }
@@ -422,27 +481,66 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
     }
   }
 
-  function handleForgotPassword(event: React.FormEvent<HTMLFormElement>) {
+  async function handleForgotPassword(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsSubmitting(true);
 
-    const email = normalizeEmail(forgotEmail);
-    const user = getRegisteredUsers().find((candidate) => candidate.email === email);
+    try {
+      const email = normalizeEmail(forgotEmail);
 
-    if (!user) {
-      showNotice({ message: "No account exists for that email address.", type: "error" });
-      return;
+      if (!email) {
+        showNotice({ message: "Enter your registered email address.", type: "error" });
+        return;
+      }
+
+      const response = await fetch("/api/auth/password-reset/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
+      });
+      const payload = (await response.json().catch(() => ({}))) as { emailSent?: boolean; resetUrl?: string };
+
+      if (response.status === 503) {
+        showNotice({ message: "Password reset needs Redis environment variables before it can send links.", type: "error" });
+        return;
+      }
+
+      if (!response.ok) {
+        showNotice({ message: "Password reset could not start. Please try again.", type: "error" });
+        return;
+      }
+
+      if (payload.emailSent) {
+        showNotice({ message: "Password reset instructions were sent to your email.", type: "success" });
+      } else {
+        showNotice({
+          message: payload.resetUrl
+            ? `Reset link created for local testing: ${payload.resetUrl}`
+            : "Reset link created, but email sending needs RESEND_API_KEY and PASSWORD_RESET_FROM_EMAIL.",
+          type: "info"
+        });
+      }
+
+      setMode("login");
+      setLoginEmail(email);
+    } catch {
+      showNotice({ message: "Password reset could not start. Please refresh and try again.", type: "error" });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    showNotice({
-      message: "Password reset instructions are ready. Connect an email provider to send the reset link.",
-      type: "success"
-    });
-    setMode("login");
-    setLoginEmail(email);
   }
 
   return (
-    <main className="min-h-screen bg-white text-[#0f172a]">
+    <main className="relative min-h-screen overflow-hidden bg-[#f8fafc] text-[#0f172a]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-70 [background-image:radial-gradient(#d9d2e8_1px,transparent_1px)] [background-size:26px_26px]"
+      />
+      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-24 h-64 w-64 -translate-x-1/2 rounded-full bg-orange-100/45 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-20 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#210947]/10 blur-3xl" />
+
       {notice && (
         <div
           className={`fixed right-5 top-5 z-[70] max-w-sm rounded-md border p-4 text-sm font-bold shadow-2xl ${
@@ -458,250 +556,208 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       )}
 
-      <header className="border-b border-slate-100 bg-white px-6 py-5">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-[#ff4f00] text-white">
-              <BarChart3 className="h-7 w-7" aria-hidden="true" />
+      <header className="relative z-10 px-6 py-7">
+        <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center">
+          <div />
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#ff4f00] text-white shadow-sm">
+              <BarChart3 className="h-5 w-5" aria-hidden="true" />
             </div>
-            <span className="text-2xl font-black tracking-tight text-[#0f172a]">StockyMonth</span>
+            <span className="text-sm font-black tracking-tight text-[#210947]">StockyMonth</span>
+            <span className="hidden text-[10px] font-black uppercase tracking-[0.28em] text-[#7f7194] sm:inline">
+              Research Harness
+            </span>
           </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => openAuthPanel("login")}
-              className="h-12 rounded-full border border-[#0f172a] bg-white px-6 text-sm font-black uppercase tracking-wide text-[#0f172a] transition hover:bg-[#fff1ea]"
-            >
-              Log in
-            </button>
-            <button
-              type="button"
-              onClick={() => openAuthPanel("signup")}
-              className="h-12 rounded-full bg-[#210947] px-7 text-sm font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-[#310a68]"
-            >
-              Get started
-            </button>
+          <div className="flex justify-end">
+            {mode !== "forgot" && (
+              <button
+                type="button"
+                onClick={() => switchAuthMode(mode === "signup" ? "login" : "signup")}
+                className="text-xs font-black text-[#210947] transition hover:text-[#ff4f00]"
+              >
+                {mode === "signup" ? "Log in" : "Create account"}
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      <section className="px-6 py-12 md:py-16">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.88fr_1.12fr]">
-          <div>
-            <h1 className="max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-[#0f172a] md:text-5xl">
-              Get Investing Superpowers With StockyMonth
-            </h1>
-            <p className="mt-7 max-w-2xl text-lg font-semibold leading-8 text-[#3f2d64]">
-              StockyMonth helps you find buy-and-hold stocks with the potential to multiply your net worth. AI-powered,
-              research-backed, and built for monthly conviction.
-            </p>
-            <button
-              type="button"
-              onClick={() => openAuthPanel("signup")}
-              className="mt-8 inline-flex h-14 w-full max-w-sm items-center justify-center rounded-full bg-[#210947] px-8 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68]"
-            >
-              Get started, it&apos;s free
-            </button>
+      <section className="relative z-10 flex min-h-[calc(100vh-96px)] items-center justify-center px-6 pb-16 pt-8">
+        <div className="w-full max-w-[430px] text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#e9dffc] bg-white/80 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.24em] text-[#210947] shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ff4f00]" />
+            {mode === "login" ? "Sign in" : mode === "signup" ? "Create account" : "Account recovery"}
+          </span>
 
-            <div className="mt-7 flex flex-wrap items-center gap-3 text-emerald-700">
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} className="h-5 w-5 fill-current" aria-hidden="true" />
-                ))}
-              </div>
-              <p className="text-base font-black">Trusted by 700,000+ investors</p>
-            </div>
-          </div>
+          <h1 className="mt-6 text-4xl font-black tracking-tight text-[#210947] md:text-5xl">
+            {mode === "login" ? "Welcome back." : mode === "signup" ? "Create your account." : "Reset your password."}
+          </h1>
+          <p className="mx-auto mt-4 max-w-sm text-sm font-semibold leading-6 text-[#6d5a85]">
+            {mode === "login"
+              ? "Pick up where you left off. Your monthly stock research is one click away."
+              : mode === "signup"
+                ? "Start with Google or reveal the email form when you are ready."
+                : "Enter your email and we will send reset instructions for your StockyMonth account."}
+          </p>
 
-          <InvestorHeroIllustration />
-        </div>
-      </section>
-
-      <section className="bg-[#f8fafc] px-6 py-14 text-[#0f172a]">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-center text-3xl font-black tracking-tight md:text-4xl">Recent Winning Picks</h2>
-          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
-            {authWinningPicks.map((pick) => (
-              <AuthWinningPickCard key={pick.ticker} pick={pick} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {authPanelOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#210947]/40 px-4 py-8 backdrop-blur-sm">
-          <section className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-md border border-slate-200 bg-white p-6 text-[#0f172a] shadow-2xl md:p-8">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">StockyMonth Access</p>
-                <h2 className="mt-2 text-2xl font-black text-[#0f172a]">
-                  {mode === "login" ? "Welcome back" : mode === "signup" ? "Create your account" : "Recover your password"}
-                </h2>
-              </div>
+          {mode !== "forgot" && (
+            <div className="mt-8 grid gap-3">
               <button
                 type="button"
-                aria-label="Close authentication panel"
-                onClick={() => setAuthPanelOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-[#0f172a]"
+                onClick={() => setGoogleChooserOpen(true)}
+                className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-md border border-[#d9c9f0] bg-white px-5 text-sm font-black text-[#210947] shadow-sm transition hover:border-[#210947] hover:bg-[#fbf7ff]"
               >
-                <X className="h-5 w-5" aria-hidden="true" />
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#4285f4] ring-1 ring-slate-200">
+                  G
+                </span>
+                Continue with Google
               </button>
-            </div>
-
-            <div className="mt-6 inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
               <button
                 type="button"
-                onClick={() => setMode("login")}
-                className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-black transition ${
-                  mode === "login" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-[#0f172a]"
+                onClick={() => setEmailFormOpen((open) => !open)}
+                className={`inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border px-5 text-sm font-black transition ${
+                  emailFormOpen
+                    ? "border-orange-200 bg-orange-50 text-[#ff4f00]"
+                    : "border-[#e9dffc] bg-white/75 text-[#210947] hover:border-orange-200 hover:bg-orange-50"
                 }`}
               >
-                <LogIn className="h-4 w-4" aria-hidden="true" />
-                Login
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("signup")}
-                className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-black transition ${
-                  mode === "signup" ? "bg-[#ff4f00] text-white shadow-sm" : "text-slate-600 hover:text-[#0f172a]"
-                }`}
-              >
-                <UserPlus className="h-4 w-4" aria-hidden="true" />
-                Sign up
+                <Mail className="h-4 w-4" aria-hidden="true" />
+                {emailFormOpen ? "Hide email form" : "Continue with email"}
               </button>
             </div>
+          )}
 
-            {mode === "login" && (
-              <form className="mt-6" onSubmit={handleLogin}>
-                <AuthMethodOptions onGoogle={() => setGoogleChooserOpen(true)} />
-                <p className="text-sm leading-relaxed text-slate-600">
-                  Enter your email and password.
-                </p>
+          {mode === "login" && emailFormOpen && (
+            <form className="mt-6 rounded-md border border-[#ece4f6] bg-white/85 p-4 text-left shadow-sm" onSubmit={handleLogin}>
+              <p className="text-sm font-bold leading-relaxed text-[#6d5a85]">Enter your email and password.</p>
+              <div className="mt-4 grid gap-4">
+                <AuthInput
+                  autoComplete="email"
+                  icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+                  label="Email address"
+                  onChange={setLoginEmail}
+                  placeholder="you@example.com"
+                  type="email"
+                  value={loginEmail}
+                />
+                <AuthInput
+                  autoComplete="current-password"
+                  icon={<KeyRound className="h-5 w-5" aria-hidden="true" />}
+                  label="Password"
+                  onChange={setLoginPassword}
+                  placeholder="Enter password"
+                  type="password"
+                  value={loginPassword}
+                />
+              </div>
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => switchAuthMode("forgot")}
+                  className="text-sm font-black text-[#ff4f00] hover:text-orange-700"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Checking account..." : "Login"}
+              </button>
+            </form>
+          )}
 
-                <div className="mt-6 grid gap-4">
+          {mode === "signup" && emailFormOpen && (
+            <form className="mt-6 rounded-md border border-[#ece4f6] bg-white/85 p-4 text-left shadow-sm" onSubmit={handleSignup}>
+              <p className="text-sm font-bold leading-relaxed text-[#6d5a85]">
+                Sign up with your first name, last name, and email address.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <AuthInput label="First name" onChange={setFirstName} placeholder="First name" type="text" value={firstName} />
+                <AuthInput label="Last name" onChange={setLastName} placeholder="Last name" type="text" value={lastName} />
+                <div className="sm:col-span-2">
                   <AuthInput
                     autoComplete="email"
                     icon={<Mail className="h-5 w-5" aria-hidden="true" />}
                     label="Email address"
-                    onChange={setLoginEmail}
+                    onChange={setSignupEmail}
                     placeholder="you@example.com"
                     type="email"
-                    value={loginEmail}
+                    value={signupEmail}
                   />
+                </div>
+                <div className="sm:col-span-2">
                   <AuthInput
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     icon={<KeyRound className="h-5 w-5" aria-hidden="true" />}
-                    label="Password"
-                    onChange={setLoginPassword}
-                    placeholder="Enter password"
+                    label="Create password"
+                    onChange={setSignupPassword}
+                    placeholder="Minimum 6 characters"
                     type="password"
-                    value={loginPassword}
+                    value={signupPassword}
                   />
                 </div>
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Creating account..." : "Get started"}
+              </button>
+            </form>
+          )}
 
-                <div className="mt-4 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setMode("forgot")}
-                    className="text-sm font-black text-[#ff4f00] hover:text-orange-700"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
+          {mode === "forgot" && (
+            <form className="mt-8 rounded-md border border-[#ece4f6] bg-white/85 p-4 text-left shadow-sm" onSubmit={handleForgotPassword}>
+              <AuthInput
+                autoComplete="email"
+                icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+                label="Registered email"
+                onChange={setForgotEmail}
+                placeholder="you@example.com"
+                type="email"
+                value={forgotEmail}
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Sending..." : "Send reset instructions"}
+              </button>
+            </form>
+          )}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubmitting ? "Checking account..." : "Login"}
+          <AuthInfoCard mode={mode} />
+
+          <div className="mt-7 text-sm font-semibold text-[#7f7194]">
+            {mode === "login" && (
+              <>
+                New here?{" "}
+                <button type="button" onClick={() => switchAuthMode("signup")} className="font-black text-[#210947] hover:text-[#ff4f00]">
+                  Create an account
                 </button>
-              </form>
+              </>
             )}
-
             {mode === "signup" && (
-              <form className="mt-6" onSubmit={handleSignup}>
-                <AuthMethodOptions onGoogle={() => setGoogleChooserOpen(true)} />
-                <p className="text-sm leading-relaxed text-slate-600">
-                  Sign up with your first name, last name, and email address.
-                </p>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <AuthInput label="First name" onChange={setFirstName} placeholder="First name" type="text" value={firstName} />
-                  <AuthInput label="Last name" onChange={setLastName} placeholder="Last name" type="text" value={lastName} />
-                  <div className="sm:col-span-2">
-                    <AuthInput
-                      autoComplete="email"
-                      icon={<Mail className="h-5 w-5" aria-hidden="true" />}
-                      label="Email address"
-                      onChange={setSignupEmail}
-                      placeholder="you@example.com"
-                      type="email"
-                      value={signupEmail}
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <AuthInput
-                      autoComplete="new-password"
-                      icon={<KeyRound className="h-5 w-5" aria-hidden="true" />}
-                      label="Create password"
-                      onChange={setSignupPassword}
-                      placeholder="Minimum 6 characters"
-                      type="password"
-                      value={signupPassword}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubmitting ? "Creating account..." : "Get started"}
+              <>
+                Already have an account?{" "}
+                <button type="button" onClick={() => switchAuthMode("login")} className="font-black text-[#210947] hover:text-[#ff4f00]">
+                  Log in
                 </button>
-              </form>
+              </>
             )}
-
             {mode === "forgot" && (
-              <form className="mt-6" onSubmit={handleForgotPassword}>
-                <p className="text-sm leading-relaxed text-slate-600">
-                  Enter your registered email address and StockyMonth will prepare the reset flow.
-                </p>
-
-                <div className="mt-6">
-                  <AuthInput
-                    autoComplete="email"
-                    icon={<Mail className="h-5 w-5" aria-hidden="true" />}
-                    label="Registered email"
-                    onChange={setForgotEmail}
-                    placeholder="you@example.com"
-                    type="email"
-                    value={forgotEmail}
-                  />
-                </div>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <button
-                    type="submit"
-                    className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68]"
-                  >
-                    Send reset instructions
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMode("login")}
-                    className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-sm font-black text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Back to login
-                  </button>
-                </div>
-              </form>
+              <button type="button" onClick={() => switchAuthMode("login")} className="font-black text-[#210947] hover:text-[#ff4f00]">
+                Back to login
+              </button>
             )}
-          </section>
+          </div>
         </div>
-      )}
+      </section>
 
       {googleChooserOpen && (
         <GoogleAccountChooser
@@ -714,23 +770,46 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   );
 }
 
-function AuthMethodOptions({ onGoogle }: { onGoogle: () => void }) {
+function AuthInfoCard({ mode }: { mode: "login" | "signup" | "forgot" }) {
+  const copy =
+    mode === "signup"
+      ? {
+          label: "What StockyMonth unlocks",
+          body: "Create one account for the featured monthly pick, top quality rankings, and the full research archive.",
+          chips: ["Featured pick", "Top quality", "All picks"]
+        }
+      : mode === "forgot"
+        ? {
+            label: "Secure reset",
+            body: "Reset instructions are sent through your registered email and expire after 30 minutes.",
+            chips: ["Email link", "30 min expiry", "Redis token"]
+          }
+        : {
+            label: "How StockyMonth ranks",
+            body: "Each pick blends market data, analyst rationale, and risk checks into a monthly conviction workflow.",
+            chips: ["Active buy", "Quality screen", "Research vault"]
+          };
+
   return (
-    <div className="mb-6 grid gap-3 sm:grid-cols-2">
-      <div className="flex h-12 items-center justify-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 text-sm font-black text-[#ff4f00]">
-        <Mail className="h-4 w-4" aria-hidden="true" />
-        Continue with email
+    <div className="mt-8 rounded-md border border-[#e6d8f5] bg-white/70 p-4 text-left shadow-sm">
+      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#7a5ca8]">{copy.label}</p>
+      <p className="mt-3 text-sm font-semibold leading-6 text-[#6d5a85]">{copy.body}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {copy.chips.map((chip, index) => (
+          <span
+            key={chip}
+            className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${
+              index === 0
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : index === 1
+                  ? "border-orange-200 bg-orange-50 text-[#ff4f00]"
+                  : "border-[#e6d8f5] bg-[#fbf7ff] text-[#210947]"
+            }`}
+          >
+            {chip}
+          </span>
+        ))}
       </div>
-      <button
-        type="button"
-        onClick={onGoogle}
-        className="flex h-12 items-center justify-center gap-3 rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-[#0f172a] shadow-sm transition hover:border-orange-200 hover:bg-[#fff7ed]"
-      >
-        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-black text-[#4285f4]">
-          G
-        </span>
-        Continue with Google
-      </button>
     </div>
   );
 }
@@ -904,9 +983,9 @@ function TopNav({
   hasPremiumAccess: boolean;
   onSignOut: () => void;
 }) {
-  const monthlyHref = hasPremiumAccess ? "/stock-of-the-month" : "/subscription";
-  const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/subscription";
-  const allPicksHref = hasPremiumAccess ? "/all-picks" : "/subscription";
+  const monthlyHref = hasPremiumAccess ? "/stock-of-the-month" : "/subscription?feature=monthly";
+  const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/subscription?feature=quality";
+  const allPicksHref = hasPremiumAccess ? "/all-picks" : "/subscription?feature=all-picks";
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
@@ -929,7 +1008,7 @@ function TopNav({
             href={qualityHref}
             className={navLinkClass(currentView === "quality")}
           >
-            Top 6 High Quality Stocks
+            Top High Quality Stocks
           </Link>
           <Link
             href={allPicksHref}
@@ -1161,7 +1240,7 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
                   Stock of the Month
                 </Link>
                 <Link href="/top-quality-stocks" className="rounded-full bg-white px-4 py-2 text-emerald-700">
-                  Top 6
+                  Top High Quality Stocks
                 </Link>
                 <Link href="/all-picks" className="rounded-full bg-white px-4 py-2 text-emerald-700">
                   All Picks
@@ -1383,7 +1462,7 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
     <section id="quality-picks" className="scroll-mt-24 border-y border-slate-200 bg-white px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top 6 High Quality Stocks</p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top High Quality Stocks</p>
           <h2 className="mt-3 text-2xl font-black text-[#0f172a] md:text-3xl">Six focused companies for the current watchlist</h2>
         </Reveal>
 
@@ -1425,7 +1504,9 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
   );
 }
 
-function PremiumGate({ title }: { title: string }) {
+function PremiumGate({ lockedFeature }: { lockedFeature: LockedFeatureKey }) {
+  const copy = featureUnlockCopy[lockedFeature];
+
   return (
     <section className="bg-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-6xl">
@@ -1436,20 +1517,20 @@ function PremiumGate({ title }: { title: string }) {
                 <LockKeyhole className="h-4 w-4" aria-hidden="true" />
                 Premium locked
               </p>
-              <h1 className="mt-3 text-3xl font-black text-[#0f172a]">{title}</h1>
+              <h1 className="mt-3 text-3xl font-black text-[#0f172a]">{copy.headline}</h1>
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
-                Subscribe once to unlock Stock of the Month, Top 6 High Quality Stocks, and the full All Picks archive.
+                {copy.description} One $1.99 monthly plan unlocks all three premium sections.
               </p>
             </div>
             <Link
-              href="/subscription"
+              href={`/subscription?feature=${lockedFeature}`}
               className="inline-flex h-12 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
             >
               Unlock premium
             </Link>
           </div>
         </Reveal>
-        <PremiumUnlockPanel compact />
+        <PremiumUnlockPanel compact lockedFeature={lockedFeature} />
       </div>
     </section>
   );
@@ -1457,11 +1538,14 @@ function PremiumGate({ title }: { title: string }) {
 
 function PremiumUnlockPanel({
   compact = false,
-  currentUser = null
+  currentUser = null,
+  lockedFeature = "monthly"
 }: {
   compact?: boolean;
   currentUser?: RegisteredUser | null;
+  lockedFeature?: LockedFeatureKey;
 }) {
+  const copy = featureUnlockCopy[lockedFeature];
   const planFeatures = [
     {
       title: "The Featured Pick",
@@ -1469,7 +1553,7 @@ function PremiumUnlockPanel({
     },
     {
       title: "The Elite List",
-      description: "Our Top 6 high-quality rankings."
+      description: "Our Top High Quality Stocks rankings."
     },
     {
       title: "The Vault",
@@ -1485,12 +1569,12 @@ function PremiumUnlockPanel({
     >
       <div id="unlock" className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ffb29d]">Unlock premium research</p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ffb29d]">{copy.panelAccent}</p>
           <h2 className="mt-4 max-w-2xl text-3xl font-black leading-tight text-white md:text-4xl">
-            Unlock the Full StockyMonth Suite for Just $1.99
+            {copy.headline}
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#e5d8f4]">
-            Get instant access to our highest-conviction research and historical data in one simple monthly plan.
+            {copy.description} Subscribe once for $1.99/month and unlock the complete StockyMonth suite.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -1508,9 +1592,10 @@ function PremiumUnlockPanel({
 
         <form action="/api/checkout" method="POST" className="rounded-md bg-white p-6 text-[#0f172a] shadow-2xl">
           {currentUser?.email && <input name="userEmail" type="hidden" value={currentUser.email} />}
+          <input name="lockedFeature" type="hidden" value={lockedFeature} />
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Monthly</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">{copy.eyebrow}</p>
               <div className="mt-3 flex items-end gap-2">
                 <span className="text-5xl font-black">$1.99</span>
                 <span className="pb-2 text-base font-bold text-slate-500">/month</span>
@@ -1558,26 +1643,37 @@ function WinningPicksShowcase() {
   );
 }
 
-function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: RegisteredUser | null; hasPremiumAccess: boolean }) {
+function SubscriptionSection({
+  currentUser,
+  hasPremiumAccess,
+  lockedFeature
+}: {
+  currentUser: RegisteredUser | null;
+  hasPremiumAccess: boolean;
+  lockedFeature: LockedFeatureKey;
+}) {
   const fullName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}`.trim() : "";
+  const copy = featureUnlockCopy[lockedFeature];
 
   return (
     <section className="bg-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-5xl">
         <Reveal className="mb-8">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Subscription</p>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">
+            {hasPremiumAccess ? "Subscription" : copy.eyebrow}
+          </p>
           <h1 className="mt-3 text-3xl font-black text-[#0f172a] md:text-4xl">
-            {hasPremiumAccess ? "Manage your StockyMonth plan" : "Unlock Premium Features"}
+            {hasPremiumAccess ? "Manage your StockyMonth plan" : copy.headline}
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
             {hasPremiumAccess
               ? "View your current monthly access and use Stripe billing tools to update or cancel your subscription."
-              : "Subscribe to access all premium stock research, historical picks, and advanced analytics."
+              : `${copy.description} Your $1.99/month plan also unlocks Stock of the Month, Top High Quality Stocks, and All Picks.`
             }
           </p>
         </Reveal>
 
-        {!hasPremiumAccess && <PremiumUnlockPanel compact currentUser={currentUser} />}
+        {!hasPremiumAccess && <PremiumUnlockPanel compact currentUser={currentUser} lockedFeature={lockedFeature} />}
 
         {hasPremiumAccess && currentUser && <Reveal className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
           <article className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
@@ -1600,6 +1696,7 @@ function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: R
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <form action="/api/customer-portal" method="POST">
+                <input name="userEmail" type="hidden" value={currentUser.email} />
                 <button
                   type="submit"
                   className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
@@ -1607,7 +1704,8 @@ function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: R
                   Manage billing
                 </button>
               </form>
-              <form action="/api/customer-portal" method="POST">
+              <form action="/api/subscription/cancel" method="POST">
+                <input name="userEmail" type="hidden" value={currentUser.email} />
                 <button
                   type="submit"
                   className="inline-flex h-12 w-full items-center justify-center rounded-full border border-rose-200 bg-white px-6 text-sm font-black text-rose-600 transition hover:bg-rose-50"
@@ -1621,7 +1719,7 @@ function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: R
           <aside className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <h3 className="text-xl font-black text-[#0f172a]">Plan includes</h3>
             <div className="mt-5 grid gap-4">
-              {["Stock of the Month", "Top 6 High Quality Stocks", "All Picks archive"].map((item) => (
+              {["Stock of the Month", "Top High Quality Stocks", "All Picks archive"].map((item) => (
                 <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-50 text-[#ff4f00]">
                     <BadgeCheck className="h-4 w-4" aria-hidden="true" />
@@ -1631,7 +1729,7 @@ function SubscriptionSection({ currentUser, hasPremiumAccess }: { currentUser: R
               ))}
             </div>
             <p className="mt-6 text-sm leading-relaxed text-slate-500">
-              The cancel button opens Stripe Billing Portal, where cancellation is handled securely by Stripe.
+              The cancel button cancels the Stripe subscription and updates your StockyMonth access status in Redis.
             </p>
           </aside>
         </Reveal>}
@@ -1659,7 +1757,7 @@ function PricingSection({
             Unlock {monthlyPick.ticker}, top quality ideas, detailed analysis, and pick history in one simple monthly plan.
           </p>
           <div className="mt-8 grid gap-4">
-            {["Stock of the month", "Top 6 quality stocks", "Alpha Vantage chart analysis"].map((item) => (
+            {["Stock of the month", "Top High Quality Stocks", "Alpha Vantage chart analysis"].map((item) => (
               <div key={item} className="flex items-center gap-3 text-lg font-black">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ff6b4a]">
                   <BadgeCheck className="h-5 w-5" aria-hidden="true" />

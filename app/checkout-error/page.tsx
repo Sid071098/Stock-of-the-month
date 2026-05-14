@@ -6,6 +6,8 @@ const messages: Record<string, string> = {
   invalid_secret: "STRIPE_SECRET_KEY should be a Stripe secret key starting with sk_.",
   invalid_price_id: "STRIPE_PRICE_ID must be a recurring Price ID starting with price_, not a Product ID starting with prod_.",
   missing_checkout_url: "Stripe created a session but did not return a Checkout URL.",
+  missing_email: "The request did not include the signed-in user email.",
+  stripe_cancel_failed: "Stripe could not cancel the subscription. Check the Vercel function logs for the Stripe error summary.",
   stripe_checkout_failed: "Stripe rejected the Checkout request. Check the Vercel function logs for the Stripe error summary."
 };
 

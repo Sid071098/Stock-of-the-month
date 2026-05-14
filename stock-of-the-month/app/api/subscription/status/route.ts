@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   if (email && isPersistentStoreConfigured()) {
     const subscription = await getPersistentSubscription(email).catch(() => null);
-    const active = Boolean(subscription?.active) || cookieActive;
+    const active = subscription ? Boolean(subscription.active) : cookieActive;
 
     return NextResponse.json({
       active,

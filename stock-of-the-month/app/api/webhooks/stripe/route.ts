@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import {
+  getEmailForPersistentCustomer,
+  getEmailForPersistentSubscription,
+  isPersistentStoreConfigured,
+  normalizePersistentEmail,
+  savePersistentSubscription
+} from "../../../lib/persistentStore";
 
 export async function POST(request: Request) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -29,12 +36,38 @@ export async function POST(request: Request) {
       event.type === "customer.subscription.deleted"
     ) {
       const subscription = event.data.object as Stripe.Subscription;
+      const customerId = getStripeId(subscription.customer);
+      const metadataEmail = normalizePersistentEmail(
+        subscription.metadata?.appUserEmail && subscription.metadata.appUserEmail !== "none"
+          ? subscription.metadata.appUserEmail
+          : ""
+      );
+      const storedSubscriptionEmail = isPersistentStoreConfigured()
+        ? await getEmailForPersistentSubscription(subscription.id).catch(() => null)
+        : null;
+      const storedCustomerEmail =
+        customerId && isPersistentStoreConfigured()
+          ? await getEmailForPersistentCustomer(customerId).catch(() => null)
+          : null;
+      const storedEmail = normalizePersistentEmail(storedSubscriptionEmail ?? storedCustomerEmail ?? "");
+      const customerEmail = customerId ? await getStripeCustomerEmail(stripe, customerId) : "";
+      const email = metadataEmail || storedEmail || customerEmail;
+
       console.log("Stripe subscription status changed", {
         customer: subscription.customer,
+        email,
         status: subscription.status,
         subscription: subscription.id
       });
-      // Production next step: persist customer/subscription/status to a database keyed to your app user.
+
+      if (email && isPersistentStoreConfigured()) {
+        await savePersistentSubscription({
+          customerId,
+          email,
+          status: subscription.status,
+          subscriptionId: subscription.id
+        });
+      }
     }
 
     return NextResponse.json({ received: true });
@@ -42,4 +75,22 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Invalid webhook";
     return NextResponse.json({ error: message }, { status: 400 });
   }
+}
+
+function getStripeId(value: string | { id?: string } | null) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return value?.id;
+}
+
+async function getStripeCustomerEmail(stripe: Stripe, customerId: string) {
+  const customer = await stripe.customers.retrieve(customerId).catch(() => null);
+
+  if (!customer || customer.deleted) {
+    return "";
+  }
+
+  return normalizePersistentEmail(customer.email ?? "");
 }

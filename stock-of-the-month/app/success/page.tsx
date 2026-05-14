@@ -63,7 +63,7 @@ export default function SuccessPage({
 
         setStatus(
           payload.status
-            ? `Subscription ${payload.status}. Stock of the Month, Top 6, and All Picks are unlocked.`
+            ? `Subscription ${payload.status}. Stock of the Month, Top High Quality Stocks, and All Picks are unlocked.`
             : "Subscription verified. Premium sections are unlocked."
         );
       })
@@ -91,7 +91,7 @@ export default function SuccessPage({
           <div className="rounded-md border border-[#efe7f7] bg-[#fffaf7] p-4">
             <Gauge className="mb-3 h-5 w-5 text-[#ff6b4a]" aria-hidden="true" />
             <p className="text-sm font-black">All sections available</p>
-            <p className="mt-1 text-sm text-[#6c5d7f]">Top 6 and All Picks archive</p>
+            <p className="mt-1 text-sm text-[#6c5d7f]">Top High Quality Stocks and All Picks archive</p>
           </div>
         </div>
         <Link

@@ -11,7 +11,14 @@ export type PersistentSubscription = {
   customerId?: string;
   email: string;
   status: string;
+  subscriptionId?: string;
   updatedAt: string;
+};
+
+export type PasswordResetToken = {
+  createdAt: string;
+  email: string;
+  expiresAt: string;
 };
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
@@ -51,24 +58,92 @@ export async function getPersistentSubscription(email: string) {
 export async function savePersistentSubscription({
   customerId,
   email,
-  status
+  status,
+  subscriptionId
 }: {
   customerId?: string;
   email: string;
   status: string;
+  subscriptionId?: string;
 }) {
   const normalizedEmail = normalizePersistentEmail(email);
+  const existingSubscription = await getPersistentSubscription(normalizedEmail).catch(() => null);
+  const nextCustomerId = customerId ?? existingSubscription?.customerId;
+  const nextSubscriptionId = subscriptionId ?? existingSubscription?.subscriptionId;
   const subscription: PersistentSubscription = {
     active: status === "active" || status === "trialing",
-    customerId,
+    customerId: nextCustomerId,
     email: normalizedEmail,
     status,
+    subscriptionId: nextSubscriptionId,
     updatedAt: new Date().toISOString()
   };
 
   await redisCommand<"OK">(["SET", subscriptionKey(normalizedEmail), JSON.stringify(subscription)]);
 
+  if (nextCustomerId) {
+    await redisCommand<"OK">(["SET", customerKey(nextCustomerId), normalizedEmail]);
+  }
+
+  if (nextSubscriptionId) {
+    await redisCommand<"OK">(["SET", stripeSubscriptionKey(nextSubscriptionId), normalizedEmail]);
+  }
+
   return subscription;
+}
+
+export async function getEmailForPersistentCustomer(customerId: string) {
+  return redisCommand<string | null>(["GET", customerKey(customerId)]);
+}
+
+export async function getEmailForPersistentSubscription(subscriptionId: string) {
+  return redisCommand<string | null>(["GET", stripeSubscriptionKey(subscriptionId)]);
+}
+
+export async function updatePersistentUserPassword(email: string, passwordHash: string) {
+  const normalizedEmail = normalizePersistentEmail(email);
+  const user = await getPersistentUser(normalizedEmail);
+
+  if (!user) {
+    return null;
+  }
+
+  return savePersistentUser({
+    ...user,
+    passwordHash
+  });
+}
+
+export async function savePasswordResetToken({
+  email,
+  token,
+  ttlSeconds
+}: {
+  email: string;
+  token: string;
+  ttlSeconds: number;
+}) {
+  const normalizedEmail = normalizePersistentEmail(email);
+  const createdAt = new Date();
+  const resetToken: PasswordResetToken = {
+    createdAt: createdAt.toISOString(),
+    email: normalizedEmail,
+    expiresAt: new Date(createdAt.getTime() + ttlSeconds * 1000).toISOString()
+  };
+
+  await redisCommand<"OK">(["SET", passwordResetKey(token), JSON.stringify(resetToken), "EX", ttlSeconds]);
+
+  return resetToken;
+}
+
+export async function getPasswordResetToken(token: string) {
+  const rawResetToken = await redisCommand<string | null>(["GET", passwordResetKey(token)]);
+
+  return parseJson<PasswordResetToken>(rawResetToken);
+}
+
+export async function deletePasswordResetToken(token: string) {
+  await redisCommand<number>(["DEL", passwordResetKey(token)]);
 }
 
 async function redisCommand<T>(command: Array<number | string>) {
@@ -114,6 +189,18 @@ function subscriptionKey(email: string) {
   return `stockymonth:subscription:${email}`;
 }
 
+function customerKey(customerId: string) {
+  return `stockymonth:stripe-customer:${customerId}`;
+}
+
+function stripeSubscriptionKey(subscriptionId: string) {
+  return `stockymonth:stripe-subscription:${subscriptionId}`;
+}
+
 function userKey(email: string) {
   return `stockymonth:user:${email}`;
+}
+
+function passwordResetKey(token: string) {
+  return `stockymonth:password-reset:${token}`;
 }

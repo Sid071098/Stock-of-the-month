@@ -59,7 +59,8 @@ export async function POST(request: Request) {
     await savePersistentSubscription({
       customerId,
       email,
-      status
+      status,
+      subscriptionId: subscription?.id
     }).catch(() => undefined);
   }
 

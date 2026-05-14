@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     customerId?: string;
     email?: string;
     status?: string;
+    subscriptionId?: string;
   };
   const email = normalizePersistentEmail(body.email ?? "");
 
@@ -24,7 +25,8 @@ export async function POST(request: Request) {
   const subscription = await savePersistentSubscription({
     customerId: body.customerId,
     email,
-    status: body.status ?? "active"
+    status: body.status ?? "active",
+    subscriptionId: body.subscriptionId
   }).catch(() => null);
 
   if (!subscription) {

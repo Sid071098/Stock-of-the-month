@@ -40,7 +40,7 @@ export default function AnalysisChart({
             fill={`url(#${gradientId})`}
             stroke={strokeColor}
             strokeWidth={3}
-            type="monotone"
+            type="linear"
           />
         </AreaChart>
       </ResponsiveContainer>

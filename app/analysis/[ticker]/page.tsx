@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type React from "react";
 import { ArrowLeft, ShieldAlert, TrendingUp, WalletCards } from "lucide-react";
+import AnalysisDeepDive from "../../components/AnalysisDeepDive";
 import AnalysisChart from "../../components/AnalysisChart";
 import { getAIAnalysis, getStockSnapshot } from "../../lib/marketData";
 import { defaultMonthlyPick } from "../../lib/picks";
@@ -62,7 +63,7 @@ export default async function AnalysisPage({
           </div>
         </section>
 
-        {snapshot.ticker === defaultMonthlyPick.ticker && <EQTDeepDive />}
+        {snapshot.ticker === defaultMonthlyPick.ticker && <AnalysisDeepDive competitors={defaultMonthlyPick.competitors} />}
       </div>
     </main>
   );
@@ -83,57 +84,6 @@ function AnalysisCard({
         {icon}
       </div>
       <h3 className="text-xl font-black">{title}</h3>
-      <p className="mt-3 text-base leading-relaxed text-slate-600">{body}</p>
-    </article>
-  );
-}
-
-function EQTDeepDive() {
-  return (
-    <section className="mt-6 rounded-md border border-slate-200 bg-white p-6 shadow-xl">
-      <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Analysis Deep-Dive</p>
-      <h2 className="mt-3 text-2xl font-black text-slate-950">Why this is the best pick of the month</h2>
-
-      <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        <DeepDiveCard
-          title="The Thesis"
-          body="EQT sits at the center of two demand tailwinds: LNG exports and AI data center electricity growth. LNG exports globalize U.S. gas demand, while AI infrastructure can support long-duration gas-fired generation needs."
-        />
-        <DeepDiveCard
-          title="Vertical Integration"
-          body="The Equitrans acquisition gives EQT more control over gathering, pipes, and transportation. Owning more of the route from wellhead to customer can reduce bottlenecks and lower delivered costs."
-        />
-        <DeepDiveCard
-          title="Management Alignment"
-          body="CEO Toby Rice owns substantial stock, receives a $1 salary, and is compensated primarily through performance-based incentives. That creates a cleaner alignment between management execution and shareholder outcomes."
-        />
-        <DeepDiveCard
-          title="Risk Frame"
-          body="Natural gas prices can remain volatile, and pipeline or commodity cycles can pressure results. The thesis depends on EQT maintaining cost leadership while LNG and power-demand catalysts develop."
-        />
-      </div>
-
-      <div className="mt-6 rounded-md border border-slate-200 bg-[#f8fafc] p-5">
-        <h3 className="text-lg font-black text-slate-950">Competitive Landscape</h3>
-        <div className="mt-4 grid gap-3 lg:grid-cols-3">
-          {defaultMonthlyPick.competitors.map((competitor) => (
-            <div key={competitor.ticker} className="rounded-md border border-slate-200 bg-white p-4">
-              <p className="text-sm font-black text-[#ff4f00]">
-                {competitor.name} ({competitor.ticker})
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{competitor.edge}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function DeepDiveCard({ body, title }: { body: string; title: string }) {
-  return (
-    <article className="rounded-md border border-slate-200 bg-[#f8fafc] p-5">
-      <h3 className="text-lg font-black text-slate-950">{title}</h3>
       <p className="mt-3 text-base leading-relaxed text-slate-600">{body}</p>
     </article>
   );
