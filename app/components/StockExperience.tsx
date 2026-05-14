@@ -536,22 +536,17 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f8fafc] text-[#0f172a]">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-70 [background-image:radial-gradient(#d9d2e8_1px,transparent_1px)] [background-size:26px_26px]"
-      />
-      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-24 h-64 w-64 -translate-x-1/2 rounded-full bg-orange-100/45 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-20 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#210947]/10 blur-3xl" />
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#08031c] via-[#1a0a4a] to-[#2d0e62] text-white">
+      <LoginBackdrop />
 
       {notice && (
         <div
-          className={`fixed right-5 top-5 z-[70] max-w-sm rounded-md border p-4 text-sm font-bold shadow-2xl ${
+          className={`fixed right-5 top-5 z-[70] max-w-sm rounded-xl border p-4 text-sm font-bold shadow-2xl backdrop-blur-md ${
             notice.type === "error"
-              ? "border-rose-200 bg-rose-50 text-rose-700"
+              ? "border-rose-300/60 bg-rose-50/90 text-rose-700"
               : notice.type === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-orange-200 bg-orange-50 text-[#ff4f00]"
+                ? "border-emerald-300/60 bg-emerald-50/90 text-emerald-700"
+                : "border-orange-300/60 bg-orange-50/90 text-[#ff4f00]"
           }`}
           role="status"
         >
@@ -559,16 +554,13 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       )}
 
-      <header className="relative z-10 px-6 py-7">
+      <header className="relative z-10 px-6 py-6">
         <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center">
           <div />
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#ff4f00] text-white shadow-sm">
-              <BarChart3 className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <span className="text-sm font-black tracking-tight text-[#210947]">StockyMonth</span>
-            <span className="hidden text-[10px] font-black uppercase tracking-[0.28em] text-[#7f7194] sm:inline">
-              Research Harness
+          <div className="glass inline-flex items-center gap-2 rounded-full px-3 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ff4f00] animate-pulse-glow" />
+            <span className="text-[10px] font-black uppercase tracking-[0.28em] text-white/90">
+              Live Market Research
             </span>
           </div>
           <div className="flex justify-end">
@@ -576,7 +568,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               <button
                 type="button"
                 onClick={() => switchAuthMode(mode === "signup" ? "login" : "signup")}
-                className="text-xs font-black text-[#210947] transition hover:text-[#ff4f00]"
+                className="rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-black text-white/90 backdrop-blur-md transition hover:border-white/30 hover:bg-white/10"
               >
                 {mode === "signup" ? "Log in" : "Create account"}
               </button>
@@ -585,30 +577,57 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       </header>
 
-      <section className="relative z-10 flex min-h-[calc(100vh-96px)] items-center justify-center px-6 pb-16 pt-8">
-        <div className="w-full max-w-[430px] text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#e9dffc] bg-white/80 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.24em] text-[#210947] shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#ff4f00]" />
-            {mode === "login" ? "Sign in" : mode === "signup" ? "Create account" : "Account recovery"}
-          </span>
+      <section className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-center px-6 pb-12 pt-4">
+        {/* MEGA hero title */}
+        <div className="text-center">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#ef0068] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
+            <BarChart3 className="h-9 w-9 text-white" aria-hidden="true" />
+          </div>
 
-          <h1 className="mt-6 text-4xl font-black tracking-tight text-[#210947] md:text-5xl">
-            {mode === "login" ? "Welcome back." : mode === "signup" ? "Create your account." : "Reset your password."}
+          <h1
+            className="animate-title-glow mt-6 bg-gradient-to-r from-white via-[#ffb29d] to-[#ff4f00] bg-clip-text text-[64px] font-black leading-none tracking-tight text-transparent md:text-[112px] lg:text-[140px]"
+            style={{ letterSpacing: "-0.04em" }}
+          >
+            StockyMonth
           </h1>
-          <p className="mx-auto mt-4 max-w-sm text-sm font-semibold leading-6 text-[#6d5a85]">
-            {mode === "login"
-              ? "Pick up where you left off. Your monthly stock research is one click away."
-              : mode === "signup"
-                ? "Start with Google or reveal the email form when you are ready."
-                : "Enter your email and we will send reset instructions for your StockyMonth account."}
+
+          <p className="mx-auto mt-5 max-w-xl text-sm font-bold text-white/70 md:text-base">
+            High-conviction monthly picks. Live market data. A vault of every thesis we&apos;ve ever published.
           </p>
+        </div>
+
+        {/* Glassmorphism login card */}
+        <div className="mt-10 w-full max-w-[460px]">
+          <div className="glass relative overflow-hidden rounded-2xl p-6 shadow-2xl md:p-8">
+            <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#ff4f00]/35 blur-3xl" />
+            <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-[#7c3aed]/35 blur-3xl" />
+
+            <div className="relative">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/90 backdrop-blur-md">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" />
+                {mode === "login" ? "Sign in" : mode === "signup" ? "Create account" : "Account recovery"}
+              </span>
+
+              <h2 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">
+                {mode === "login" ? "Welcome back." : mode === "signup" ? "Create your account." : "Reset your password."}
+              </h2>
+              <p className="mt-2 text-sm font-semibold leading-6 text-white/70">
+                {mode === "login"
+                  ? "Pick up where you left off. Your monthly stock research is one click away."
+                  : mode === "signup"
+                    ? "Start with Google or reveal the email form when you are ready."
+                    : "Enter your email and we will send reset instructions for your StockyMonth account."}
+              </p>
+            </div>
+
+          <div className="relative">
 
           {mode !== "forgot" && (
-            <div className="mt-8 grid gap-3">
+            <div className="mt-7 grid gap-3">
               <button
                 type="button"
                 onClick={() => setGoogleChooserOpen(true)}
-                className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-md border border-[#d9c9f0] bg-white px-5 text-sm font-black text-[#210947] shadow-sm transition hover:border-[#210947] hover:bg-[#fbf7ff]"
+                className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/95 px-5 text-sm font-black text-[#210947] shadow-lg transition hover:bg-white"
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#4285f4] ring-1 ring-slate-200">
                   G
@@ -618,10 +637,10 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               <button
                 type="button"
                 onClick={() => setEmailFormOpen((open) => !open)}
-                className={`inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border px-5 text-sm font-black transition ${
+                className={`inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border px-5 text-sm font-black transition ${
                   emailFormOpen
-                    ? "border-orange-200 bg-orange-50 text-[#ff4f00]"
-                    : "border-[#e9dffc] bg-white/75 text-[#210947] hover:border-orange-200 hover:bg-orange-50"
+                    ? "border-orange-300/60 bg-orange-50/90 text-[#ff4f00]"
+                    : "border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20"
                 }`}
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
@@ -631,7 +650,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
           )}
 
           {mode === "login" && emailFormOpen && (
-            <form className="mt-6 rounded-md border border-[#ece4f6] bg-white/85 p-4 text-left shadow-sm" onSubmit={handleLogin}>
+            <form className="mt-6 rounded-xl border border-white/30 bg-white/95 p-4 text-left shadow-2xl backdrop-blur-md" onSubmit={handleLogin}>
               <p className="text-sm font-bold leading-relaxed text-[#6d5a85]">Enter your email and password.</p>
               <div className="mt-4 grid gap-4">
                 <AuthInput
@@ -714,7 +733,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
           )}
 
           {mode === "forgot" && (
-            <form className="mt-8 rounded-md border border-[#ece4f6] bg-white/85 p-4 text-left shadow-sm" onSubmit={handleForgotPassword}>
+            <form className="mt-6 rounded-xl border border-white/30 bg-white/95 p-4 text-left shadow-2xl backdrop-blur-md" onSubmit={handleForgotPassword}>
               <AuthInput
                 autoComplete="email"
                 icon={<Mail className="h-5 w-5" aria-hidden="true" />}
@@ -727,20 +746,21 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#210947] px-6 text-sm font-black uppercase tracking-wide text-white transition hover:bg-[#310a68] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Sending..." : "Send reset instructions"}
               </button>
             </form>
           )}
 
-          <AuthInfoCard mode={mode} />
+          </div>
+          </div>
 
-          <div className="mt-7 text-sm font-semibold text-[#7f7194]">
+          <div className="mt-6 text-center text-sm font-semibold text-white/60">
             {mode === "login" && (
               <>
                 New here?{" "}
-                <button type="button" onClick={() => switchAuthMode("signup")} className="font-black text-[#210947] hover:text-[#ff4f00]">
+                <button type="button" onClick={() => switchAuthMode("signup")} className="font-black text-white hover:text-[#ffb29d]">
                   Create an account
                 </button>
               </>
@@ -748,13 +768,13 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             {mode === "signup" && (
               <>
                 Already have an account?{" "}
-                <button type="button" onClick={() => switchAuthMode("login")} className="font-black text-[#210947] hover:text-[#ff4f00]">
+                <button type="button" onClick={() => switchAuthMode("login")} className="font-black text-white hover:text-[#ffb29d]">
                   Log in
                 </button>
               </>
             )}
             {mode === "forgot" && (
-              <button type="button" onClick={() => switchAuthMode("login")} className="font-black text-[#210947] hover:text-[#ff4f00]">
+              <button type="button" onClick={() => switchAuthMode("login")} className="font-black text-white hover:text-[#ffb29d]">
                 Back to login
               </button>
             )}
@@ -770,6 +790,121 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         />
       )}
     </main>
+  );
+}
+
+function LoginBackdrop() {
+  const tickers = [
+    { sym: "EQT",  pct: "+12.4%", left: "6%",  top: "18%",  anim: "animate-float-slow",   color: "text-emerald-300" },
+    { sym: "NVDA", pct: "+8.1%",  left: "85%", top: "14%",  anim: "animate-float-medium", color: "text-emerald-300" },
+    { sym: "CRWD", pct: "+18.6%", left: "10%", top: "72%",  anim: "animate-float-fast",   color: "text-emerald-300" },
+    { sym: "FTAI", pct: "+187%",  left: "82%", top: "70%",  anim: "animate-float-slow",   color: "text-amber-300"   },
+    { sym: "NET",  pct: "+160%",  left: "4%",  top: "44%",  anim: "animate-float-medium", color: "text-emerald-300" },
+    { sym: "HWM",  pct: "+120%",  left: "88%", top: "44%",  anim: "animate-float-fast",   color: "text-amber-300"   }
+  ];
+
+  return (
+    <>
+      {/* Animated radial orbs */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="animate-drift absolute -top-32 left-1/4 h-[420px] w-[420px] rounded-full bg-[#ff4f00]/20 blur-3xl" />
+        <div className="animate-drift absolute top-1/3 right-1/4 h-[480px] w-[480px] rounded-full bg-[#7c3aed]/25 blur-3xl" style={{ animationDelay: "2s" }} />
+        <div className="animate-drift absolute bottom-0 left-1/3 h-[360px] w-[360px] rounded-full bg-[#ef0068]/20 blur-3xl" style={{ animationDelay: "4s" }} />
+      </div>
+
+      {/* Dot grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.18] [background-image:radial-gradient(rgba(255,255,255,0.4)_1px,transparent_1px)] [background-size:32px_32px]"
+      />
+
+      {/* Animated SVG stock chart */}
+      <svg
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[55vh] w-full opacity-25"
+        viewBox="0 0 1440 400"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="chartLine" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stopColor="#ff4f00" stopOpacity="0" />
+            <stop offset="50%"  stopColor="#ff8a3d" stopOpacity="1" />
+            <stop offset="100%" stopColor="#ef0068" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%"   stopColor="#ff4f00" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#ff4f00" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M0,300 C120,260 200,180 320,220 C440,260 540,140 680,160 C820,180 920,80 1080,120 C1200,150 1320,60 1440,90 L1440,400 L0,400 Z"
+          fill="url(#chartFill)"
+        />
+        <path
+          d="M0,300 C120,260 200,180 320,220 C440,260 540,140 680,160 C820,180 920,80 1080,120 C1200,150 1320,60 1440,90"
+          fill="none"
+          stroke="url(#chartLine)"
+          strokeWidth="2.5"
+          className="animate-draw-line"
+        />
+      </svg>
+
+      {/* Floating candlestick mini-chart */}
+      <div
+        aria-hidden="true"
+        className="animate-float-slow pointer-events-none absolute right-[6%] top-[26%] hidden lg:block"
+      >
+        <div className="glass flex h-[120px] items-end gap-1.5 rounded-xl p-3">
+          {[
+            { h: 60, c: "bg-emerald-400" },
+            { h: 75, c: "bg-emerald-400" },
+            { h: 50, c: "bg-rose-400"    },
+            { h: 88, c: "bg-emerald-400" },
+            { h: 68, c: "bg-emerald-400" },
+            { h: 95, c: "bg-emerald-400" }
+          ].map((bar, i) => (
+            <span key={i} className={`w-2.5 rounded-sm ${bar.c}`} style={{ height: `${bar.h}%` }} />
+          ))}
+        </div>
+      </div>
+
+      {/* Floating ticker pills */}
+      {tickers.map((t) => (
+        <div
+          key={t.sym}
+          aria-hidden="true"
+          className={`pointer-events-none absolute hidden md:block ${t.anim}`}
+          style={{ left: t.left, top: t.top }}
+        >
+          <div className="glass inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black shadow-lg">
+            <span className="text-white">{t.sym}</span>
+            <span className={t.color}>{t.pct}</span>
+          </div>
+        </div>
+      ))}
+
+      {/* Scrolling ticker tape at very bottom */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden border-t border-white/10 bg-black/30 py-2 backdrop-blur-md">
+        <div className="animate-ticker-tape inline-flex whitespace-nowrap">
+          {Array.from({ length: 2 }).map((_, copy) => (
+            <span key={copy} className="inline-flex items-center gap-6 px-6 text-[11px] font-black uppercase tracking-[0.18em] text-white/70">
+              <span>AAPL <span className="text-emerald-400">+2.31%</span></span>
+              <span>TSLA <span className="text-emerald-400">+5.12%</span></span>
+              <span>NVDA <span className="text-emerald-400">+1.84%</span></span>
+              <span>EQT  <span className="text-emerald-400">+12.40%</span></span>
+              <span>FTAI <span className="text-emerald-400">+187%</span></span>
+              <span>CRWD <span className="text-emerald-400">+18.60%</span></span>
+              <span>HWM  <span className="text-emerald-400">+120%</span></span>
+              <span>NET  <span className="text-emerald-400">+160%</span></span>
+              <span>WAB  <span className="text-emerald-400">+52%</span></span>
+              <span>MSFT <span className="text-emerald-400">+1.95%</span></span>
+              <span>AMZN <span className="text-emerald-400">+2.78%</span></span>
+              <span>GOOG <span className="text-emerald-400">+1.22%</span></span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -984,7 +1119,7 @@ function TopNav({
   currentView: StockExperienceView;
   currentUser: RegisteredUser;
   hasPremiumAccess: boolean;
-  onSignOut: () => void;
+  onSignOut?: () => void;
 }) {
   const monthlyHref = hasPremiumAccess ? "/stock-of-the-month" : "/subscription?feature=monthly";
   const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/subscription?feature=quality";
@@ -1017,7 +1152,7 @@ function TopNav({
           </Link>
         </div>
 
-        <ProfileMenu currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} onSignOut={onSignOut} />
+        <ProfileMenu currentUser={currentUser} hasPremiumAccess={hasPremiumAccess} />
       </div>
     </nav>
   );
@@ -1033,237 +1168,29 @@ function navLinkClass(isActive: boolean) {
 
 function ProfileMenu({
   currentUser,
-  hasPremiumAccess,
-  onSignOut
+  hasPremiumAccess
 }: {
   currentUser: RegisteredUser;
   hasPremiumAccess: boolean;
-  onSignOut: () => void;
+  onSignOut?: () => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activePanel, setActivePanel] = useState<null | "account" | "subscription">(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const fullName = `${currentUser.firstName} ${currentUser.lastName}`.trim();
-  const memberSince = currentUser.createdAt
-    ? new Date(currentUser.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
-    : "—";
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setActivePanel(null);
-      }
-    }
-    if (isOpen) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
-
-  function togglePanel(panel: "account" | "subscription") {
-    setActivePanel((current) => (current === panel ? null : panel));
-  }
-
   return (
-    <div className="relative" ref={menuRef}>
-      <button
-        type="button"
-        aria-label="Profile"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((current) => !current)}
-        className={`inline-flex h-10 items-center gap-2 rounded-full border px-3 text-sm font-black shadow-sm transition-all duration-200 ${
-          isOpen
-            ? "border-[#210947] bg-[#210947] text-white"
-            : "border-slate-200 bg-white text-slate-800 hover:border-[#210947] hover:bg-[#f5f0ff]"
-        }`}
-      >
-        <div
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
-            isOpen ? "bg-white/20 text-white" : "bg-[#210947] text-white"
-          }`}
-        >
-          {getUserInitials(currentUser)}
-        </div>
-        <span className="hidden sm:inline">{currentUser.firstName}</span>
-        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-      </button>
-
-      {isOpen && (
-        <div className="animate-fade-slide-down absolute right-0 mt-3 w-80 overflow-hidden rounded-xl border border-[#efe7f7] bg-white text-[#0f172a] shadow-2xl">
-          {/* Gradient header */}
-          <div className="flex items-start gap-3 bg-gradient-to-br from-[#210947] to-[#3d1278] p-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-black text-white ring-2 ring-white/30">
-              {getUserInitials(currentUser)}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-black text-white">{fullName}</p>
-              <p className="truncate text-xs font-semibold text-purple-200">{currentUser.email}</p>
-              {hasPremiumAccess && (
-                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-black text-emerald-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  Premium Active
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Menu items */}
-          <div className="p-2">
-            {/* Account Details */}
-            <button
-              type="button"
-              onClick={() => togglePanel("account")}
-              className={`inline-flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors ${
-                activePanel === "account"
-                  ? "bg-violet-50 text-[#210947]"
-                  : "text-slate-700 hover:bg-slate-50 hover:text-[#210947]"
-              }`}
-            >
-              <span className="flex items-center gap-2.5">
-                <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-                    activePanel === "account" ? "bg-violet-100 text-[#210947]" : "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  <User className="h-3.5 w-3.5" aria-hidden="true" />
-                </span>
-                Account details
-              </span>
-              <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform duration-200 ${activePanel === "account" ? "rotate-180" : ""}`}
-                aria-hidden="true"
-              />
-            </button>
-
-            {activePanel === "account" && (
-              <div className="mx-1 mb-1 mt-1 rounded-lg border border-violet-100 bg-violet-50/60 p-3 text-xs">
-                <div className="grid gap-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-500">Full name</span>
-                    <span className="font-black text-[#210947]">{fullName || "—"}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-500">Email</span>
-                    <span className="max-w-[160px] truncate text-right font-black text-[#210947]">{currentUser.email}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-1 font-bold text-slate-500">
-                      <Calendar className="h-3 w-3" aria-hidden="true" />
-                      Member since
-                    </span>
-                    <span className="font-black text-[#210947]">{memberSince}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-500">Account type</span>
-                    <span className={`font-black ${hasPremiumAccess ? "text-emerald-600" : "text-slate-600"}`}>
-                      {hasPremiumAccess ? "Premium" : "Free"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Subscription & Billing */}
-            <button
-              type="button"
-              onClick={() => togglePanel("subscription")}
-              className={`inline-flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors ${
-                activePanel === "subscription"
-                  ? "bg-orange-50 text-[#ff4f00]"
-                  : "text-slate-700 hover:bg-slate-50 hover:text-[#ff4f00]"
-              }`}
-            >
-              <span className="flex items-center gap-2.5">
-                <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-                    activePanel === "subscription" ? "bg-orange-100 text-[#ff4f00]" : "bg-slate-100 text-slate-500"
-                  }`}
-                >
-                  <CreditCard className="h-3.5 w-3.5" aria-hidden="true" />
-                </span>
-                Subscription &amp; billing
-              </span>
-              <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform duration-200 ${activePanel === "subscription" ? "rotate-180" : ""}`}
-                aria-hidden="true"
-              />
-            </button>
-
-            {activePanel === "subscription" && (
-              <div className="mx-1 mb-1 mt-1 rounded-lg border border-orange-100 bg-orange-50/60 p-3 text-xs">
-                <div className="grid gap-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-500">Plan</span>
-                    <span className="font-black text-[#0f172a]">StockyMonth Monthly</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-500">Price</span>
-                    <span className="font-black text-[#0f172a]">$1.99 / month</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-500">Status</span>
-                    {hasPremiumAccess ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-black text-emerald-700">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 font-black text-slate-600">
-                        Inactive
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {hasPremiumAccess ? (
-                  <div className="mt-3 grid gap-2">
-                    <form action="/api/customer-portal" method="POST">
-                      <input name="userEmail" type="hidden" value={currentUser.email} />
-                      <button
-                        type="submit"
-                        className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-[#ff4f00] px-4 text-xs font-black text-white transition hover:bg-orange-600"
-                      >
-                        Manage billing
-                      </button>
-                    </form>
-                    <form action="/api/subscription/cancel" method="POST">
-                      <input name="userEmail" type="hidden" value={currentUser.email} />
-                      <button
-                        type="submit"
-                        className="inline-flex h-8 w-full items-center justify-center rounded-lg border border-rose-200 bg-white px-4 text-xs font-black text-rose-600 transition hover:bg-rose-50"
-                      >
-                        Cancel subscription
-                      </button>
-                    </form>
-                  </div>
-                ) : (
-                  <div className="mt-3">
-                    <a
-                      href="/subscription"
-                      className="inline-flex h-8 w-full items-center justify-center rounded-lg bg-[#210947] px-4 text-xs font-black text-white transition hover:bg-[#310a68]"
-                    >
-                      Upgrade to Premium
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="my-1.5 border-t border-slate-100" />
-
-            {/* Sign out */}
-            <button
-              type="button"
-              onClick={() => { onSignOut(); setIsOpen(false); }}
-              className="inline-flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-bold text-slate-600 transition-colors hover:bg-rose-50 hover:text-rose-600"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 transition-colors group-hover:bg-rose-100">
-                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-              </span>
-              Sign out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <Link
+      href="/profile"
+      aria-label="Open profile"
+      className="group inline-flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 pr-3 text-sm font-black text-slate-800 shadow-sm transition-all duration-200 hover:border-[#210947] hover:bg-[#f5f0ff] hover:shadow"
+    >
+      <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#210947] to-[#3d1278] text-[10px] font-black text-white shadow-sm">
+        {getUserInitials(currentUser)}
+        {hasPremiumAccess && (
+          <span
+            aria-hidden="true"
+            className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500"
+          />
+        )}
+      </div>
+      <span className="hidden sm:inline">{currentUser.firstName}</span>
+    </Link>
   );
 }
 
@@ -1717,24 +1644,26 @@ function PremiumGate({ lockedFeature }: { lockedFeature: LockedFeatureKey }) {
   const copy = featureUnlockCopy[lockedFeature];
 
   return (
-    <section className="bg-[#f8fafc] px-6 py-14">
+    <section className="bg-gradient-to-b from-[#f8fafc] via-orange-50/40 to-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-6xl">
-        <Reveal className="mb-8 rounded-md border border-orange-200 bg-white p-6 shadow-sm md:p-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <Reveal className="mb-8 overflow-hidden rounded-xl border border-orange-200 bg-white shadow-lg">
+          <div className="h-1 w-full bg-gradient-to-r from-[#ff4f00] via-orange-400 to-rose-400" />
+          <div className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between md:p-8">
             <div>
-              <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">
-                <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+              <p className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#ff4f00]">
+                <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
                 Premium locked
               </p>
-              <h1 className="mt-3 text-3xl font-black text-[#0f172a]">{copy.headline}</h1>
+              <h1 className="mt-3 bg-gradient-to-r from-[#0f172a] via-[#210947] to-[#ff4f00] bg-clip-text text-3xl font-black text-transparent">{copy.headline}</h1>
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
                 {copy.description} One $1.99 monthly plan unlocks all three premium sections.
               </p>
             </div>
             <Link
               href={`/subscription?feature=${lockedFeature}`}
-              className="inline-flex h-12 items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:shadow-xl hover:shadow-orange-300"
             >
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
               Unlock premium
             </Link>
           </div>
@@ -1772,14 +1701,20 @@ function PremiumUnlockPanel({
 
   return (
     <Reveal
-      className={`mt-8 overflow-hidden rounded-md bg-[#22006c] text-white shadow-2xl ${
+      className={`relative mt-8 overflow-hidden rounded-2xl bg-gradient-to-br from-[#22006c] via-[#310a68] to-[#3d1278] text-white shadow-2xl ${
         compact ? "p-6 md:p-8" : "p-6 md:p-10"
       }`}
     >
-      <div id="unlock" className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
+      <div aria-hidden="true" className="pointer-events-none absolute -right-32 -top-32 h-72 w-72 rounded-full bg-[#ff4f00]/25 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#ef0068]/25 blur-3xl" />
+
+      <div id="unlock" className="relative grid gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ffb29d]">{copy.panelAccent}</p>
-          <h2 className="mt-4 max-w-2xl text-3xl font-black leading-tight text-white md:text-4xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#ffb29d] backdrop-blur-md">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+            {copy.panelAccent}
+          </span>
+          <h2 className="mt-4 max-w-2xl bg-gradient-to-r from-white via-[#ffd4c2] to-[#ffb29d] bg-clip-text text-3xl font-black leading-tight text-transparent md:text-4xl">
             {copy.headline}
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#e5d8f4]">
@@ -1787,38 +1722,45 @@ function PremiumUnlockPanel({
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {planFeatures.map((item) => (
-              <div key={item.title} className="rounded-md bg-white/10 p-4 ring-1 ring-white/15">
-                <ShieldCheck className="mb-3 h-5 w-5 text-[#22c55e]" aria-hidden="true" />
-                <p className="text-sm font-black">{item.title}</p>
-                <p className="mt-2 text-xs font-semibold leading-relaxed text-[#e5d8f4]">{item.description}</p>
-              </div>
-            ))}
+            {planFeatures.map((item, index) => {
+              const accents = ["from-orange-400 to-rose-400", "from-violet-400 to-purple-500", "from-emerald-400 to-teal-500"];
+              return (
+                <div key={item.title} className="group relative overflow-hidden rounded-xl border border-white/15 bg-white/10 p-4 backdrop-blur-md transition hover:border-white/30 hover:bg-white/15">
+                  <div className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${accents[index]}`} />
+                  <ShieldCheck className="mb-3 h-5 w-5 text-[#22c55e]" aria-hidden="true" />
+                  <p className="text-sm font-black">{item.title}</p>
+                  <p className="mt-2 text-xs font-semibold leading-relaxed text-[#e5d8f4]">{item.description}</p>
+                </div>
+              );
+            })}
           </div>
 
           <WinningPicksShowcase />
         </div>
 
-        <form action="/api/checkout" method="POST" className="rounded-md bg-white p-6 text-[#0f172a] shadow-2xl">
+        <form action="/api/checkout" method="POST" className="relative overflow-hidden rounded-2xl bg-white p-6 text-[#0f172a] shadow-2xl">
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff4f00] via-orange-400 to-rose-400" />
           {currentUser?.email && <input name="userEmail" type="hidden" value={currentUser.email} />}
           <input name="lockedFeature" type="hidden" value={lockedFeature} />
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">{copy.eyebrow}</p>
               <div className="mt-3 flex items-end gap-2">
-                <span className="text-5xl font-black">$1.99</span>
+                <span className="bg-gradient-to-r from-[#0f172a] to-[#ff4f00] bg-clip-text text-5xl font-black text-transparent">$1.99</span>
                 <span className="pb-2 text-base font-bold text-slate-500">/month</span>
               </div>
             </div>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+              <LiveDot />
               Active Buy
             </span>
           </div>
 
           <button
             type="submit"
-            className="mt-6 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
+            className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:shadow-xl"
           >
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
             Continue to payment
           </button>
         </form>
