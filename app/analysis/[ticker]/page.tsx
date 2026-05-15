@@ -13,7 +13,7 @@ import {
 import AnalysisDeepDive from "../../components/AnalysisDeepDive";
 import AnalysisChart from "../../components/AnalysisChart";
 import TradingViewChart from "../../components/TradingViewChart";
-import { getAIAnalysis, getStockSnapshot } from "../../lib/marketData";
+import { getAIAnalysis, getCandles, getStockSnapshot } from "../../lib/marketData";
 import { defaultMonthlyPick } from "../../lib/picks";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,10 @@ export default async function AnalysisPage({
   params: { ticker: string };
 }) {
   const snapshot = await getStockSnapshot(params.ticker);
-  const analysis = await getAIAnalysis(snapshot);
+  const [analysis, initialCandles] = await Promise.all([
+    getAIAnalysis(snapshot),
+    getCandles(snapshot.ticker, "1M")
+  ]);
   const isPositive = snapshot.changePercent.startsWith("+");
 
   return (
@@ -56,7 +59,7 @@ export default async function AnalysisPage({
           </Link>
           <span className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-600 backdrop-blur-md md:inline-flex">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-glow" />
-            Live Market Data
+            Market Data · ~15 min delay
           </span>
         </div>
 
@@ -94,7 +97,11 @@ export default async function AnalysisPage({
 
         {/* Trading view */}
         <div className="mt-6">
-          <TradingViewChart defaultPair={`${snapshot.ticker}/USD`} />
+          <TradingViewChart
+            defaultPair={`${snapshot.ticker}/USD`}
+            initialCandles={initialCandles}
+            initialRange="1M"
+          />
         </div>
 
         {/* Chart + KPI cards */}
