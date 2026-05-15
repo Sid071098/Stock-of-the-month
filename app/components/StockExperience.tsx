@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
-  Activity,
-  ArrowUpRight,
   BadgeCheck,
   BarChart3,
   BriefcaseBusiness,
@@ -14,12 +12,10 @@ import {
   ChevronDown,
   CircleDollarSign,
   CircleGauge,
-  Command,
   CreditCard,
   Database,
   Edit3,
   KeyRound,
-  Layers,
   LineChart,
   LogOut,
   Mail,
@@ -278,74 +274,44 @@ export default function StockExperience({
   const shouldShowSubscriptionFirst = !canAccessPremiumFeatures && view !== "subscription";
   const lockedFeature = subscriptionContext ?? featureKeyForView(view);
 
-  const artifactTitleByView: Record<StockExperienceView, { title: string; eyebrow: string; source: string }> = {
-    monthly:       { title: `${monthlyPick.name} (${monthlyPick.ticker}) · ${monthlyPick.month}`, eyebrow: "Stock of the Month", source: "LLM-Reasoning" },
-    quality:       { title: "Top High Quality Stocks · ranked watchlist",                          eyebrow: "Quality Screen",     source: "Quality-Screen"  },
-    "all-picks":   { title: "Historical Archive · all monthly picks",                              eyebrow: "Pick Archive",       source: "Research-Vault"  },
-    subscription:  { title: "Subscription · billing & access",                                     eyebrow: "Account",            source: "Stripe"          }
-  };
-
-  const activeArtifact = artifactTitleByView[shouldShowSubscriptionFirst ? "subscription" : view];
-
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#020617] text-slate-100">
-      {/* Corner glows: teal top-left, violet bottom-right + cyan accent */}
-      <div aria-hidden="true" className="pointer-events-none fixed -left-40 -top-40 h-[560px] w-[560px] rounded-full bg-teal-500/20 blur-[140px]" />
-      <div aria-hidden="true" className="pointer-events-none fixed -bottom-40 -right-40 h-[560px] w-[560px] rounded-full bg-violet-500/20 blur-[140px]" />
-      <div aria-hidden="true" className="pointer-events-none fixed top-1/3 right-1/3 h-[320px] w-[320px] rounded-full bg-cyan-500/[0.08] blur-[120px]" />
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 opacity-[0.04] [background-image:radial-gradient(rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:32px_32px]" />
-
-      <MissionControlSidebar currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} />
-
-      <div className="relative ml-16 flex min-h-screen flex-col md:ml-20">
-        <MissionControlHeader currentView={view} ticker={monthlyPick.ticker} hasPremiumAccess={canAccessPremiumFeatures} />
-
-        <div className="flex-1 px-4 py-6 md:px-8 md:py-8">
-          <div className="mx-auto max-w-[1460px] space-y-6">
-            <Artifact title={activeArtifact.title} eyebrow={activeArtifact.eyebrow} source={activeArtifact.source}>
-              {shouldShowSubscriptionFirst && (
-                <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
-              )}
-              {!shouldShowSubscriptionFirst && view === "monthly" && (
-                canAccessPremiumFeatures ? (
-                  <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
-                ) : (
-                  <PremiumGate lockedFeature="monthly" />
-                )
-              )}
-              {!shouldShowSubscriptionFirst && view === "quality" && (
-                canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate lockedFeature="quality" />
-              )}
-              {!shouldShowSubscriptionFirst && view === "all-picks" && (
-                canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate lockedFeature="all-picks" />
-              )}
-              {!shouldShowSubscriptionFirst && view === "subscription" && (
-                <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
-              )}
-            </Artifact>
-
-            {showPricing && (
-              <Artifact title="Pricing · monthly access" eyebrow="Plans" source="Stripe">
-                <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
-              </Artifact>
-            )}
-            {showAdmin && (
-              <Artifact title="Admin · pick management" eyebrow="Internal" source="Admin-Console">
-                <AdminPanel
-                  monthlyPick={monthlyPick}
-                  qualityPicks={qualityPicks}
-                  onResetMonthlyPick={resetMonthlyPick}
-                  onResetQualityPicks={resetQualityPicks}
-                  onSaveMonthlyPick={saveMonthlyPick}
-                  onSaveQualityPicks={saveQualityPicks}
-                />
-              </Artifact>
-            )}
-          </div>
-        </div>
-
-        <Footer />
-      </div>
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#ecfeff] text-[#0f172a]">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-full bg-orange-100/40 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-cyan-100/40 blur-3xl" />
+      <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
+      {shouldShowSubscriptionFirst && (
+        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
+      )}
+      {!shouldShowSubscriptionFirst && view === "monthly" && (
+        canAccessPremiumFeatures ? (
+          <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
+        ) : (
+          <PremiumGate lockedFeature="monthly" />
+        )
+      )}
+      {!shouldShowSubscriptionFirst && view === "quality" && (
+        canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate lockedFeature="quality" />
+      )}
+      {!shouldShowSubscriptionFirst && view === "all-picks" && (
+        canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate lockedFeature="all-picks" />
+      )}
+      {!shouldShowSubscriptionFirst && view === "subscription" && (
+        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
+      )}
+      {showPricing && (
+        <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
+      )}
+      {showAdmin && (
+        <AdminPanel
+          monthlyPick={monthlyPick}
+          qualityPicks={qualityPicks}
+          onResetMonthlyPick={resetMonthlyPick}
+          onResetQualityPicks={resetQualityPicks}
+          onSaveMonthlyPick={saveMonthlyPick}
+          onSaveQualityPicks={saveQualityPicks}
+        />
+      )}
+      <Footer />
     </main>
   );
 }
@@ -1287,207 +1253,6 @@ function AuthInput({
   );
 }
 
-function MissionControlSidebar({
-  currentView,
-  currentUser,
-  hasPremiumAccess
-}: {
-  currentView: StockExperienceView;
-  currentUser: RegisteredUser;
-  hasPremiumAccess: boolean;
-}) {
-  const monthlyHref = hasPremiumAccess ? "/stock-of-the-month" : "/subscription?feature=monthly";
-  const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/subscription?feature=quality";
-  const allPicksHref = hasPremiumAccess ? "/all-picks" : "/subscription?feature=all-picks";
-
-  const navItems = [
-    { href: monthlyHref,  Icon: LineChart,  label: "Stock of the Month", active: currentView === "monthly"    },
-    { href: qualityHref,  Icon: TrendingUp, label: "Top Quality Stocks", active: currentView === "quality"    },
-    { href: allPicksHref, Icon: Database,   label: "All Picks Archive",  active: currentView === "all-picks"  }
-  ];
-
-  return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-16 flex-col items-center justify-between border-r border-white/10 bg-white/5 py-5 backdrop-blur-lg md:w-20">
-      {/* Logo */}
-      <Link
-        href={monthlyHref}
-        aria-label="StockyMonth home"
-        className="group flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff8a3d] to-[#ff4f00] shadow-lg shadow-orange-500/30 ring-1 ring-white/15 transition hover:scale-105"
-      >
-        <BarChart3 className="h-5 w-5 text-white" aria-hidden="true" />
-      </Link>
-
-      {/* Nav */}
-      <nav aria-label="Primary" className="flex flex-col gap-2">
-        {navItems.map(({ href, Icon, label, active }) => (
-          <Link
-            key={href}
-            href={href}
-            aria-label={label}
-            title={label}
-            className={`group relative flex h-11 w-11 items-center justify-center rounded-xl transition ${
-              active
-                ? "bg-white/10 text-cyan-300 ring-1 ring-cyan-400/40 shadow-lg shadow-cyan-500/10"
-                : "text-slate-400 hover:bg-white/5 hover:text-white"
-            }`}
-          >
-            {active && (
-              <span
-                aria-hidden="true"
-                className="absolute -left-[10px] h-6 w-[3px] rounded-r-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.7)]"
-              />
-            )}
-            <Icon className="h-5 w-5" aria-hidden="true" />
-            <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md bg-slate-900/95 px-2.5 py-1.5 text-xs font-black text-white opacity-0 ring-1 ring-white/10 backdrop-blur-md transition group-hover:opacity-100 md:block">
-              {label}
-            </span>
-          </Link>
-        ))}
-      </nav>
-
-      {/* Profile */}
-      <Link
-        href="/profile"
-        aria-label="Open profile"
-        className="group relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-[11px] font-black text-white ring-1 ring-white/10 transition hover:ring-cyan-400/40"
-      >
-        {getUserInitials(currentUser)}
-        {hasPremiumAccess && (
-          <span
-            aria-hidden="true"
-            className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#020617] bg-emerald-400"
-          />
-        )}
-        <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md bg-slate-900/95 px-2.5 py-1.5 text-xs font-black text-white opacity-0 ring-1 ring-white/10 backdrop-blur-md transition group-hover:opacity-100 md:block">
-          {currentUser.firstName}
-        </span>
-      </Link>
-    </aside>
-  );
-}
-
-function MissionControlHeader({
-  currentView,
-  ticker,
-  hasPremiumAccess
-}: {
-  currentView: StockExperienceView;
-  ticker: string;
-  hasPremiumAccess: boolean;
-}) {
-  const agentStateByView: Record<StockExperienceView, string> = {
-    monthly: `Analyzing ${ticker}`,
-    quality: "Ranking quality screen",
-    "all-picks": "Indexing pick archive",
-    subscription: "Awaiting subscription"
-  };
-  const agentState = agentStateByView[currentView];
-
-  return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-white/[0.03] px-4 py-3 backdrop-blur-lg md:px-8">
-      <div className="flex items-center justify-between gap-3">
-        {/* Left: Live agent state */}
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">Agent State</p>
-            <p className="mt-0.5 truncate text-sm font-black text-white">
-              StockyMonth Agent
-              <span className="mx-1.5 text-slate-600">·</span>
-              <span className="text-cyan-300">{agentState}</span>
-              <span className="ml-1 inline-flex animate-pulse text-cyan-300">…</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Right: Session badges */}
-        <div className="hidden items-center gap-1.5 md:flex">
-          <SessionBadge label="Session" value={hasPremiumAccess ? "premium" : "trial"} tone={hasPremiumAccess ? "emerald" : "slate"} />
-          <SessionBadge label="Model" value="reasoning-v2" tone="cyan" />
-          <SessionBadge label="Mode" value="research" tone="violet" />
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function SessionBadge({
-  label,
-  value,
-  tone
-}: {
-  label: string;
-  value: string;
-  tone: "emerald" | "cyan" | "violet" | "slate";
-}) {
-  const toneStyles: Record<typeof tone, string> = {
-    emerald: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
-    cyan:    "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
-    violet:  "border-violet-400/30 bg-violet-400/10 text-violet-300",
-    slate:   "border-white/15 bg-white/5 text-slate-300"
-  };
-  const dotByTone: Record<typeof tone, string> = {
-    emerald: "bg-emerald-400",
-    cyan:    "bg-cyan-400",
-    violet:  "bg-violet-400",
-    slate:   "bg-slate-400"
-  };
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black ${toneStyles[tone]}`}>
-      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${dotByTone[tone]}`} />
-      <span className="text-slate-400">{label}</span>
-      <span className="font-mono">{value}</span>
-    </span>
-  );
-}
-
-function Artifact({
-  title,
-  source = "LLM-Reasoning",
-  eyebrow,
-  actions,
-  children
-}: {
-  title: string;
-  source?: string;
-  eyebrow?: string;
-  actions?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] shadow-2xl backdrop-blur-sm">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
-
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 bg-white/[0.02] px-4 py-3 md:px-5">
-        <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="flex h-7 w-7 items-center justify-center rounded-md bg-white/5 ring-1 ring-white/10">
-            <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
-          </span>
-          <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.28em] text-slate-500">
-              {eyebrow ?? "Artifact"}
-            </p>
-            <p className="mt-0.5 text-sm font-black text-white">{title}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {actions}
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-black text-cyan-300">
-            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
-            Source: {source}
-          </span>
-        </div>
-      </header>
-
-      <div className="relative">{children}</div>
-    </section>
-  );
-}
-
 function TopNav({
   currentView,
   currentUser,
@@ -1656,7 +1421,7 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
   ];
 
   return (
-    <section id="stock-of-month" className="scroll-mt-24 px-4 py-6 md:px-6">
+    <section id="stock-of-month" className="scroll-mt-24 bg-[#f8fafc] px-4 py-6 md:px-6">
       <div className="mx-auto max-w-[1460px]">
         <Reveal className="sr-only mb-7 flex items-center gap-3 text-[#0f172a]">
           <CircleGauge className="h-6 w-6" aria-hidden="true" />
@@ -1726,23 +1491,20 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
         <DetailedAnalysisSection monthlyPick={monthlyPick} />
         {!hasPremiumAccess && <PremiumUnlockPanel />}
         {hasPremiumAccess && (
-          <Reveal className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/[0.08] p-5 text-emerald-100 shadow-lg backdrop-blur-sm">
+          <Reveal className="mt-8 rounded-md border border-emerald-200 bg-emerald-50 p-5 text-emerald-800 shadow-sm">
             <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
               <div>
-                <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  Premium unlocked
-                </p>
-                <h2 className="mt-1.5 text-2xl font-black text-white">All three StockyMonth sections are available.</h2>
+                <p className="text-sm font-black uppercase tracking-[0.16em]">Premium unlocked</p>
+                <h2 className="mt-1 text-2xl font-black text-[#0f172a]">All three StockyMonth sections are available.</h2>
               </div>
               <div className="flex flex-wrap gap-2 text-sm font-black">
-                <Link href="/stock-of-the-month" className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-white transition hover:bg-white/15">
+                <Link href="/stock-of-the-month" className="rounded-full bg-white px-4 py-2 text-emerald-700">
                   Stock of the Month
                 </Link>
-                <Link href="/top-quality-stocks" className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-white transition hover:bg-white/15">
+                <Link href="/top-quality-stocks" className="rounded-full bg-white px-4 py-2 text-emerald-700">
                   Top High Quality Stocks
                 </Link>
-                <Link href="/all-picks" className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-white transition hover:bg-white/15">
+                <Link href="/all-picks" className="rounded-full bg-white px-4 py-2 text-emerald-700">
                   All Picks
                 </Link>
               </div>
@@ -1775,19 +1537,19 @@ function DetailedAnalysisSection({ monthlyPick }: { monthlyPick: MonthlyPick }) 
   ];
 
   return (
-    <Reveal className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-lg backdrop-blur-sm md:p-8">
+    <Reveal className="mt-8 rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-300">Detailed analysis</p>
-          <h2 className="mt-3 text-3xl font-black text-white">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Detailed analysis</p>
+          <h2 className="mt-3 text-3xl font-black text-[#0f172a]">
             Why {monthlyPick.name} is the May 2026 pick
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-400">
+          <p className="mt-4 text-base leading-relaxed text-slate-600">
             A deeper look at the setup behind the monthly call: catalysts, cost structure, market positioning, and management alignment.
           </p>
           <Link
             href={`/analysis/${monthlyPick.ticker}`}
-            className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-5 text-sm font-black text-white shadow-lg shadow-orange-500/30 transition hover:shadow-orange-400/40"
+            className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-5 text-sm font-black text-white transition hover:bg-orange-600"
           >
             Open full analysis
             <LineChart className="h-4 w-4" aria-hidden="true" />
@@ -1796,9 +1558,9 @@ function DetailedAnalysisSection({ monthlyPick }: { monthlyPick: MonthlyPick }) 
 
         <div className="grid gap-4 sm:grid-cols-2">
           {analysisCards.map((card) => (
-            <article key={card.title} className="rounded-xl border border-white/10 bg-white/[0.04] p-5 transition hover:border-cyan-400/30 hover:bg-white/[0.06]">
-              <h3 className="text-lg font-black text-white">{card.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-400">{card.text}</p>
+            <article key={card.title} className="rounded-md border border-slate-200 bg-[#f8fafc] p-5">
+              <h3 className="text-lg font-black text-[#0f172a]">{card.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-600">{card.text}</p>
             </article>
           ))}
         </div>
@@ -1811,13 +1573,13 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section id="all-picks" className="scroll-mt-24 px-6 py-14">
+    <section id="all-picks" className="scroll-mt-24 bg-gradient-to-b from-[#f8fafc] to-slate-100/50 px-6 py-14">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-300">Historical Archive</p>
-            <h2 className="mt-3 text-3xl font-black text-white">All Picks</h2>
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-400">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Historical Archive</p>
+            <h2 className="mt-3 text-3xl font-black text-[#0f172a]">All Picks</h2>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
               A complete archive of StockyMonth monthly selections with price movement, short summaries, and the three core reasons behind each pick.
             </p>
           </div>
@@ -1837,48 +1599,46 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                       setActiveIndex(index);
                     }
                   }}
-                  className={`relative min-h-full cursor-pointer overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-cyan-400/40 ${
+                  className={`relative min-h-full cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-100 ${
                     activeIndex === index
-                      ? "border-orange-400/60 bg-gradient-to-br from-orange-500/15 to-white/[0.03] shadow-xl ring-1 ring-orange-400/30"
-                      : "border-white/10 bg-white/[0.03] hover:border-cyan-400/30 hover:bg-white/[0.06]"
+                      ? "border-[#ff4f00] bg-gradient-to-br from-orange-50 to-white shadow-xl ring-2 ring-orange-100"
+                      : "border-slate-200 hover:border-orange-200 hover:bg-orange-50/30"
                   }`}
                 >
                   {activeIndex === index && (
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff4f00] to-orange-400" />
                   )}
-                  <div className="mb-5 flex items-start justify-between gap-4 p-6 pb-0">
+                  <div className="mb-5 flex items-start justify-between gap-4">
                     <div className="flex gap-3">
                       <ArchiveLogo pick={pick} />
                       <div>
-                        <p className="text-xs font-black text-orange-300">{pick.month}</p>
-                        <h3 className="mt-1 text-lg font-black leading-snug text-white">
+                        <p className="text-sm font-black text-[#ff4f00]">{pick.month}</p>
+                        <h3 className="mt-1 text-lg font-black leading-snug text-[#0f172a]">
                           {pick.name} ({pick.ticker})
                         </h3>
                       </div>
                     </div>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-300">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
                       <LiveDot />
                       {activeIndex === index ? "Selected" : "Active Buy"}
                     </span>
                   </div>
 
-                  <div className="mx-6 mb-5 flex items-end justify-between border-y border-white/10 py-4">
-                    <p className="text-2xl font-black text-white">{pick.price}</p>
-                    <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-300" : "text-rose-300"}`}>
+                  <div className="mb-5 flex items-end justify-between border-y border-slate-200 py-4">
+                    <p className="text-2xl font-black text-[#0f172a]">{pick.price}</p>
+                    <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
                       {pick.change}
                     </p>
                   </div>
 
-                  <div className="px-6 pb-6">
-                    <p className="text-sm leading-relaxed text-slate-400">{pick.summary}</p>
-                    <div className="mt-5 grid gap-3">
-                      {pick.bullets.map((bullet) => (
-                        <p key={bullet} className="flex gap-3 text-sm leading-relaxed text-slate-300">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff4f00]" />
-                          {bullet}
-                        </p>
-                      ))}
-                    </div>
+                  <p className="text-sm leading-relaxed text-slate-600">{pick.summary}</p>
+                  <div className="mt-5 grid gap-3">
+                    {pick.bullets.map((bullet) => (
+                      <p key={bullet} className="flex gap-3 text-sm leading-relaxed text-slate-700">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff4f00]" />
+                        {bullet}
+                      </p>
+                    ))}
                   </div>
                 </article>
               </Reveal>
@@ -1975,11 +1735,11 @@ const cardAccents = [
 
 function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
   return (
-    <section id="quality-picks" className="scroll-mt-24 px-6 py-16">
+    <section id="quality-picks" className="scroll-mt-24 border-y border-slate-200 bg-gradient-to-b from-white to-slate-50/60 px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-300">Top High Quality Stocks</p>
-          <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">Six focused companies for the current watchlist</h2>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Top High Quality Stocks</p>
+          <h2 className="mt-3 text-2xl font-black text-[#0f172a] md:text-3xl">Six focused companies for the current watchlist</h2>
         </Reveal>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -1987,12 +1747,12 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
             <Reveal key={pick.ticker} delay={index * 70}>
               <Link
                 href={`/analysis/${pick.ticker}`}
-                className="group relative block overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] shadow-lg backdrop-blur-sm transition-all duration-200 hover:-translate-y-1.5 hover:border-cyan-400/40 hover:bg-white/[0.06] hover:shadow-cyan-500/10"
+                className="group relative block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1.5 hover:border-transparent hover:shadow-xl"
               >
                 <div className={`h-1 w-full bg-gradient-to-r ${cardAccents[index % cardAccents.length]}`} />
                 <div className="p-6">
                   <div className="flex items-start justify-end">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-300">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
                       <LiveDot />
                       {pick.tag}
                     </span>
@@ -2000,19 +1760,19 @@ function QualityPicksSection({ picks }: { picks: QualityPick[] }) {
                   <div className="mt-5 flex items-center gap-3">
                     <CompanyLogo pick={pick} />
                     <div className="min-w-0">
-                      <h3 className="text-lg font-black text-white transition-colors group-hover:text-cyan-300">
+                      <h3 className="text-lg font-black text-[#0f172a] transition-colors group-hover:text-[#ff4f00]">
                         {pick.name} ({pick.ticker})
                       </h3>
-                      <p className="mt-1 text-sm font-bold text-slate-400">{pick.sector}</p>
+                      <p className="mt-1 text-sm font-bold text-slate-500">{pick.sector}</p>
                     </div>
                   </div>
                   <div className="mt-5 flex items-end justify-between">
-                    <p className="text-lg font-black text-white">{pick.price}</p>
-                    <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-300" : "text-rose-300"}`}>
+                    <p className="text-lg font-black text-[#0f172a]">{pick.price}</p>
+                    <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
                       {pick.change}
                     </p>
                   </div>
-                  <p className="mt-5 line-clamp-3 text-sm leading-relaxed text-slate-400">{pick.thesis}</p>
+                  <p className="mt-5 line-clamp-3 text-sm leading-relaxed text-slate-600">{pick.thesis}</p>
                 </div>
               </Link>
             </Reveal>
@@ -2027,24 +1787,24 @@ function PremiumGate({ lockedFeature }: { lockedFeature: LockedFeatureKey }) {
   const copy = featureUnlockCopy[lockedFeature];
 
   return (
-    <section className="px-6 py-14">
+    <section className="bg-gradient-to-b from-[#f8fafc] via-orange-50/40 to-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-6xl">
-        <Reveal className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-lg backdrop-blur-sm">
+        <Reveal className="mb-8 overflow-hidden rounded-xl border border-orange-200 bg-white shadow-lg">
           <div className="h-1 w-full bg-gradient-to-r from-[#ff4f00] via-orange-400 to-rose-400" />
           <div className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between md:p-8">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-orange-300">
+              <p className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#ff4f00]">
                 <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
                 Premium locked
               </p>
-              <h1 className="mt-3 bg-gradient-to-r from-white via-cyan-200 to-[#ff8a3d] bg-clip-text text-3xl font-black text-transparent">{copy.headline}</h1>
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-400">
+              <h1 className="mt-3 bg-gradient-to-r from-[#0f172a] via-[#0f1729] to-[#ff4f00] bg-clip-text text-3xl font-black text-transparent">{copy.headline}</h1>
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
                 {copy.description} One $1.99 monthly plan unlocks all three premium sections.
               </p>
             </div>
             <Link
               href={`/subscription?feature=${lockedFeature}`}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-500/30 transition hover:shadow-orange-400/40"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:shadow-xl hover:shadow-orange-300"
             >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               Unlock premium
@@ -2196,16 +1956,16 @@ function SubscriptionSection({
   const copy = featureUnlockCopy[lockedFeature];
 
   return (
-    <section className="px-6 py-14">
+    <section className="bg-[#f8fafc] px-6 py-14">
       <div className="mx-auto max-w-5xl">
-        <Reveal className="mb-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-orange-300">
+        <Reveal className="mb-8">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">
             {hasPremiumAccess ? "Subscription" : copy.eyebrow}
           </p>
-          <h1 className="mt-3 bg-gradient-to-r from-white via-cyan-200 to-[#ff8a3d] bg-clip-text text-3xl font-black text-transparent md:text-4xl">
+          <h1 className="mt-3 text-3xl font-black text-[#0f172a] md:text-4xl">
             {hasPremiumAccess ? "Manage your StockyMonth plan" : copy.headline}
           </h1>
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-400">
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
             {hasPremiumAccess
               ? "View your current monthly access and use Stripe billing tools to update or cancel your subscription."
               : `${copy.description} Your $1.99/month plan also unlocks Stock of the Month, Top High Quality Stocks, and All Picks.`
@@ -2216,22 +1976,22 @@ function SubscriptionSection({
         {!hasPremiumAccess && <PremiumUnlockPanel compact currentUser={currentUser} lockedFeature={lockedFeature} />}
 
         {hasPremiumAccess && currentUser && <Reveal className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
-          <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-lg backdrop-blur-sm md:p-8">
-            <div className="flex flex-col justify-between gap-6 border-b border-white/10 pb-6 md:flex-row md:items-start">
+          <article className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="flex flex-col justify-between gap-6 border-b border-slate-200 pb-6 md:flex-row md:items-start">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Current plan</p>
-                <h2 className="mt-2 text-3xl font-black text-white">StockyMonth Monthly</h2>
-                <p className="mt-2 text-sm font-semibold text-slate-400">Signed in as {fullName || currentUser.email}</p>
+                <p className="text-sm font-black text-slate-500">Current plan</p>
+                <h2 className="mt-2 text-3xl font-black text-[#0f172a]">StockyMonth Monthly</h2>
+                <p className="mt-2 text-sm font-semibold text-slate-500">Signed in as {fullName || currentUser.email}</p>
               </div>
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-black text-emerald-300">
+              <span className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-black text-emerald-700">
                 <LiveDot />
                 Active
               </span>
             </div>
 
             <div className="mt-7 flex items-end gap-2">
-              <span className="bg-gradient-to-r from-white to-[#ff8a3d] bg-clip-text text-5xl font-black text-transparent">$1.99</span>
-              <span className="pb-2 text-base font-bold text-slate-400">/month</span>
+              <span className="text-5xl font-black text-[#0f172a]">$1.99</span>
+              <span className="pb-2 text-base font-bold text-slate-500">/month</span>
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -2239,7 +1999,7 @@ function SubscriptionSection({
                 <input name="userEmail" type="hidden" value={currentUser.email} />
                 <button
                   type="submit"
-                  className="inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-500/30 transition hover:shadow-orange-400/40"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff4f00] px-6 text-sm font-black text-white transition hover:bg-orange-600"
                 >
                   Manage billing
                 </button>
@@ -2248,7 +2008,7 @@ function SubscriptionSection({
                 <input name="userEmail" type="hidden" value={currentUser.email} />
                 <button
                   type="submit"
-                  className="inline-flex h-12 w-full items-center justify-center rounded-full border border-rose-400/40 bg-rose-400/10 px-6 text-sm font-black text-rose-300 transition hover:bg-rose-400/15"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-full border border-rose-200 bg-white px-6 text-sm font-black text-rose-600 transition hover:bg-rose-50"
                 >
                   Cancel subscription
                 </button>
@@ -2256,19 +2016,19 @@ function SubscriptionSection({
             </div>
           </article>
 
-          <aside className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-lg backdrop-blur-sm md:p-8">
-            <h3 className="text-xl font-black text-white">Plan includes</h3>
+          <aside className="rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <h3 className="text-xl font-black text-[#0f172a]">Plan includes</h3>
             <div className="mt-5 grid gap-4">
               {["Stock of the Month", "Top High Quality Stocks", "All Picks archive"].map((item) => (
-                <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-200">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-400/15 text-orange-300">
+                <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-50 text-[#ff4f00]">
                     <BadgeCheck className="h-4 w-4" aria-hidden="true" />
                   </span>
                   {item}
                 </div>
               ))}
             </div>
-            <p className="mt-6 text-sm leading-relaxed text-slate-400">
+            <p className="mt-6 text-sm leading-relaxed text-slate-500">
               The cancel button cancels the Stripe subscription and updates your StockyMonth access status in Redis.
             </p>
           </aside>
@@ -2363,7 +2123,7 @@ function AdminPanel({
   }
 
   return (
-    <section id="admin" className="px-6 py-16">
+    <section id="admin" className="bg-[#f8fafc] px-6 py-16">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff6b4a]">Admin</p>
@@ -2562,16 +2322,16 @@ function LiveDot({ dark = false }: { dark?: boolean }) {
 
 function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-white/[0.02] px-6 py-8 backdrop-blur-lg">
-      <div aria-hidden="true" className="pointer-events-none absolute -top-16 left-1/2 h-32 w-[60%] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
+    <footer className="relative overflow-hidden border-t border-slate-200 bg-gradient-to-b from-white to-slate-50 px-6 py-10">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-16 left-1/2 h-32 w-[60%] -translate-x-1/2 rounded-full bg-orange-200/25 blur-3xl" />
       <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-[#ff8a3d] to-[#ff4f00] text-white shadow-md shadow-orange-500/30 ring-1 ring-white/15">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-[#ff8a3d] to-[#ff4f00] text-white shadow-md">
             <BarChart3 className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-sm font-black tracking-tight text-white">StockyMonth</p>
-            <p className="text-[11px] font-bold text-slate-400">High-conviction monthly research</p>
+            <p className="text-sm font-black tracking-tight text-[#0f172a]">StockyMonth</p>
+            <p className="text-[11px] font-bold text-slate-500">High-conviction monthly research</p>
           </div>
         </div>
         <p className="max-w-xl text-xs font-semibold leading-relaxed text-slate-500">
