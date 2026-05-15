@@ -10,9 +10,11 @@ import {
   BarChart3,
   Calendar,
   CreditCard,
+  Gift,
   Loader2,
   LogOut,
   Mail,
+  PartyPopper,
   RotateCcw,
   ShieldCheck,
   Sparkles,
@@ -64,7 +66,11 @@ type SubscriptionStatus = {
   active: boolean;
   cancelAtPeriodEnd: boolean;
   currentPeriodEnd: number | null;
+  retentionOfferUsed?: boolean;
+  retainedUntil?: number | null;
 };
+
+type CancelStep = "closed" | "retention" | "confirm" | "retained";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -73,7 +79,9 @@ export default function ProfilePage() {
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [currentPeriodEnd, setCurrentPeriodEnd] = useState<number | null>(null);
-  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [retentionOfferUsed, setRetentionOfferUsed] = useState(false);
+  const [retainedUntil, setRetainedUntil] = useState<number | null>(null);
+  const [cancelStep, setCancelStep] = useState<CancelStep>("closed");
   const [actionPending, setActionPending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -88,6 +96,12 @@ export default function ProfilePage() {
     }
     setCancelAtPeriodEnd(Boolean(payload.cancelAtPeriodEnd));
     setCurrentPeriodEnd(payload.currentPeriodEnd ?? null);
+    if (typeof payload.retentionOfferUsed === "boolean") {
+      setRetentionOfferUsed(payload.retentionOfferUsed);
+    }
+    if (payload.retainedUntil !== undefined) {
+      setRetainedUntil(payload.retainedUntil ?? null);
+    }
   }
 
   useEffect(() => {
@@ -110,7 +124,10 @@ export default function ProfilePage() {
       .finally(() => setReady(true));
   }, [router]);
 
-  async function submitSubscriptionAction(path: "/api/subscription/cancel" | "/api/subscription/resume") {
+  async function submitSubscriptionAction(
+    path: "/api/subscription/cancel" | "/api/subscription/resume" | "/api/subscription/retain",
+    onSuccess?: () => void
+  ) {
     if (!currentUser) return;
     setActionPending(true);
     setActionError(null);
@@ -130,12 +147,33 @@ export default function ProfilePage() {
       }
 
       applyStatus(payload, currentUser.email);
-      setShowCancelModal(false);
+      if (onSuccess) onSuccess();
+      else setCancelStep("closed");
     } catch (error) {
       setActionError(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setActionPending(false);
     }
+  }
+
+  function startCancelFlow() {
+    setActionError(null);
+    setCancelStep(retentionOfferUsed ? "confirm" : "retention");
+  }
+
+  function closeCancelFlow() {
+    if (actionPending) return;
+    setCancelStep("closed");
+    setActionError(null);
+  }
+
+  function handleClaimRetention() {
+    void submitSubscriptionAction("/api/subscription/retain", () => setCancelStep("retained"));
+  }
+
+  function handleDeclineRetention() {
+    setActionError(null);
+    setCancelStep("confirm");
   }
 
   function handleCancelSubscription() {
@@ -347,10 +385,7 @@ export default function ProfilePage() {
                     <>
                       <button
                         type="button"
-                        onClick={() => {
-                          setActionError(null);
-                          setShowCancelModal(true);
-                        }}
+                        onClick={startCancelFlow}
                         className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-rose-200 bg-white px-6 text-sm font-black text-rose-600 shadow-sm transition hover:bg-rose-50"
                       >
                         Cancel subscription
@@ -404,78 +439,171 @@ export default function ProfilePage() {
         </article>
       </section>
 
-      {showCancelModal ? (
+      {cancelStep !== "closed" ? (
         <div
           role="dialog"
           aria-modal="true"
-          aria-labelledby="cancel-subscription-title"
+          aria-labelledby="cancel-flow-title"
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-8 backdrop-blur-sm"
         >
           <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
             <button
               type="button"
-              onClick={() => {
-                if (actionPending) return;
-                setShowCancelModal(false);
-                setActionError(null);
-              }}
+              onClick={closeCancelFlow}
               className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
               aria-label="Close"
+              disabled={actionPending}
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
-            <div className="px-6 pb-2 pt-8 md:px-8">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-                <AlertTriangle className="h-6 w-6" aria-hidden="true" />
-              </div>
-              <h2 id="cancel-subscription-title" className="mt-4 text-xl font-black text-[#0f172a]">
-                Cancel your subscription?
-              </h2>
-              <p className="mt-2 text-sm font-semibold text-slate-600">
-                You will keep premium access until <span className="font-black text-[#0f172a]">{formatPeriodEnd(currentPeriodEnd)}</span>. After
-                that date, you will lose access to:
-              </p>
-              <ul className="mt-4 space-y-2 text-sm font-semibold text-slate-600">
-                <li className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
-                  Stock of the Month featured pick
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
-                  Top High Quality Stocks list
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
-                  Full archive of every monthly pick
-                </li>
-              </ul>
-              {actionError ? (
-                <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">{actionError}</p>
-              ) : null}
-            </div>
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/60 px-6 py-4 md:flex-row md:px-8">
-              <button
-                type="button"
-                onClick={() => {
-                  if (actionPending) return;
-                  setShowCancelModal(false);
-                  setActionError(null);
-                }}
-                disabled={actionPending}
-                className="inline-flex h-11 flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Keep subscription
-              </button>
-              <button
-                type="button"
-                onClick={handleCancelSubscription}
-                disabled={actionPending}
-                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-rose-600 px-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {actionPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
-                Confirm cancellation
-              </button>
-            </div>
+
+            {cancelStep === "retention" ? (
+              <>
+                {/* Gradient celebratory header */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-[#ff4f00] via-orange-500 to-rose-500 px-6 pb-6 pt-8 text-white md:px-8">
+                  <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/20 blur-3xl" />
+                  <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-rose-200/30 blur-3xl" />
+                  <div className="relative flex items-center gap-3">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 ring-2 ring-white/30 backdrop-blur-md">
+                      <Gift className="h-6 w-6 animate-pulse-glow" aria-hidden="true" />
+                    </span>
+                    <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/85">Wait — exclusive offer</p>
+                  </div>
+                  <h2 id="cancel-flow-title" className="relative mt-4 text-3xl font-black leading-tight">
+                    2 months free,
+                    <br />
+                    <span className="bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent">on us.</span>
+                  </h2>
+                  <p className="relative mt-3 text-sm font-semibold leading-relaxed text-white/85">
+                    Before you go, stay with StockyMonth and we&apos;ll cover your next <span className="font-black">2 monthly bills</span> — a $3.98 credit applied automatically. No code needed.
+                  </p>
+                </div>
+
+                <div className="px-6 py-5 md:px-8">
+                  <div className="grid gap-2.5 text-sm font-semibold text-slate-700">
+                    <p className="flex items-start gap-2">
+                      <BadgeCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" aria-hidden="true" />
+                      Keep your access — pick of the month, quality screen, full archive.
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <BadgeCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" aria-hidden="true" />
+                      Cancel anytime after — no auto-renewal traps.
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <BadgeCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" aria-hidden="true" />
+                      One-time offer per account.
+                    </p>
+                  </div>
+                  {actionError ? (
+                    <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">{actionError}</p>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/60 px-6 py-4 md:px-8">
+                  <button
+                    type="button"
+                    onClick={handleDeclineRetention}
+                    disabled={actionPending}
+                    className="text-sm font-semibold text-slate-500 transition hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    No thanks, continue cancelling
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClaimRetention}
+                    disabled={actionPending}
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-6 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:shadow-orange-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {actionPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Gift className="h-4 w-4" aria-hidden="true" />}
+                    Claim 2 free months
+                  </button>
+                </div>
+              </>
+            ) : null}
+
+            {cancelStep === "confirm" ? (
+              <>
+                <div className="px-6 pb-2 pt-8 md:px-8">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                    <AlertTriangle className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <h2 id="cancel-flow-title" className="mt-4 text-xl font-black text-[#0f172a]">
+                    Cancel your subscription?
+                  </h2>
+                  <p className="mt-2 text-sm font-semibold text-slate-600">
+                    You will keep premium access until{" "}
+                    <span className="font-black text-[#0f172a]">{formatPeriodEnd(currentPeriodEnd)}</span>. After that date, you will lose access to:
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm font-semibold text-slate-600">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
+                      Stock of the Month featured pick
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
+                      Top High Quality Stocks list
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
+                      Full archive of every monthly pick
+                    </li>
+                  </ul>
+                  {actionError ? (
+                    <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">{actionError}</p>
+                  ) : null}
+                </div>
+                <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/60 px-6 py-4 md:flex-row md:px-8">
+                  <button
+                    type="button"
+                    onClick={closeCancelFlow}
+                    disabled={actionPending}
+                    className="inline-flex h-11 flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Keep subscription
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelSubscription}
+                    disabled={actionPending}
+                    className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-rose-600 px-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {actionPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                    Confirm cancellation
+                  </button>
+                </div>
+              </>
+            ) : null}
+
+            {cancelStep === "retained" ? (
+              <>
+                <div className="px-6 pb-2 pt-8 text-center md:px-8">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200">
+                    <PartyPopper className="h-7 w-7" aria-hidden="true" />
+                  </div>
+                  <h2 id="cancel-flow-title" className="mt-4 text-xl font-black text-[#0f172a]">
+                    Your 2 free months are locked in
+                  </h2>
+                  <p className="mt-2 text-sm font-semibold text-slate-600">
+                    Your next two monthly invoices will be discounted 100%. Premium access continues without a billing interruption.
+                  </p>
+                  {retainedUntil ? (
+                    <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+                      <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                      Free through {formatPeriodEnd(retainedUntil)}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="border-t border-slate-100 bg-slate-50/60 px-6 py-4 md:px-8">
+                  <button
+                    type="button"
+                    onClick={closeCancelFlow}
+                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-4 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:shadow-orange-300"
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       ) : null}

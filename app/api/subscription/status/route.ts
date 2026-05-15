@@ -19,6 +19,8 @@ export async function GET(request: Request) {
       active,
       cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd ?? false,
       currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
+      retentionOfferUsed: subscription?.retentionOfferUsed ?? false,
+      retainedUntil: subscription?.retainedUntil ?? null,
       source: subscription ? "persistent_store" : "cookie",
       status: subscription?.status ?? status
     });
@@ -28,6 +30,8 @@ export async function GET(request: Request) {
     active: cookieActive,
     cancelAtPeriodEnd: false,
     currentPeriodEnd: null,
+    retentionOfferUsed: false,
+    retainedUntil: null,
     source: "cookie",
     status
   });

@@ -12,6 +12,8 @@ export type PersistentSubscription = {
   currentPeriodEnd?: number;
   customerId?: string;
   email: string;
+  retentionOfferUsed?: boolean;
+  retainedUntil?: number;
   status: string;
   subscriptionId?: string;
   updatedAt: string;
@@ -62,6 +64,8 @@ export async function savePersistentSubscription({
   currentPeriodEnd,
   customerId,
   email,
+  retentionOfferUsed,
+  retainedUntil,
   status,
   subscriptionId
 }: {
@@ -69,6 +73,8 @@ export async function savePersistentSubscription({
   currentPeriodEnd?: number;
   customerId?: string;
   email: string;
+  retentionOfferUsed?: boolean;
+  retainedUntil?: number;
   status: string;
   subscriptionId?: string;
 }) {
@@ -79,12 +85,17 @@ export async function savePersistentSubscription({
   const nextCancelAtPeriodEnd =
     cancelAtPeriodEnd ?? existingSubscription?.cancelAtPeriodEnd ?? false;
   const nextCurrentPeriodEnd = currentPeriodEnd ?? existingSubscription?.currentPeriodEnd;
+  const nextRetentionOfferUsed =
+    retentionOfferUsed ?? existingSubscription?.retentionOfferUsed ?? false;
+  const nextRetainedUntil = retainedUntil ?? existingSubscription?.retainedUntil;
   const subscription: PersistentSubscription = {
     active: status === "active" || status === "trialing",
     cancelAtPeriodEnd: nextCancelAtPeriodEnd,
     currentPeriodEnd: nextCurrentPeriodEnd,
     customerId: nextCustomerId,
     email: normalizedEmail,
+    retentionOfferUsed: nextRetentionOfferUsed,
+    retainedUntil: nextRetainedUntil,
     status,
     subscriptionId: nextSubscriptionId,
     updatedAt: new Date().toISOString()
