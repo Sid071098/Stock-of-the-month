@@ -62,6 +62,25 @@ function formatPeriodEnd(periodEndSeconds: number | null): string {
   });
 }
 
+function friendlyErrorMessage(code?: string, message?: string): string {
+  switch (code) {
+    case "missing_email":
+      return "We could not identify your account. Please sign out and log back in.";
+    case "no_active_subscription":
+      return "We could not find an active subscription on your account.";
+    case "retention_offer_already_used":
+      return "Your account has already claimed this offer.";
+    case "missing_secret":
+    case "persistent_store_not_configured":
+      return "Billing service is temporarily unavailable. Please try again in a moment.";
+    case "stripe_retain_failed":
+    case "stripe_cancel_failed":
+      return message ?? "Billing service rejected the request. Please try again.";
+    default:
+      return message ?? "Something went wrong. Please try again.";
+  }
+}
+
 type SubscriptionStatus = {
   active: boolean;
   cancelAtPeriodEnd: boolean;
@@ -143,7 +162,7 @@ export default function ProfilePage() {
         | null;
 
       if (!response.ok || !payload?.ok) {
-        throw new Error(payload?.message ?? payload?.error ?? "Request failed");
+        throw new Error(friendlyErrorMessage(payload?.error, payload?.message));
       }
 
       applyStatus(payload, currentUser.email);
