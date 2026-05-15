@@ -12,7 +12,7 @@ import type { Candle, CandleRange } from "../lib/marketData";
 
 type ChartType = "candlestick" | "line";
 
-const ranges: CandleRange[] = ["1D", "1W", "1M", "1Y"];
+const ranges: CandleRange[] = ["5D", "1M", "6M", "1Y"];
 const defaultPairs = [
   "EQT/USD",
   "AAPL/USD",
@@ -23,16 +23,10 @@ const defaultPairs = [
 ];
 
 function formatAxisLabel(t: string, range: CandleRange): string {
-  if (range === "1D") {
-    // Alpha Vantage intraday timestamps come as "YYYY-MM-DD HH:MM:SS" in US/Eastern.
-    // Pull HH:MM straight from the string to avoid local-TZ shifting.
-    const match = /(\d{2}):(\d{2})/.exec(t);
-    if (match) return `${match[1]}:${match[2]}`;
-  }
   const d = new Date(t);
   if (Number.isNaN(d.getTime())) return t;
-  if (range === "1W") return d.toLocaleDateString("en-US", { weekday: "short" });
-  if (range === "1M") return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (range === "5D") return d.toLocaleDateString("en-US", { weekday: "short" });
+  if (range === "1M" || range === "6M") return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 

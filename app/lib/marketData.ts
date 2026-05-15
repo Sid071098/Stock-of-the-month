@@ -26,7 +26,7 @@ export type AIAnalysis = {
   thesis: string;
 };
 
-export type CandleRange = "1D" | "1W" | "1M" | "1Y";
+export type CandleRange = "5D" | "1M" | "6M" | "1Y";
 
 export type Candle = {
   t: string;
@@ -39,16 +39,19 @@ export type Candle = {
 const candleRangeConfig: Record<
   CandleRange,
   {
-    fn: "TIME_SERIES_INTRADAY" | "TIME_SERIES_DAILY" | "TIME_SERIES_WEEKLY";
-    interval?: "5min" | "60min";
+    fn: "TIME_SERIES_DAILY" | "TIME_SERIES_WEEKLY";
+    outputsize?: "compact" | "full";
     limit: number;
   }
 > = {
-  "1D": { fn: "TIME_SERIES_INTRADAY", interval: "5min", limit: 100 },
-  "1W": { fn: "TIME_SERIES_INTRADAY", interval: "60min", limit: 35 },
-  "1M": { fn: "TIME_SERIES_DAILY", limit: 22 },
+  "5D": { fn: "TIME_SERIES_DAILY", outputsize: "compact", limit: 5 },
+  "1M": { fn: "TIME_SERIES_DAILY", outputsize: "compact", limit: 22 },
+  "6M": { fn: "TIME_SERIES_DAILY", outputsize: "full", limit: 130 },
   "1Y": { fn: "TIME_SERIES_WEEKLY", limit: 52 }
 };
+
+const candleCache = new Map<string, { data: Candle[]; expires: number }>();
+const CANDLE_CACHE_TTL_MS = 60_000;
 
 const alphaBaseUrl = "https://www.alphavantage.co/query";
 
@@ -103,22 +106,27 @@ export async function getCandles(ticker: string, range: CandleRange): Promise<Ca
     return fallback;
   }
 
+  const cacheKey = `${symbol}:${range}`;
+  const cached = candleCache.get(cacheKey);
+  if (cached && cached.expires > Date.now()) {
+    return cached.data;
+  }
+
   const config = candleRangeConfig[range];
   const params: Record<string, string> = {
     function: config.fn,
     symbol,
     apikey: apiKey
   };
-  if (config.interval) {
-    params.interval = config.interval;
-    params.outputsize = "compact";
+  if (config.outputsize) {
+    params.outputsize = config.outputsize;
   }
 
   try {
     const url = new URL(alphaBaseUrl);
     Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
 
-    const response = await fetch(url, { next: { revalidate: 60 } });
+    const response = await fetch(url, { next: { revalidate: 300 } });
     if (!response.ok) {
       return fallback;
     }
@@ -135,7 +143,7 @@ export async function getCandles(ticker: string, range: CandleRange): Promise<Ca
       return fallback;
     }
 
-    let candles: Candle[] = Object.entries(series)
+    const parsed: Candle[] = Object.entries(series)
       .map(([t, v]) => ({
         t,
         o: Number(v["1. open"]),
@@ -145,15 +153,10 @@ export async function getCandles(ticker: string, range: CandleRange): Promise<Ca
       }))
       .filter((c) => [c.o, c.h, c.l, c.c].every(Number.isFinite));
 
-    if (range === "1D") {
-      const latestDate = candles[0]?.t.slice(0, 10);
-      if (latestDate) {
-        candles = candles.filter((c) => c.t.startsWith(latestDate));
-      }
-    }
-
-    candles = candles.slice(0, config.limit).reverse();
-    return candles.length > 0 ? candles : fallback;
+    const candles = parsed.slice(0, config.limit).reverse();
+    const result = candles.length > 0 ? candles : fallback;
+    candleCache.set(cacheKey, { data: result, expires: Date.now() + CANDLE_CACHE_TTL_MS });
+    return result;
   } catch {
     return fallback;
   }

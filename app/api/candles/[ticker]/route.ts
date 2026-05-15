@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCandles, type CandleRange } from "../../../lib/marketData";
 
-const validRanges: CandleRange[] = ["1D", "1W", "1M", "1Y"];
+const validRanges: CandleRange[] = ["5D", "1M", "6M", "1Y"];
 
 export async function GET(
   request: Request,

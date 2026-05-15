@@ -1589,7 +1589,6 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
             </div>
           </div>
         </Reveal>
-        <DetailedAnalysisSection monthlyPick={monthlyPick} />
         {!hasPremiumAccess && <PremiumUnlockPanel />}
         {hasPremiumAccess && (
           <Reveal className="mt-8 rounded-md border border-emerald-200 bg-emerald-50 p-5 text-emerald-800 shadow-sm">
