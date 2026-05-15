@@ -274,10 +274,17 @@ export default function StockExperience({
   const shouldShowSubscriptionFirst = !canAccessPremiumFeatures && view !== "subscription";
   const lockedFeature = subscriptionContext ?? featureKeyForView(view);
 
+  const activeBackdropView: StockExperienceView = shouldShowSubscriptionFirst ? "subscription" : view;
+  const viewBaseClass: Record<StockExperienceView, string> = {
+    monthly:      "from-slate-100 via-white to-cyan-50/60",
+    quality:      "from-slate-100 via-white to-emerald-50/60",
+    "all-picks":  "from-slate-100 via-white to-amber-50/60",
+    subscription: "from-slate-100 via-white to-violet-50/60"
+  };
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#ecfeff] text-[#0f172a]">
-      <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-full bg-orange-100/40 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-cyan-100/40 blur-3xl" />
+    <main className={`relative min-h-screen overflow-hidden bg-gradient-to-b ${viewBaseClass[activeBackdropView]} text-[#0f172a]`}>
+      <PageBackdrop view={activeBackdropView} />
       <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
       {shouldShowSubscriptionFirst && (
         <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
@@ -1251,6 +1258,87 @@ function AuthInput({
       </span>
     </label>
   );
+}
+
+function PageBackdrop({ view }: { view: StockExperienceView }) {
+  if (view === "monthly") {
+    return (
+      <>
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 left-1/4 h-80 w-80 rounded-full bg-cyan-300/30 blur-3xl" />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/3 -right-32 h-80 w-80 rounded-full bg-orange-300/30 blur-3xl" style={{ animationDelay: "3s" }} />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" style={{ animationDelay: "6s" }} />
+      </>
+    );
+  }
+
+  if (view === "quality") {
+    return (
+      <>
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-emerald-300/30 blur-3xl" />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/2 -right-32 h-80 w-80 rounded-full bg-teal-300/30 blur-3xl" style={{ animationDelay: "2.5s" }} />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-cyan-200/30 blur-3xl" style={{ animationDelay: "5s" }} />
+        {/* Subtle teal grid that hints at a screen / matrix */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(13,148,136,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(13,148,136,0.6)_1px,transparent_1px)] [background-size:64px_64px]"
+        />
+      </>
+    );
+  }
+
+  if (view === "all-picks") {
+    return (
+      <>
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 right-1/4 h-80 w-80 rounded-full bg-amber-300/35 blur-3xl" />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/2 -left-32 h-80 w-80 rounded-full bg-rose-200/35 blur-3xl" style={{ animationDelay: "3s" }} />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -bottom-32 right-1/3 h-72 w-72 rounded-full bg-orange-200/30 blur-3xl" style={{ animationDelay: "5.5s" }} />
+        {/* Faint amber dot pattern — archive feel */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:radial-gradient(rgba(217,119,6,0.55)_1px,transparent_1px)] [background-size:34px_34px]"
+        />
+        {/* Slow horizontal ticker tape at the very bottom */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-10 overflow-hidden opacity-[0.08]">
+          <div className="animate-ticker-tape flex whitespace-nowrap text-[10px] font-black uppercase tracking-[0.28em] text-amber-700">
+            {Array.from({ length: 2 }).map((_, copy) => (
+              <span key={copy} className="inline-flex items-center gap-6 px-6">
+                <span>2024 · 2025 · 2026</span>
+                <span>archive · vault · history</span>
+                <span>FTAI · NET · HWM · CRWD · WAB</span>
+                <span>monthly picks · curated</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (view === "subscription") {
+    return (
+      <>
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-violet-300/30 blur-3xl" />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/3 -left-32 h-80 w-80 rounded-full bg-sky-300/30 blur-3xl" style={{ animationDelay: "2.5s" }} />
+        <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-fuchsia-200/30 blur-3xl" style={{ animationDelay: "5s" }} />
+        {/* Floating premium sparkles */}
+        {[
+          { left: "12%", top: "20%", delay: "0s",   color: "bg-violet-400" },
+          { left: "82%", top: "30%", delay: "1.5s", color: "bg-sky-400"    },
+          { left: "22%", top: "70%", delay: "3s",   color: "bg-fuchsia-400" },
+          { left: "70%", top: "75%", delay: "4.5s", color: "bg-violet-400" }
+        ].map((s, i) => (
+          <span
+            key={i}
+            aria-hidden="true"
+            className={`pointer-events-none absolute h-1.5 w-1.5 rounded-full ${s.color} opacity-60 animate-pulse-glow`}
+            style={{ left: s.left, top: s.top, animationDelay: s.delay }}
+          />
+        ))}
+      </>
+    );
+  }
+
+  return null;
 }
 
 function TopNav({

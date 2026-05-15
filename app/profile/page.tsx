@@ -174,7 +174,16 @@ export default function ProfilePage() {
     : "—";
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-cyan-50/30 to-[#f8fafc] text-[#0f172a]">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-100 via-white to-indigo-50/50 text-[#0f172a]">
+      {/* Profile-specific animated backdrop: indigo + cyan + soft pink (account/identity feel) */}
+      <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-300/30 blur-3xl" />
+      <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/3 -right-32 h-80 w-80 rounded-full bg-cyan-300/30 blur-3xl" style={{ animationDelay: "3s" }} />
+      <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-rose-200/30 blur-3xl" style={{ animationDelay: "6s" }} />
+      {/* Faint diagonal stripes for "card / ID" vibe */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.025] [background-image:repeating-linear-gradient(135deg,rgba(99,102,241,0.6)_0px,rgba(99,102,241,0.6)_1px,transparent_1px,transparent_22px)]"
+      />
       {/* Top bar */}
       <nav className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/96 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-6">

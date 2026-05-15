@@ -28,11 +28,21 @@ export default async function AnalysisPage({
   const isPositive = snapshot.changePercent.startsWith("+");
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8fafc] via-white to-[#ecfeff] px-6 py-10 text-slate-950">
-      {/* Decorative aurora orbs */}
-      <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[80%] -translate-x-1/2 rounded-full bg-orange-100/40 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute top-1/3 -left-32 h-72 w-72 rounded-full bg-cyan-100/45 blur-3xl" />
-      <div aria-hidden="true" className="pointer-events-none absolute bottom-0 -right-32 h-72 w-72 rounded-full bg-emerald-100/40 blur-3xl" />
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-100 via-white to-sky-50/60 px-6 py-10 text-slate-950">
+      {/* Analysis-specific animated backdrop: cyan + sky + amber (analytical / chart feel) */}
+      <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 left-1/2 h-80 w-[80%] -translate-x-1/2 rounded-full bg-cyan-200/35 blur-3xl" />
+      <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/3 -left-32 h-80 w-80 rounded-full bg-sky-300/30 blur-3xl" style={{ animationDelay: "2.5s" }} />
+      <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute bottom-0 -right-32 h-80 w-80 rounded-full bg-amber-200/30 blur-3xl" style={{ animationDelay: "5s" }} />
+      {/* Subtle horizontal grid (chart axis feel) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(rgba(14,165,233,0.6)_1px,transparent_1px)] [background-size:100%_56px]"
+      />
+      {/* Animated scanning line — drifts top to bottom slowly */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-1/3 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent animate-float-slow"
+      />
 
       <div className="relative mx-auto max-w-7xl">
         {/* Top bar */}
