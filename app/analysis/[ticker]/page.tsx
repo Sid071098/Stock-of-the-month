@@ -28,7 +28,7 @@ export default async function AnalysisPage({
   const isPositive = snapshot.changePercent.startsWith("+");
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-100 via-white to-sky-50/60 px-6 py-10 text-slate-950">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-200 via-slate-50 to-sky-100/70 px-6 py-10 text-slate-950">
       {/* Analysis-specific animated backdrop: cyan + sky + amber (analytical / chart feel) */}
       <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 left-1/2 h-80 w-[80%] -translate-x-1/2 rounded-full bg-cyan-200/35 blur-3xl" />
       <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/3 -left-32 h-80 w-80 rounded-full bg-sky-300/30 blur-3xl" style={{ animationDelay: "2.5s" }} />

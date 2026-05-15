@@ -174,7 +174,7 @@ export default function ProfilePage() {
     : "—";
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-100 via-white to-indigo-50/50 text-[#0f172a]">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-200 via-slate-50 to-indigo-100/70 text-[#0f172a]">
       {/* Profile-specific animated backdrop: indigo + cyan + soft pink (account/identity feel) */}
       <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-300/30 blur-3xl" />
       <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute top-1/3 -right-32 h-80 w-80 rounded-full bg-cyan-300/30 blur-3xl" style={{ animationDelay: "3s" }} />

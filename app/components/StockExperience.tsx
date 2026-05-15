@@ -276,10 +276,10 @@ export default function StockExperience({
 
   const activeBackdropView: StockExperienceView = shouldShowSubscriptionFirst ? "subscription" : view;
   const viewBaseClass: Record<StockExperienceView, string> = {
-    monthly:      "from-slate-100 via-white to-cyan-50/60",
-    quality:      "from-slate-100 via-white to-emerald-50/60",
-    "all-picks":  "from-slate-100 via-white to-amber-50/60",
-    subscription: "from-slate-100 via-white to-violet-50/60"
+    monthly:      "from-slate-200 via-slate-50 to-cyan-100/70",
+    quality:      "from-slate-200 via-slate-50 to-emerald-100/70",
+    "all-picks":  "from-slate-200 via-slate-50 to-amber-100/70",
+    subscription: "from-slate-200 via-slate-50 to-violet-100/70"
   };
 
   return (
