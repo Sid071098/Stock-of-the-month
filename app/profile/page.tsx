@@ -4,16 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  AlertTriangle,
   ArrowLeft,
   BadgeCheck,
   BarChart3,
   Calendar,
   CreditCard,
+  Loader2,
   LogOut,
   Mail,
+  RotateCcw,
   ShieldCheck,
   Sparkles,
-  User
+  User,
+  X
 } from "lucide-react";
 
 type RegisteredUser = {
@@ -47,11 +51,44 @@ function getUserInitials(user: RegisteredUser): string {
   return (first + last).toUpperCase() || user.email.charAt(0).toUpperCase();
 }
 
+function formatPeriodEnd(periodEndSeconds: number | null): string {
+  if (!periodEndSeconds) return "the end of your billing period";
+  return new Date(periodEndSeconds * 1000).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+type SubscriptionStatus = {
+  active: boolean;
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: number | null;
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<RegisteredUser | null>(null);
   const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
+  const [currentPeriodEnd, setCurrentPeriodEnd] = useState<number | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [actionPending, setActionPending] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  function applyStatus(payload: Partial<SubscriptionStatus>, email: string) {
+    const subKey = getSubscriptionStorageKey(email);
+    if (payload.active) {
+      setHasPremiumAccess(true);
+      window.localStorage.setItem(subKey, "true");
+    } else {
+      setHasPremiumAccess(false);
+      window.localStorage.removeItem(subKey);
+    }
+    setCancelAtPeriodEnd(Boolean(payload.cancelAtPeriodEnd));
+    setCurrentPeriodEnd(payload.currentPeriodEnd ?? null);
+  }
 
   useEffect(() => {
     const savedUser = readStoredValue<RegisteredUser>(authSessionStorageKey);
@@ -68,18 +105,46 @@ export default function ProfilePage() {
 
     void fetch(`/api/subscription/status?email=${encodeURIComponent(savedUser.email)}`, { cache: "no-store" })
       .then((response) => response.json())
-      .then((payload: { active?: boolean }) => {
-        if (payload.active) {
-          setHasPremiumAccess(true);
-          window.localStorage.setItem(subKey, "true");
-        } else {
-          setHasPremiumAccess(false);
-          window.localStorage.removeItem(subKey);
-        }
-      })
+      .then((payload: Partial<SubscriptionStatus>) => applyStatus(payload, savedUser.email))
       .catch(() => undefined)
       .finally(() => setReady(true));
   }, [router]);
+
+  async function submitSubscriptionAction(path: "/api/subscription/cancel" | "/api/subscription/resume") {
+    if (!currentUser) return;
+    setActionPending(true);
+    setActionError(null);
+
+    try {
+      const response = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail: currentUser.email })
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | (Partial<SubscriptionStatus> & { error?: string; message?: string; ok?: boolean })
+        | null;
+
+      if (!response.ok || !payload?.ok) {
+        throw new Error(payload?.message ?? payload?.error ?? "Request failed");
+      }
+
+      applyStatus(payload, currentUser.email);
+      setShowCancelModal(false);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Something went wrong");
+    } finally {
+      setActionPending(false);
+    }
+  }
+
+  function handleCancelSubscription() {
+    void submitSubscriptionAction("/api/subscription/cancel");
+  }
+
+  function handleResumeSubscription() {
+    void submitSubscriptionAction("/api/subscription/resume");
+  }
 
   function handleSignOut() {
     window.localStorage.removeItem(authSessionStorageKey);
@@ -246,18 +311,50 @@ export default function ProfilePage() {
               </dl>
 
               {hasPremiumAccess ? (
-                <form action="/api/subscription/cancel" method="POST" className="mt-6">
-                  <input name="userEmail" type="hidden" value={currentUser.email} />
-                  <button
-                    type="submit"
-                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-rose-200 bg-white px-6 text-sm font-black text-rose-600 shadow-sm transition hover:bg-rose-50"
-                  >
-                    Cancel subscription
-                  </button>
-                  <p className="mt-3 text-xs font-semibold text-slate-500">
-                    Cancellation takes effect immediately and ends premium access.
-                  </p>
-                </form>
+                <div className="mt-6 space-y-3">
+                  {cancelAtPeriodEnd ? (
+                    <>
+                      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                        <p className="text-sm font-black text-amber-900">Cancellation scheduled</p>
+                        <p className="mt-1 text-xs font-semibold text-amber-800">
+                          Your premium access ends on {formatPeriodEnd(currentPeriodEnd)}. You will not be charged again.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleResumeSubscription}
+                        disabled={actionPending}
+                        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-6 text-sm font-black text-white shadow-lg shadow-emerald-200 transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {actionPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                        )}
+                        Resume subscription
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActionError(null);
+                          setShowCancelModal(true);
+                        }}
+                        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-rose-200 bg-white px-6 text-sm font-black text-rose-600 shadow-sm transition hover:bg-rose-50"
+                      >
+                        Cancel subscription
+                      </button>
+                      <p className="text-xs font-semibold text-slate-500">
+                        You will keep premium access until the end of your current billing period.
+                      </p>
+                    </>
+                  )}
+                  {actionError ? (
+                    <p className="text-xs font-semibold text-rose-600">{actionError}</p>
+                  ) : null}
+                </div>
               ) : (
                 <Link
                   href="/subscription"
@@ -297,6 +394,82 @@ export default function ProfilePage() {
           </div>
         </article>
       </section>
+
+      {showCancelModal ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-subscription-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-8 backdrop-blur-sm"
+        >
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <button
+              type="button"
+              onClick={() => {
+                if (actionPending) return;
+                setShowCancelModal(false);
+                setActionError(null);
+              }}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <div className="px-6 pb-2 pt-8 md:px-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                <AlertTriangle className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <h2 id="cancel-subscription-title" className="mt-4 text-xl font-black text-[#0f172a]">
+                Cancel your subscription?
+              </h2>
+              <p className="mt-2 text-sm font-semibold text-slate-600">
+                You will keep premium access until <span className="font-black text-[#0f172a]">{formatPeriodEnd(currentPeriodEnd)}</span>. After
+                that date, you will lose access to:
+              </p>
+              <ul className="mt-4 space-y-2 text-sm font-semibold text-slate-600">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
+                  Stock of the Month featured pick
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
+                  Top High Quality Stocks list
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#ff4f00]" />
+                  Full archive of every monthly pick
+                </li>
+              </ul>
+              {actionError ? (
+                <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">{actionError}</p>
+              ) : null}
+            </div>
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/60 px-6 py-4 md:flex-row md:px-8">
+              <button
+                type="button"
+                onClick={() => {
+                  if (actionPending) return;
+                  setShowCancelModal(false);
+                  setActionError(null);
+                }}
+                disabled={actionPending}
+                className="inline-flex h-11 flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Keep subscription
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelSubscription}
+                disabled={actionPending}
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-rose-600 px-4 text-sm font-black text-white shadow-lg shadow-rose-200 transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {actionPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                Confirm cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

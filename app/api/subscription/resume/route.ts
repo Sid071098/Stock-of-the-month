@@ -21,19 +21,7 @@ export async function POST(request: Request) {
   const storedSubscription = await getPersistentSubscription(email).catch(() => null);
 
   if (!storedSubscription?.subscriptionId) {
-    await savePersistentSubscription({
-      cancelAtPeriodEnd: false,
-      customerId: storedSubscription?.customerId,
-      email,
-      status: "canceled"
-    }).catch(() => undefined);
-
-    return NextResponse.json({
-      cancelAtPeriodEnd: false,
-      currentPeriodEnd: null,
-      ok: true,
-      status: "canceled"
-    });
+    return NextResponse.json({ error: "no_subscription" }, { status: 404 });
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -47,7 +35,7 @@ export async function POST(request: Request) {
 
   try {
     const updatedSubscription = await stripe.subscriptions.update(storedSubscription.subscriptionId, {
-      cancel_at_period_end: true
+      cancel_at_period_end: false
     });
 
     await savePersistentSubscription({
@@ -69,8 +57,8 @@ export async function POST(request: Request) {
       status: updatedSubscription.status
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Subscription cancellation failed";
-    return NextResponse.json({ error: "stripe_cancel_failed", message }, { status: 502 });
+    const message = error instanceof Error ? error.message : "Subscription resume failed";
+    return NextResponse.json({ error: "stripe_resume_failed", message }, { status: 502 });
   }
 }
 

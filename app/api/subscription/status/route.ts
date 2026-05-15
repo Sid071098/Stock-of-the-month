@@ -17,10 +17,18 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       active,
+      cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd ?? false,
+      currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
       source: subscription ? "persistent_store" : "cookie",
       status: subscription?.status ?? status
     });
   }
 
-  return NextResponse.json({ active: cookieActive, source: "cookie", status });
+  return NextResponse.json({
+    active: cookieActive,
+    cancelAtPeriodEnd: false,
+    currentPeriodEnd: null,
+    source: "cookie",
+    status
+  });
 }

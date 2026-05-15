@@ -8,6 +8,8 @@ export type PersistentUser = {
 
 export type PersistentSubscription = {
   active: boolean;
+  cancelAtPeriodEnd?: boolean;
+  currentPeriodEnd?: number;
   customerId?: string;
   email: string;
   status: string;
@@ -56,11 +58,15 @@ export async function getPersistentSubscription(email: string) {
 }
 
 export async function savePersistentSubscription({
+  cancelAtPeriodEnd,
+  currentPeriodEnd,
   customerId,
   email,
   status,
   subscriptionId
 }: {
+  cancelAtPeriodEnd?: boolean;
+  currentPeriodEnd?: number;
   customerId?: string;
   email: string;
   status: string;
@@ -70,8 +76,13 @@ export async function savePersistentSubscription({
   const existingSubscription = await getPersistentSubscription(normalizedEmail).catch(() => null);
   const nextCustomerId = customerId ?? existingSubscription?.customerId;
   const nextSubscriptionId = subscriptionId ?? existingSubscription?.subscriptionId;
+  const nextCancelAtPeriodEnd =
+    cancelAtPeriodEnd ?? existingSubscription?.cancelAtPeriodEnd ?? false;
+  const nextCurrentPeriodEnd = currentPeriodEnd ?? existingSubscription?.currentPeriodEnd;
   const subscription: PersistentSubscription = {
     active: status === "active" || status === "trialing",
+    cancelAtPeriodEnd: nextCancelAtPeriodEnd,
+    currentPeriodEnd: nextCurrentPeriodEnd,
     customerId: nextCustomerId,
     email: normalizedEmail,
     status,

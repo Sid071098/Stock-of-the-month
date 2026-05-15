@@ -62,6 +62,8 @@ export async function POST(request: Request) {
 
       if (email && isPersistentStoreConfigured()) {
         await savePersistentSubscription({
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          currentPeriodEnd: subscription.current_period_end,
           customerId,
           email,
           status: subscription.status,
