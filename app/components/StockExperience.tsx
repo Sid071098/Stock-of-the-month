@@ -1428,21 +1428,30 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
           <h2 className="text-xl font-black tracking-tight md:text-2xl">Our Latest Stock Pick</h2>
         </Reveal>
 
-        <Reveal as="article" className="overflow-hidden rounded-md border border-slate-800 bg-[#0f172a] p-3 shadow-2xl md:p-4">
-          <div className="grid gap-5 lg:grid-cols-[0.56fr_1fr] lg:items-stretch">
+        <Reveal as="article" className="group relative overflow-hidden rounded-2xl border border-slate-800/80 bg-[#0a1024] p-3 shadow-2xl md:p-4">
+          {/* Animated color-graded orbs */}
+          <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -left-32 -top-32 h-[420px] w-[420px] rounded-full bg-cyan-500/15 blur-3xl" />
+          <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -right-32 top-1/3 h-[420px] w-[420px] rounded-full bg-orange-500/15 blur-3xl" style={{ animationDelay: "3s" }} />
+          <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -bottom-32 left-1/3 h-[360px] w-[360px] rounded-full bg-emerald-500/10 blur-3xl" style={{ animationDelay: "6s" }} />
+          {/* Top gradient hairline */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
+
+          <div className="relative grid gap-5 lg:grid-cols-[0.56fr_1fr] lg:items-stretch">
             <MonthlyPickArtwork monthlyPick={monthlyPick} />
 
             <div className="flex min-w-0 flex-col justify-start py-1">
               <div className="flex flex-wrap items-center gap-3">
                 <EQTLogo />
-                <span className="inline-flex items-center gap-2 rounded-full bg-[#22c55e] px-3 py-1.5 text-sm font-black text-[#0f172a]">
+                <span className="animate-pulse-soft inline-flex items-center gap-2 rounded-full bg-[#22c55e] px-3 py-1.5 text-sm font-black text-[#0f172a]">
                   <LiveDot dark />
                   {monthlyPick.rating}
                 </span>
               </div>
 
-              <h3 className="mt-4 text-3xl font-black leading-tight text-white">
+              {/* Animated gradient title with sheen sweep */}
+              <h3 className="relative mt-4 inline-block w-fit overflow-hidden bg-gradient-to-r from-white via-cyan-100 to-[#ffd4c2] bg-clip-text text-3xl font-black leading-tight text-transparent">
                 {monthlyPick.name} ({monthlyPick.ticker})
+                <span aria-hidden="true" className="animate-sheen-sweep pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_30%,rgba(255,255,255,0.55)_50%,transparent_70%)] bg-clip-text text-transparent" />
               </h3>
 
               <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-black text-slate-400">
@@ -1452,9 +1461,13 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <Database className="h-4 w-4 text-slate-500" aria-hidden="true" />
-                  {monthlyPick.price}{" "}
-                  <span className={monthlyPick.change.startsWith("+") ? "text-emerald-700" : "text-[#f43f5e]"}>
-                    ({monthlyPick.change})
+                  <span className="font-mono text-slate-200">{monthlyPick.price}</span>{" "}
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ${
+                    monthlyPick.change.startsWith("+")
+                      ? "bg-emerald-400/15 text-emerald-300"
+                      : "bg-rose-400/15 text-rose-300"
+                  }`}>
+                    {monthlyPick.change.startsWith("+") ? "▲" : "▼"} {monthlyPick.change.replace(/^[+-]/, "")}
                   </span>
                 </span>
               </div>
@@ -1463,7 +1476,7 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
 
               <div className="mt-6">
                 <div className="mb-4 flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-[#22c55e]">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-[#22c55e] ring-1 ring-emerald-400/20">
                     <CircleDollarSign className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <h4 className="text-sm font-black uppercase tracking-tight text-white md:text-base">
@@ -1471,7 +1484,7 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
                   </h4>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-3">
                   {backingPoints.map((point, index) => (
                     <BackingPoint key={point.text} accent={index} icon={point.icon} text={point.text} />
                   ))}
@@ -1480,10 +1493,10 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
 
               <Link
                 href={`/analysis/${monthlyPick.ticker}`}
-                className="mt-5 inline-flex h-10 w-fit items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-5 text-sm font-black text-white transition hover:bg-orange-600"
+                className="group/cta mt-6 inline-flex h-11 w-fit items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-5 text-sm font-black text-white shadow-lg shadow-orange-500/30 transition hover:shadow-orange-400/50"
               >
-                Detailed analysis
-                <LineChart className="h-4 w-4" aria-hidden="true" />
+                <span className="relative">Detailed analysis</span>
+                <LineChart className="h-4 w-4 transition-transform duration-200 group-hover/cta:translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -1537,11 +1550,18 @@ function DetailedAnalysisSection({ monthlyPick }: { monthlyPick: MonthlyPick }) 
   ];
 
   return (
-    <Reveal className="mt-8 rounded-md border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+    <Reveal className="relative mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff4f00] via-orange-400 to-cyan-400" />
+      <div aria-hidden="true" className="pointer-events-none absolute -right-32 -top-24 h-72 w-72 rounded-full bg-orange-100/60 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 -left-24 h-72 w-72 rounded-full bg-cyan-100/50 blur-3xl" />
+
+      <div className="relative grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
         <div>
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Detailed analysis</p>
-          <h2 className="mt-3 text-3xl font-black text-[#0f172a]">
+          <p className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-[#ff4f00]">
+            <Sparkles className="h-3 w-3" aria-hidden="true" />
+            Detailed analysis
+          </p>
+          <h2 className="mt-3 bg-gradient-to-r from-[#0f172a] via-[#0f1729] to-[#ff4f00] bg-clip-text text-3xl font-black text-transparent">
             Why {monthlyPick.name} is the May 2026 pick
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-600">
@@ -1549,20 +1569,32 @@ function DetailedAnalysisSection({ monthlyPick }: { monthlyPick: MonthlyPick }) 
           </p>
           <Link
             href={`/analysis/${monthlyPick.ticker}`}
-            className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#ff4f00] px-5 text-sm font-black text-white transition hover:bg-orange-600"
+            className="group/cta mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-5 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:shadow-orange-300"
           >
             Open full analysis
-            <LineChart className="h-4 w-4" aria-hidden="true" />
+            <LineChart className="h-4 w-4 transition-transform duration-200 group-hover/cta:translate-x-0.5" aria-hidden="true" />
           </Link>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {analysisCards.map((card) => (
-            <article key={card.title} className="rounded-md border border-slate-200 bg-[#f8fafc] p-5">
-              <h3 className="text-lg font-black text-[#0f172a]">{card.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">{card.text}</p>
-            </article>
-          ))}
+          {analysisCards.map((card, index) => {
+            const accents = [
+              "from-orange-400 to-rose-400",
+              "from-cyan-400 to-sky-500",
+              "from-emerald-400 to-teal-500",
+              "from-violet-400 to-fuchsia-500"
+            ];
+            return (
+              <article
+                key={card.title}
+                className="group relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/70 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-transparent hover:shadow-xl"
+              >
+                <div aria-hidden="true" className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${accents[index]} opacity-0 transition-opacity duration-200 group-hover:opacity-100`} />
+                <h3 className="text-lg font-black text-[#0f172a]">{card.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">{card.text}</p>
+              </article>
+            );
+          })}
         </div>
       </div>
     </Reveal>
@@ -1712,11 +1744,13 @@ function BackingPoint({
   icon: React.ReactNode;
   text: string;
 }) {
-  const colors = ["bg-[#fff1ea] text-[#ff6b4a]", "bg-[#ffe5dc] text-[#ff6b4a]", "bg-[#ffd8cc] text-[#ff6b4a]"];
+  const iconBg = ["bg-[#fff1ea] text-[#ff6b4a]", "bg-cyan-400/15 text-cyan-300", "bg-emerald-400/15 text-emerald-300"];
+  const sideBar = ["from-orange-400/80 to-rose-400/60", "from-cyan-400/80 to-sky-400/60", "from-emerald-400/80 to-teal-400/60"];
 
   return (
-    <div className="grid grid-cols-[36px_1fr] gap-3">
-      <span className={`flex h-8 w-8 items-center justify-center rounded-md ${colors[accent]}`}>
+    <div className="group relative grid grid-cols-[36px_1fr] gap-3 rounded-lg border border-white/5 bg-white/[0.02] py-3 pl-3 pr-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.04] hover:shadow-lg hover:shadow-cyan-500/5">
+      <span aria-hidden="true" className={`pointer-events-none absolute inset-y-2 left-0 w-[2px] rounded-r bg-gradient-to-b ${sideBar[accent]} opacity-0 transition-opacity duration-200 group-hover:opacity-100`} />
+      <span className={`flex h-8 w-8 items-center justify-center rounded-md ${iconBg[accent]} transition-transform duration-200 group-hover:scale-110`}>
         {icon}
       </span>
       <p className="text-sm font-medium leading-relaxed text-slate-200 md:text-base">{text}</p>
