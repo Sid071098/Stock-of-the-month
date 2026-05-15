@@ -56,11 +56,11 @@ type AuthNotice = {
 };
 
 const authWinningPicks = [
-  { name: "FTAI Aviation", return: "187%", ticker: "FTAI", picked: "July 2024" },
-  { name: "Cloudflare", return: "160%", ticker: "NET", picked: "September 2024" },
-  { name: "Howmet", return: "120%", ticker: "HWM", picked: "January 2025" },
-  { name: "CrowdStrike", return: "96%", ticker: "CRWD", picked: "August 2024" },
-  { name: "Wabtec", return: "52%", ticker: "WAB", picked: "June 2024" }
+  { name: "FTAI Aviation", return: "187%", ticker: "FTAI", picked: "July 2024",     domain: "ftaiaviation.com" },
+  { name: "Cloudflare",    return: "160%", ticker: "NET",  picked: "September 2024", domain: "cloudflare.com" },
+  { name: "Howmet",        return: "120%", ticker: "HWM",  picked: "January 2025",   domain: "howmet.com" },
+  { name: "CrowdStrike",   return: "96%",  ticker: "CRWD", picked: "August 2024",    domain: "crowdstrike.com" },
+  { name: "Wabtec",        return: "52%",  ticker: "WAB",  picked: "June 2024",      domain: "wabteccorp.com" }
 ];
 
 const googleAccountOptions = [
@@ -2111,9 +2111,20 @@ function WinningPicksShowcase() {
             className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-md transition hover:border-white/25 hover:bg-white/10"
           >
             <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400" />
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-black text-white">{pick.name}</span>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-[#ffb29d]">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1.5 ring-1 ring-white/20">
+                  <LogoImg
+                    ticker={pick.ticker}
+                    domain={pick.domain}
+                    name={pick.name}
+                    className="h-full w-full object-contain"
+                    initialsClassName="text-[10px] font-black text-[#0f172a]"
+                  />
+                </span>
+                <span className="truncate text-sm font-black text-white">{pick.name}</span>
+              </div>
+              <span className="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-[#ffb29d]">
                 {pick.ticker}
               </span>
             </div>
@@ -2459,42 +2470,74 @@ function MiniStat({
   );
 }
 
-function CompanyLogo({ pick }: { pick: QualityPick }) {
-  const [failed, setFailed] = useState(false);
+type LogoStage = "local-png" | "local-svg" | "clearbit" | "initials";
+
+function LogoImg({
+  ticker,
+  domain,
+  name,
+  className,
+  initialsClassName
+}: {
+  ticker: string;
+  domain: string;
+  name: string;
+  className: string;
+  initialsClassName: string;
+}) {
+  // Try `/logos/<ticker>.png` → `/logos/<ticker>.svg` → clearbit → text initials.
+  const [stage, setStage] = useState<LogoStage>("local-png");
+  const tickerLower = ticker.toLowerCase();
+
+  if (stage === "initials") {
+    return <span className={initialsClassName}>{ticker.slice(0, 2)}</span>;
+  }
+
+  const src =
+    stage === "local-png"
+      ? `/logos/${tickerLower}.png`
+      : stage === "local-svg"
+        ? `/logos/${tickerLower}.svg`
+        : `https://logo.clearbit.com/${domain}`;
 
   return (
+    <img
+      key={stage}
+      src={src}
+      alt={`${name} logo`}
+      className={className}
+      loading="lazy"
+      onError={() => {
+        setStage((s) => (s === "local-png" ? "local-svg" : s === "local-svg" ? "clearbit" : "initials"));
+      }}
+    />
+  );
+}
+
+function CompanyLogo({ pick }: { pick: QualityPick }) {
+  return (
     <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-white p-2">
-      {failed ? (
-        <span className="text-sm font-black text-[#0f172a]">{pick.ticker.slice(0, 2)}</span>
-      ) : (
-        <img
-          src={`https://logo.clearbit.com/${pick.domain}`}
-          alt={`${pick.name} logo`}
-          className="h-full w-full object-contain"
-          loading="lazy"
-          onError={() => setFailed(true)}
-        />
-      )}
+      <LogoImg
+        ticker={pick.ticker}
+        domain={pick.domain}
+        name={pick.name}
+        className="h-full w-full object-contain"
+        initialsClassName="text-sm font-black text-[#0f172a]"
+      />
     </div>
   );
 }
 
 function ArchiveLogo({ pick }: { pick: ArchivePick }) {
-  const [failed, setFailed] = useState(false);
-
   return (
     <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white p-2 shadow-sm">
-      {failed ? (
-        <span className="text-xs font-black text-[#0f172a]">{pick.ticker.slice(0, 2)}</span>
-      ) : (
-        <img
-          src={`https://logo.clearbit.com/${pick.domain}`}
-          alt={`${pick.name} logo`}
-          className="h-full w-full object-contain"
-          loading="lazy"
-          onError={() => setFailed(true)}
-        />
-      )}
+      <LogoImg
+        ticker={pick.ticker}
+        domain={pick.domain}
+        name={pick.name}
+        className="h-full w-full object-contain"
+        initialsClassName="text-xs font-black text-[#0f172a]"
+      />
     </div>
   );
 }
