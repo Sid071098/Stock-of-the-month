@@ -1704,7 +1704,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
           </div>
         </Reveal>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 md:gap-7 xl:grid-cols-3">
           {picks.map((pick, index) => {
             return (
               <Reveal key={`${pick.month}-${pick.ticker}`} delay={(index % 6) * 55}>
@@ -1718,7 +1718,7 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                       setActiveIndex(index);
                     }
                   }}
-                  className={`relative min-h-full cursor-pointer overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-100 ${
+                  className={`group relative flex min-h-full cursor-pointer flex-col overflow-hidden rounded-2xl border bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-100 md:p-7 ${
                     activeIndex === index
                       ? "border-[#ff4f00] bg-gradient-to-br from-orange-50 to-white shadow-xl ring-2 ring-orange-100"
                       : "border-slate-200 hover:border-orange-200 hover:bg-orange-50/30"
@@ -1727,23 +1727,23 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                   {activeIndex === index && (
                     <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#ff4f00] to-orange-400" />
                   )}
-                  <div className="mb-5 flex items-start justify-between gap-4">
-                    <div className="flex gap-3">
+                  <div className="mb-6 flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 gap-3">
                       <ArchiveLogo pick={pick} />
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-black text-[#ff4f00]">{pick.month}</p>
                         <h3 className="mt-1 text-lg font-black leading-snug text-[#0f172a]">
                           {pick.name} ({pick.ticker})
                         </h3>
                       </div>
                     </div>
-                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
+                    <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
                       <LiveDot />
                       {activeIndex === index ? "Selected" : "Active Buy"}
                     </span>
                   </div>
 
-                  <div className="mb-5 flex items-end justify-between border-y border-slate-200 py-4">
+                  <div className="mb-6 flex items-end justify-between border-y border-slate-200 py-5">
                     <p className="text-2xl font-black text-[#0f172a]">{pick.price}</p>
                     <p className={`text-sm font-black ${pick.change.startsWith("+") ? "text-emerald-700" : "text-rose-600"}`}>
                       {pick.change}
@@ -1751,14 +1751,14 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
                   </div>
 
                   <p className="text-sm leading-relaxed text-slate-600">{pick.summary}</p>
-                  <div className="mt-5 grid gap-3">
+                  <ul className="mt-5 grid gap-3">
                     {pick.bullets.map((bullet) => (
-                      <p key={bullet} className="flex gap-3 text-sm leading-relaxed text-slate-700">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff4f00]" />
-                        {bullet}
-                      </p>
+                      <li key={bullet} className="flex gap-3 text-sm leading-relaxed text-slate-700">
+                        <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ff4f00]" />
+                        <span>{bullet}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </article>
               </Reveal>
             );
