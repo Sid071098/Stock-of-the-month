@@ -56,7 +56,7 @@ type AuthNotice = {
 };
 
 const authWinningPicks = [
-  { name: "FTAI Aviation", return: "187%", ticker: "FTAI", picked: "July 2024",     domain: "ftaiaviation.com" },
+  { name: "FTAI Aviation", return: "187%", ticker: "FTAI", picked: "July 2024",     domain: "ftai.com" },
   { name: "Cloudflare",    return: "160%", ticker: "NET",  picked: "September 2024", domain: "cloudflare.com" },
   { name: "Howmet",        return: "120%", ticker: "HWM",  picked: "January 2025",   domain: "howmet.com" },
   { name: "CrowdStrike",   return: "96%",  ticker: "CRWD", picked: "August 2024",    domain: "crowdstrike.com" },
@@ -2470,7 +2470,15 @@ function MiniStat({
   );
 }
 
-type LogoStage = "local-png" | "local-svg" | "clearbit" | "initials";
+type LogoStage = "local-png" | "local-svg" | "local-ico" | "clearbit" | "initials";
+
+const nextStage: Record<LogoStage, LogoStage> = {
+  "local-png": "local-svg",
+  "local-svg": "local-ico",
+  "local-ico": "clearbit",
+  clearbit:    "initials",
+  initials:    "initials"
+};
 
 function LogoImg({
   ticker,
@@ -2485,7 +2493,7 @@ function LogoImg({
   className: string;
   initialsClassName: string;
 }) {
-  // Try `/logos/<ticker>.png` → `/logos/<ticker>.svg` → clearbit → text initials.
+  // `/logos/<ticker>.png` → .svg → .ico → clearbit → text initials.
   const [stage, setStage] = useState<LogoStage>("local-png");
   const tickerLower = ticker.toLowerCase();
 
@@ -2498,7 +2506,9 @@ function LogoImg({
       ? `/logos/${tickerLower}.png`
       : stage === "local-svg"
         ? `/logos/${tickerLower}.svg`
-        : `https://logo.clearbit.com/${domain}`;
+        : stage === "local-ico"
+          ? `/logos/${tickerLower}.ico`
+          : `https://logo.clearbit.com/${domain}`;
 
   return (
     <img
@@ -2507,9 +2517,7 @@ function LogoImg({
       alt={`${name} logo`}
       className={className}
       loading="lazy"
-      onError={() => {
-        setStage((s) => (s === "local-png" ? "local-svg" : s === "local-svg" ? "clearbit" : "initials"));
-      }}
+      onError={() => setStage((s) => nextStage[s])}
     />
   );
 }
