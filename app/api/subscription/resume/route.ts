@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
+      active: updatedSubscription.status === "active" || updatedSubscription.status === "trialing",
       cancelAtPeriodEnd: updatedSubscription.cancel_at_period_end,
       currentPeriodEnd: updatedSubscription.current_period_end,
       ok: true,

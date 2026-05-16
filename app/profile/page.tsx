@@ -104,9 +104,16 @@ export default function ProfilePage() {
   const [actionPending, setActionPending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  function applyStatus(payload: Partial<SubscriptionStatus>, email: string) {
+  function applyStatus(payload: Partial<SubscriptionStatus> & { status?: string }, email: string) {
     const subKey = getSubscriptionStorageKey(email);
-    if (payload.active) {
+    // Derive active from explicit boolean, or fall back to the status string
+    // (Stripe keeps status="active" even after cancel_at_period_end:true).
+    const isActive =
+      typeof payload.active === "boolean"
+        ? payload.active
+        : payload.status === "active" || payload.status === "trialing";
+
+    if (isActive) {
       setHasPremiumAccess(true);
       window.localStorage.setItem(subKey, "true");
     } else {

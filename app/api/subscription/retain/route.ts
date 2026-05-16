@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json({
+        active: updatedSubscription.status === "active" || updatedSubscription.status === "trialing",
         cancelAtPeriodEnd: updatedSubscription.cancel_at_period_end,
         currentPeriodEnd: updatedSubscription.current_period_end,
         ok: true,
@@ -101,13 +102,15 @@ export async function POST(request: Request) {
     status: storedSubscription.status || "active"
   });
 
+  const finalStatus = storedSubscription.status || "active";
   return NextResponse.json({
+    active: finalStatus === "active" || finalStatus === "trialing",
     cancelAtPeriodEnd: false,
     currentPeriodEnd: retainedUntil,
     ok: true,
     retainedUntil,
     retentionOfferUsed: true,
-    status: storedSubscription.status || "active"
+    status: finalStatus
   });
 }
 
