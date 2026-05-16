@@ -184,7 +184,11 @@ export default function ProfilePage() {
 
   function startCancelFlow() {
     setActionError(null);
-    setCancelStep(retentionOfferUsed ? "confirm" : "retention");
+    // ?force-retention=1 bypasses the "one-time per account" rule for testing.
+    const forceRetention =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("force-retention") === "1";
+    setCancelStep(retentionOfferUsed && !forceRetention ? "confirm" : "retention");
   }
 
   function closeCancelFlow() {
