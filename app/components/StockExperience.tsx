@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
+  Activity,
   BadgeCheck,
   BarChart3,
   BriefcaseBusiness,
@@ -12,6 +13,7 @@ import {
   ChevronDown,
   CircleDollarSign,
   CircleGauge,
+  Cpu,
   CreditCard,
   Database,
   Edit3,
@@ -283,42 +285,74 @@ export default function StockExperience({
   };
 
   return (
-    <main className={`relative min-h-screen overflow-hidden bg-gradient-to-b ${viewBaseClass[activeBackdropView]} text-[#0f172a]`}>
-      <PageBackdrop view={activeBackdropView} />
-      <TopNav currentUser={currentUser} currentView={view} hasPremiumAccess={canAccessPremiumFeatures} onSignOut={signOut} />
-      {shouldShowSubscriptionFirst && (
-        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
-      )}
-      {!shouldShowSubscriptionFirst && view === "monthly" && (
-        canAccessPremiumFeatures ? (
-          <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
-        ) : (
-          <PremiumGate lockedFeature="monthly" />
-        )
-      )}
-      {!shouldShowSubscriptionFirst && view === "quality" && (
-        canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate lockedFeature="quality" />
-      )}
-      {!shouldShowSubscriptionFirst && view === "all-picks" && (
-        canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate lockedFeature="all-picks" />
-      )}
-      {!shouldShowSubscriptionFirst && view === "subscription" && (
-        <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
-      )}
-      {showPricing && (
-        <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
-      )}
-      {showAdmin && (
-        <AdminPanel
-          monthlyPick={monthlyPick}
-          qualityPicks={qualityPicks}
-          onResetMonthlyPick={resetMonthlyPick}
-          onResetQualityPicks={resetQualityPicks}
-          onSaveMonthlyPick={saveMonthlyPick}
-          onSaveQualityPicks={saveQualityPicks}
-        />
-      )}
-      <Footer />
+    <main className="relative min-h-screen overflow-hidden bg-[#020617] text-white">
+      {/* Corner gradient glows: teal + violet */}
+      <div aria-hidden="true" className="pointer-events-none fixed -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-teal-500/25 blur-[120px]" />
+      <div aria-hidden="true" className="pointer-events-none fixed -bottom-40 -right-40 h-[520px] w-[520px] rounded-full bg-violet-500/22 blur-[120px]" />
+      <div aria-hidden="true" className="pointer-events-none fixed top-1/3 right-1/4 h-72 w-72 rounded-full bg-cyan-500/10 blur-[100px]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 opacity-[0.04] [background-image:radial-gradient(rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:32px_32px]"
+      />
+
+      <MissionSidebar currentView={view} currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} />
+
+      <div className="relative ml-16 flex min-h-screen flex-col md:ml-20">
+        <ContextualHeader view={view} currentUser={currentUser} onSignOut={signOut} />
+
+        <div className="flex-1 space-y-6 px-4 py-6 md:px-8">
+          {shouldShowSubscriptionFirst && (
+            <Artifact title="Subscription state" source="Billing Agent">
+              <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
+            </Artifact>
+          )}
+          {!shouldShowSubscriptionFirst && view === "monthly" && (
+            canAccessPremiumFeatures ? (
+              <Artifact title={`${monthlyPick.month} · ${monthlyPick.ticker} thesis`} source="LLM-Reasoning">
+                <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
+              </Artifact>
+            ) : (
+              <Artifact title="Stock of the Month · locked" source="Subscription Gate">
+                <PremiumGate lockedFeature="monthly" />
+              </Artifact>
+            )
+          )}
+          {!shouldShowSubscriptionFirst && view === "quality" && (
+            <Artifact title="Top High Quality shortlist" source="Quality Screener">
+              {canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate lockedFeature="quality" />}
+            </Artifact>
+          )}
+          {!shouldShowSubscriptionFirst && view === "all-picks" && (
+            <Artifact title="All Picks · historical vault" source="Archive Index">
+              {canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate lockedFeature="all-picks" />}
+            </Artifact>
+          )}
+          {!shouldShowSubscriptionFirst && view === "subscription" && (
+            <Artifact title="Subscription state" source="Billing Agent">
+              <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
+            </Artifact>
+          )}
+          {showPricing && (
+            <Artifact title="Pricing · Stripe table" source="Stripe Catalog">
+              <PricingSection monthlyPick={monthlyPick} pricingTableId={pricingTableId} publishableKey={publishableKey} />
+            </Artifact>
+          )}
+          {showAdmin && (
+            <Artifact title="Admin · pick management" source="Admin Console">
+              <AdminPanel
+                monthlyPick={monthlyPick}
+                qualityPicks={qualityPicks}
+                onResetMonthlyPick={resetMonthlyPick}
+                onResetQualityPicks={resetQualityPicks}
+                onSaveMonthlyPick={saveMonthlyPick}
+                onSaveQualityPicks={saveQualityPicks}
+              />
+            </Artifact>
+          )}
+        </div>
+
+        <Footer />
+      </div>
     </main>
   );
 }
@@ -1339,6 +1373,187 @@ function PageBackdrop({ view }: { view: StockExperienceView }) {
   }
 
   return null;
+}
+
+function MissionSidebar({
+  currentView,
+  currentUser,
+  hasPremiumAccess
+}: {
+  currentView: StockExperienceView;
+  currentUser: RegisteredUser;
+  hasPremiumAccess: boolean;
+}) {
+  const items: Array<{
+    key: StockExperienceView;
+    icon: typeof LineChart;
+    label: string;
+    href: string;
+  }> = [
+    {
+      key: "monthly",
+      icon: LineChart,
+      label: "Stock of the Month",
+      href: hasPremiumAccess ? "/stock-of-the-month" : "/subscription?feature=monthly"
+    },
+    {
+      key: "quality",
+      icon: ShieldCheck,
+      label: "Top High Quality",
+      href: hasPremiumAccess ? "/top-quality-stocks" : "/subscription?feature=quality"
+    },
+    {
+      key: "all-picks",
+      icon: Database,
+      label: "All Picks",
+      href: hasPremiumAccess ? "/all-picks" : "/subscription?feature=all-picks"
+    },
+    {
+      key: "subscription",
+      icon: CircleDollarSign,
+      label: "Subscription",
+      href: "/subscription"
+    }
+  ];
+
+  const homeHref = hasPremiumAccess ? "/stock-of-the-month" : "/subscription";
+
+  return (
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-16 flex-col items-center justify-between border-r border-white/[0.06] bg-white/[0.04] py-5 backdrop-blur-lg md:w-20">
+      <div className="flex flex-col items-center gap-6">
+        <Link
+          href={homeHref}
+          aria-label="StockyMonth home"
+          className="group flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff8a3d] to-[#ff4f00] shadow-lg shadow-orange-500/30 transition-transform duration-200 hover:scale-105"
+        >
+          <BarChart3 className="h-5 w-5 text-white" aria-hidden="true" />
+        </Link>
+
+        <div className="flex flex-col gap-2">
+          {items.map((it) => {
+            const isActive = currentView === it.key;
+            const Icon = it.icon;
+            return (
+              <Link
+                key={it.key}
+                href={it.href}
+                aria-label={it.label}
+                title={it.label}
+                className={`group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-gradient-to-br from-teal-500/30 to-cyan-500/20 text-teal-200 shadow-[inset_0_0_0_1px_rgba(45,212,191,0.35)]"
+                    : "text-white/45 hover:bg-white/[0.06] hover:text-white"
+                }`}
+              >
+                {isActive && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -left-[14px] top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-gradient-to-b from-teal-400 to-cyan-400 shadow-[0_0_12px_rgba(45,212,191,0.6)] md:-left-[18px]"
+                  />
+                )}
+                <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md border border-white/10 bg-[#020617]/95 px-2.5 py-1 text-[11px] font-black text-white shadow-xl backdrop-blur-md group-hover:block">
+                  {it.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      <Link
+        href="/profile"
+        aria-label="Profile"
+        title="Profile"
+        className="group relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-[11px] font-black text-white ring-1 ring-white/10 transition hover:ring-teal-400/40"
+      >
+        {getUserInitials(currentUser)}
+        {hasPremiumAccess && (
+          <span aria-hidden="true" className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#020617] bg-emerald-500" />
+        )}
+        <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md border border-white/10 bg-[#020617]/95 px-2.5 py-1 text-[11px] font-black text-white shadow-xl backdrop-blur-md group-hover:block">
+          Profile
+        </span>
+      </Link>
+    </aside>
+  );
+}
+
+function ContextualHeader({
+  view,
+  currentUser
+}: {
+  view: StockExperienceView;
+  currentUser: RegisteredUser;
+  onSignOut?: () => void;
+}) {
+  const agentStates: Record<StockExperienceView, { agent: string; status: string; meta: string }> = {
+    monthly:      { agent: "StockyMonth Agent",     status: "Analyzing EQT — May 2026 conviction pick",      meta: "thesis · catalysts · positioning" },
+    quality:      { agent: "Quality Screener Agent", status: "Scanning the Top High Quality shortlist",       meta: "6 names · ranked · active buys" },
+    "all-picks":  { agent: "Archive Agent",          status: "Indexing the entire monthly picks vault",       meta: "since 2024 · 29+ picks" },
+    subscription: { agent: "Billing Agent",          status: "Managing StockyMonth subscription state",       meta: "$1.99/mo · Stripe" }
+  };
+
+  const state = agentStates[view];
+
+  return (
+    <header className="sticky top-0 z-30 border-b border-white/[0.05] bg-[#020617]/85 backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-4 px-4 py-4 md:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/25 to-cyan-500/15 ring-1 ring-teal-400/30">
+            <Cpu className="h-4 w-4 text-teal-300" aria-hidden="true" />
+            <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-teal-300/80">{state.agent}</p>
+            <p className="truncate text-sm font-black text-white md:text-base">{state.status}</p>
+          </div>
+        </div>
+        <div className="hidden items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45 md:flex">
+          <span className="hidden xl:inline">{state.meta}</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1">
+            <Activity className="h-3 w-3 text-emerald-400" aria-hidden="true" />
+            <span className="font-mono text-white/75">{currentUser.email.split("@")[0]}</span>
+          </span>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Artifact({
+  title,
+  source = "LLM-Reasoning",
+  children
+}: {
+  title?: string;
+  source?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] shadow-[0_0_60px_-20px_rgba(20,184,166,0.25)] backdrop-blur-xl">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-400/40 to-transparent" />
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.02] px-5 py-3">
+        <div className="flex items-center gap-2.5 text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
+          <span className="relative inline-flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-teal-400" />
+          </span>
+          {title ?? "Artifact"}
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-teal-300">
+          <Cpu className="h-3 w-3" aria-hidden="true" />
+          Source: {source}
+        </span>
+      </div>
+
+      <div>{children}</div>
+    </section>
+  );
 }
 
 function TopNav({
@@ -2561,19 +2776,19 @@ function LiveDot({ dark = false }: { dark?: boolean }) {
 
 function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-slate-200 bg-gradient-to-b from-white to-slate-50 px-6 py-10">
-      <div aria-hidden="true" className="pointer-events-none absolute -top-16 left-1/2 h-32 w-[60%] -translate-x-1/2 rounded-full bg-orange-200/25 blur-3xl" />
+    <footer className="relative overflow-hidden border-t border-white/[0.06] bg-[#020617]/60 px-6 py-8 backdrop-blur-md">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-16 left-1/2 h-32 w-[60%] -translate-x-1/2 rounded-full bg-teal-500/12 blur-3xl" />
       <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-[#ff8a3d] to-[#ff4f00] text-white shadow-md">
             <BarChart3 className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-sm font-black tracking-tight text-[#0f172a]">StockyMonth</p>
-            <p className="text-[11px] font-bold text-slate-500">High-conviction monthly research</p>
+            <p className="text-sm font-black tracking-tight text-white">StockyMonth</p>
+            <p className="text-[11px] font-bold text-white/45">High-conviction monthly research</p>
           </div>
         </div>
-        <p className="max-w-xl text-xs font-semibold leading-relaxed text-slate-500">
+        <p className="max-w-xl text-xs font-semibold leading-relaxed text-white/45">
           © 2026 Easecase, Inc. All rights reserved. AI-assisted and human-reviewed financial research.
         </p>
       </div>
