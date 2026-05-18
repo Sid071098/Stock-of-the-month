@@ -32,6 +32,32 @@ import {
 import StripePricingTable from "./StripePricingTable";
 import type { ArchivePick, MonthlyPick, QualityPick } from "../lib/picks";
 
+type GoogleTokenResponse = {
+  access_token?: string;
+  error?: string;
+  error_description?: string;
+};
+
+type GoogleTokenClient = {
+  requestAccessToken: (overrides?: { prompt?: string }) => void;
+};
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        oauth2: {
+          initTokenClient: (config: {
+            client_id: string;
+            scope: string;
+            callback: (response: GoogleTokenResponse) => void;
+          }) => GoogleTokenClient;
+        };
+      };
+    };
+  }
+}
+
 const monthlyStorageKey = "stockymonth.monthlyPick";
 const qualityStorageKey = "stockymonth.qualityPicks";
 const authUsersStorageKey = "stockymonth.registeredUsers";
@@ -349,6 +375,30 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   const [forgotEmail, setForgotEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [googleChooserOpen, setGoogleChooserOpen] = useState(false);
+  const [googleScriptReady, setGoogleScriptReady] = useState(false);
+
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const googleEnabled = Boolean(googleClientId);
+
+  useEffect(() => {
+    if (!googleEnabled || typeof window === "undefined") return;
+    if (window.google?.accounts?.oauth2) {
+      setGoogleScriptReady(true);
+      return;
+    }
+    const existing = document.getElementById("google-identity-services") as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener("load", () => setGoogleScriptReady(true), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "google-identity-services";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setGoogleScriptReady(true);
+    document.head.appendChild(script);
+  }, [googleEnabled]);
 
   function showNotice(nextNotice: AuthNotice) {
     setNotice(nextNotice);
@@ -358,6 +408,60 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
   function switchAuthMode(nextMode: "login" | "signup" | "forgot") {
     setMode(nextMode);
     setEmailFormOpen(false);
+  }
+
+  function startGoogleOauth() {
+    if (!googleEnabled) {
+      // Local-dev fallback: show the mock chooser
+      setGoogleChooserOpen(true);
+      return;
+    }
+    if (typeof window === "undefined" || !window.google?.accounts?.oauth2 || !googleScriptReady) {
+      showNotice({ message: "Google sign-in is still loading. Please try again in a second.", type: "info" });
+      return;
+    }
+    try {
+      const tokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: googleClientId,
+        scope: "openid email profile",
+        callback: async (response) => {
+          if (!response?.access_token) {
+            if (response?.error && response.error !== "access_denied" && response.error !== "popup_closed") {
+              showNotice({ message: `Google sign-in failed: ${response.error}.`, type: "error" });
+            }
+            return;
+          }
+          try {
+            const userinfo = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+              headers: { Authorization: `Bearer ${response.access_token}` }
+            }).then((r) => r.json());
+
+            const email = normalizeEmail(userinfo.email ?? "");
+            if (!email) {
+              showNotice({ message: "Google did not return an email address.", type: "error" });
+              return;
+            }
+            const firstName =
+              userinfo.given_name ||
+              (typeof userinfo.name === "string" ? userinfo.name.split(" ")[0] : "") ||
+              email.split("@")[0];
+            const lastName =
+              userinfo.family_name ||
+              (typeof userinfo.name === "string"
+                ? userinfo.name.split(" ").slice(1).join(" ")
+                : "") ||
+              "";
+
+            await handleGoogleAccount({ email, firstName, lastName });
+          } catch {
+            showNotice({ message: "Could not finish Google sign-in. Please try again.", type: "error" });
+          }
+        }
+      });
+      tokenClient.requestAccessToken({ prompt: "select_account" });
+    } catch {
+      showNotice({ message: "Google sign-in could not start. Please refresh and try again.", type: "error" });
+    }
   }
 
   async function handleGoogleAccount(account: { email: string; firstName: string; lastName: string }) {
@@ -635,7 +739,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             <div className="mt-7 grid gap-3">
               <button
                 type="button"
-                onClick={() => setGoogleChooserOpen(true)}
+                onClick={startGoogleOauth}
                 className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/95 px-5 text-sm font-black text-[#0f1729] shadow-lg transition hover:bg-white"
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-[#4285f4] ring-1 ring-slate-200">
