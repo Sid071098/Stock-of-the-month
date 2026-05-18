@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   try {
     const existingUser = await getPersistentUser(email);
     if (existingUser) {
-      return NextResponse.json({ user: publicUser(existingUser) });
+      return NextResponse.json({ user: publicUser(existingUser), existed: true });
     }
 
     const user = await savePersistentUser({
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       passwordHash: body.passwordHash ?? `google:${email}`
     });
 
-    return NextResponse.json({ user: publicUser(user) });
+    return NextResponse.json({ user: publicUser(user), existed: false });
   } catch {
     return NextResponse.json({ error: "persistent_store_failed" }, { status: 500 });
   }

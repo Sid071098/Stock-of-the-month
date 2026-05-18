@@ -474,18 +474,33 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
       passwordHash,
       createdAt: new Date().toISOString()
     };
-    const persistedUser = await syncGooglePersistentUser(googleUser);
-    const users = getRegisteredUsers();
-    let user = persistedUser ?? users.find((candidate) => candidate.email === email);
+    const persistedResult = await syncGooglePersistentUser(googleUser);
+    const localUsers = getRegisteredUsers();
+    const localExisting = localUsers.find((candidate) => candidate.email === email);
+    const accountExists = persistedResult?.existed === true || Boolean(localExisting);
 
-    if (!user) {
-      user = googleUser;
+    // In signup mode, block re-creating an existing account.
+    if (mode === "signup" && accountExists) {
+      setGoogleChooserOpen(false);
+      showNotice({
+        message: "User is already registered. Please log in instead.",
+        type: "error"
+      });
+      setMode("login");
+      setLoginEmail(email);
+      return;
     }
 
+    const user = persistedResult?.user ?? localExisting ?? googleUser;
     upsertRegisteredUser({ ...user, passwordHash });
 
     setGoogleChooserOpen(false);
-    showNotice({ message: "Google login successful. Welcome to StockyMonth.", type: "success" });
+    showNotice({
+      message: accountExists
+        ? "Google login successful. Welcome back."
+        : "Account created. Welcome to StockyMonth.",
+      type: "success"
+    });
     onAuthenticated(user);
   }
 
@@ -2839,7 +2854,9 @@ async function registerPersistentUser(user: RegisteredUser) {
   }
 }
 
-async function syncGooglePersistentUser(user: RegisteredUser) {
+async function syncGooglePersistentUser(
+  user: RegisteredUser
+): Promise<{ user: RegisteredUser; existed: boolean } | null> {
   try {
     const response = await fetch("/api/auth/google", {
       method: "POST",
@@ -2853,8 +2870,12 @@ async function syncGooglePersistentUser(user: RegisteredUser) {
       return null;
     }
 
-    const payload = (await response.json()) as { user?: RegisteredUser };
-    return payload.user ? { ...payload.user, passwordHash: user.passwordHash } : null;
+    const payload = (await response.json()) as { user?: RegisteredUser; existed?: boolean };
+    if (!payload.user) return null;
+    return {
+      user: { ...payload.user, passwordHash: user.passwordHash },
+      existed: Boolean(payload.existed)
+    };
   } catch {
     return null;
   }
