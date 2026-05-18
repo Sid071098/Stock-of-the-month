@@ -708,7 +708,10 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
       <section className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-center px-6 pb-12 pt-4">
         {/* MEGA hero title */}
         <div className="text-center">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#06b6d4] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
+          {/* Latest pick teaser chip */}
+          <LatestPickTeaser />
+
+          <div className="mt-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#06b6d4] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
             <BarChart3 className="h-9 w-9 text-white" aria-hidden="true" />
           </div>
 
@@ -722,10 +725,13 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
           <p className="mx-auto mt-4 max-w-xl text-sm font-bold text-white/65 md:text-base">
             High-conviction monthly picks. Live market data. A vault of every thesis we&apos;ve ever published.
           </p>
+
+          {/* Animated count-up stats */}
+          <HeroStats />
         </div>
 
         {/* Glassmorphism login card */}
-        <div className="mt-10 w-full max-w-[460px]">
+        <div className="mt-8 w-full max-w-[460px]">
           <div className="glass relative overflow-hidden rounded-2xl p-6 shadow-2xl md:p-8">
             <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#ff4f00]/35 blur-3xl" />
             <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-[#06b6d4]/35 blur-3xl" />
@@ -905,6 +911,9 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
               </button>
             )}
           </div>
+
+          {/* Trust strip below the form */}
+          <TrustStrip />
         </div>
 
         {/* Stock trading animation below the login card */}
@@ -1055,6 +1064,101 @@ function TradingAnimation() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function LatestPickTeaser() {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-white/90 shadow-lg backdrop-blur-md md:text-[11px]">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+      </span>
+      <span className="text-emerald-300">May 2026</span>
+      <span className="opacity-30">·</span>
+      <span>EQT</span>
+      <span className="opacity-30">·</span>
+      <span className="text-white/70">Upstream Natural Gas</span>
+    </div>
+  );
+}
+
+function useCountUp(target: number, duration = 1400) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    let raf = 0;
+    let start: number | null = null;
+    function step(ts: number) {
+      if (start === null) start = ts;
+      const progress = Math.min(1, (ts - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(target * eased));
+      if (progress < 1) raf = requestAnimationFrame(step);
+    }
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+
+  return value;
+}
+
+function HeroStats() {
+  const picks = useCountUp(29);
+  const best = useCountUp(187);
+  const buys = useCountUp(6);
+
+  return (
+    <div className="mx-auto mt-7 grid w-full max-w-xl grid-cols-3 gap-2.5 sm:gap-4">
+      <div className="glass rounded-xl px-3 py-3 text-center sm:px-4 sm:py-4">
+        <p className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+          {picks}
+        </p>
+        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/55 sm:text-[10px]">
+          Monthly picks
+        </p>
+      </div>
+      <div className="glass rounded-xl px-3 py-3 text-center sm:px-4 sm:py-4">
+        <p className="bg-gradient-to-r from-emerald-300 to-emerald-400 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+          +{best}%
+        </p>
+        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/55 sm:text-[10px]">
+          Best winner
+        </p>
+      </div>
+      <div className="glass rounded-xl px-3 py-3 text-center sm:px-4 sm:py-4">
+        <p className="bg-gradient-to-r from-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+          {buys}
+        </p>
+        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/55 sm:text-[10px]">
+          Active buys
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function TrustStrip() {
+  const items = [
+    { icon: ShieldCheck, color: "text-emerald-400", label: "256-bit secure" },
+    { icon: Sparkles,    color: "text-cyan-400",    label: "Free to join"   },
+    { icon: BadgeCheck,  color: "text-amber-400",   label: "Cancel anytime" }
+  ];
+  return (
+    <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[0.18em] text-white/50 sm:gap-5">
+      {items.map((it, i) => {
+        const Icon = it.icon;
+        return (
+          <span key={it.label} className="inline-flex items-center gap-3">
+            {i > 0 && <span aria-hidden="true" className="h-1 w-1 rounded-full bg-white/20" />}
+            <span className="inline-flex items-center gap-1.5">
+              <Icon className={`h-3 w-3 ${it.color}`} aria-hidden="true" />
+              {it.label}
+            </span>
+          </span>
+        );
+      })}
     </div>
   );
 }
