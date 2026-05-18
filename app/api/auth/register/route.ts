@@ -6,6 +6,7 @@ import {
   savePersistentUser,
   type PersistentUser
 } from "../../../lib/persistentStore";
+import { runOnboarding } from "../../../lib/onboarding";
 
 export async function POST(request: Request) {
   if (!isPersistentStoreConfigured()) {
@@ -31,6 +32,18 @@ export async function POST(request: Request) {
       firstName: body.firstName.trim(),
       lastName: body.lastName.trim(),
       passwordHash: body.passwordHash
+    });
+
+    // Fire the onboarding workflow (draft email → parallel send + CRM log).
+    // Awaited so the response only returns after the workflow finishes on
+    // serverless — typically ~1-2s. Failures are logged, never thrown.
+    await runOnboarding({
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      signupSource: "email"
+    }).catch((err) => {
+      console.error("[onboarding] register flow failed", err);
     });
 
     return NextResponse.json({ user: publicUser(user) });

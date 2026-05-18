@@ -6,6 +6,7 @@ import {
   savePersistentUser,
   type PersistentUser
 } from "../../../lib/persistentStore";
+import { runOnboarding } from "../../../lib/onboarding";
 
 export async function POST(request: Request) {
   if (!isPersistentStoreConfigured()) {
@@ -31,6 +32,17 @@ export async function POST(request: Request) {
       firstName: body.firstName.trim(),
       lastName: body.lastName.trim(),
       passwordHash: body.passwordHash ?? `google:${email}`
+    });
+
+    // First-time Google signup → run the onboarding workflow. Returning Google
+    // logins (existed=true above) skip this entirely.
+    await runOnboarding({
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      signupSource: "google"
+    }).catch((err) => {
+      console.error("[onboarding] google flow failed", err);
     });
 
     return NextResponse.json({ user: publicUser(user), existed: false });

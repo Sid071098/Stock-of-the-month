@@ -118,6 +118,18 @@ export async function getEmailForPersistentCustomer(customerId: string) {
   return redisCommand<string | null>(["GET", customerKey(customerId)]);
 }
 
+// Append-only log for onboarding outcomes / CRM events. Capped at 1,000 entries.
+// Read with `LRANGE stockymonth:onboarding:log 0 49` to see the 50 most recent.
+const onboardingLogKey = "stockymonth:onboarding:log";
+const onboardingLogMaxEntries = 1000;
+
+export async function appendOnboardingLog(entry: Record<string, unknown>) {
+  if (!isPersistentStoreConfigured()) return;
+  const payload = JSON.stringify({ at: new Date().toISOString(), ...entry });
+  await redisCommand<number>(["LPUSH", onboardingLogKey, payload]);
+  await redisCommand<"OK">(["LTRIM", onboardingLogKey, 0, onboardingLogMaxEntries - 1]);
+}
+
 export async function getEmailForPersistentSubscription(subscriptionId: string) {
   return redisCommand<string | null>(["GET", stripeSubscriptionKey(subscriptionId)]);
 }
