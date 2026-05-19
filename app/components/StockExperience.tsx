@@ -1962,79 +1962,49 @@ function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
   const bullets = (monthlyPick.summaryBullets?.length ? monthlyPick.summaryBullets : [monthlyPick.thesis]).slice(0, 3);
 
   return (
-    <div className="relative h-full min-h-[300px] overflow-hidden rounded-xl bg-gradient-to-br from-[#fff7ed] via-[#ffedd5] to-[#fed7aa] p-3 sm:p-4 lg:min-h-[0]">
-      {/* Animated drifting blobs — warm palette */}
-      <div aria-hidden="true" className="animate-drift-wide absolute -left-24 -top-24 h-44 w-44 rounded-full bg-[#ea580c] opacity-90" />
-      <div aria-hidden="true" className="animate-drift-wide absolute left-16 -top-24 h-48 w-48 rounded-full bg-[#fdba74]/85" style={{ animationDelay: "2.5s" }} />
-      <div aria-hidden="true" className="animate-drift-wide absolute -left-16 top-20 h-28 w-28 rotate-[8deg] rounded-[42px] bg-[#fed7aa]/90" style={{ animationDelay: "4s" }} />
-      <div aria-hidden="true" className="absolute right-24 top-0 h-16 w-52 bg-[#ffedd5]/80" />
-      <div aria-hidden="true" className="absolute right-12 top-0 h-16 w-20 skew-x-[-24deg] bg-[#fdba74]" />
-      <div aria-hidden="true" className="animate-float-medium absolute -right-10 top-6 h-20 w-20 rotate-45 rounded-[42px] bg-[#ea580c]" />
-      <div aria-hidden="true" className="animate-drift-wide absolute -bottom-24 -left-10 h-44 w-44 rounded-full bg-[#ea580c]" style={{ animationDelay: "5s" }} />
-      <div aria-hidden="true" className="absolute bottom-0 right-0 h-0 w-0 border-b-[100px] border-l-[100px] border-b-[#ea580c] border-l-transparent" />
-      <div aria-hidden="true" className="absolute bottom-0 right-20 h-0 w-0 border-b-[80px] border-l-[80px] border-b-[#fdba74] border-l-transparent" />
-
-      {/* Animated sparkline */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 480 80"
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] h-20 w-full -translate-y-1/2 opacity-30 mix-blend-multiply"
-      >
-        <defs>
-          <linearGradient id="mpa-line" x1="0" x2="1" y1="0" y2="0">
-            <stop offset="0%"   stopColor="#c2410c" stopOpacity="0" />
-            <stop offset="50%"  stopColor="#c2410c" stopOpacity="1" />
-            <stop offset="100%" stopColor="#c2410c" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M0,55 C40,48 80,30 130,38 C180,46 220,18 270,24 C320,30 360,12 400,16 C440,20 470,8 480,6"
-          fill="none"
-          stroke="url(#mpa-line)"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          className="animate-draw-line"
-        />
-      </svg>
+    <div className="relative h-full min-h-[300px] overflow-hidden rounded-xl bg-gradient-to-br from-[#0a1023] via-[#111729] to-[#1a1f3a] p-3 sm:p-4 lg:min-h-[0]">
+      {/* Just two faint, slow corner glows — calm, not distracting */}
+      <div aria-hidden="true" className="pointer-events-none absolute -left-24 -top-24 h-44 w-44 rounded-full bg-[#ff4f00]/15 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -right-16 h-44 w-44 rounded-full bg-amber-400/10 blur-3xl" />
+      {/* Top hairline */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-400/40 to-transparent" />
 
       <div className="relative z-10 flex flex-col">
         {/* Eyebrow */}
         <div className="flex items-center gap-2">
           <span aria-hidden="true" className="flex h-1.5 w-1.5 rounded-full bg-[#ff4f00] animate-pulse-soft" />
-          <p className="text-[9px] font-black uppercase tracking-[0.28em] text-[#9a3412]">
-            Dynamic LLM Brief · <span className="text-[#c2410c]/70">Live</span>
+          <p className="text-[9px] font-black uppercase tracking-[0.28em] text-orange-300">
+            Dynamic LLM Brief · <span className="text-orange-300/60">Live</span>
           </p>
         </div>
 
         <div className="mt-2.5 flex items-center gap-2.5">
-          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#0f172a] shadow-md ring-2 ring-white/70">
-            <BadgeCheck className="h-5 w-5 text-[#ea580c]" aria-hidden="true" />
+          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur-md">
+            <BadgeCheck className="h-5 w-5 text-orange-300" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="text-xl font-black leading-tight text-[#0f172a] md:text-[22px]">
-              {monthlyPick.month} <span className="bg-gradient-to-r from-[#ea580c] to-[#c2410c] bg-clip-text text-transparent">Pick</span>
+            <h3 className="text-xl font-black leading-tight text-white md:text-[22px]">
+              {monthlyPick.month} <span className="bg-gradient-to-r from-orange-300 to-amber-300 bg-clip-text text-transparent">Pick</span>
             </h3>
-            <p className="mt-0.5 inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-[#9a3412]/80">
-              <span className="font-mono text-[#0f172a]">{monthlyPick.ticker}</span>
-              <span className="text-[#c2410c]/50">·</span>
+            <p className="mt-0.5 inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-orange-300/70">
+              <span className="font-mono text-white">{monthlyPick.ticker}</span>
+              <span className="text-orange-300/40">·</span>
               <span className="font-mono">{monthlyPick.price}</span>
             </p>
           </div>
         </div>
 
         {/* Live-feed strip */}
-        <div className="mt-3 flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 backdrop-blur-sm ring-1 ring-white/60 shadow-sm">
-          <span aria-hidden="true" className="flex h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
-          <span className="text-[9px] font-black uppercase tracking-[0.18em] text-[#9a3412]">Signal feed</span>
-          <span className="text-[9px] font-mono font-bold text-slate-500">conviction · high</span>
-          <span className="ml-auto text-[9px] font-mono text-slate-400">↻ 03:24</span>
+        <div className="mt-3 flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1 ring-1 ring-white/10 backdrop-blur-sm">
+          <span aria-hidden="true" className="flex h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
+          <span className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-300">Signal feed</span>
+          <span className="text-[9px] font-mono font-bold text-white/55">conviction · high</span>
+          <span className="ml-auto text-[9px] font-mono text-white/40">↻ 03:24</span>
         </div>
 
-        {/* Bullet card */}
-        <div className="relative mt-3 overflow-hidden rounded-xl bg-white/95 p-3 shadow-lg ring-1 ring-white/70 md:p-4">
+        {/* Bullet card — light surface for contrast against dark backdrop */}
+        <div className="relative mt-3 overflow-hidden rounded-xl bg-white p-3 shadow-xl shadow-black/30 ring-1 ring-white/10 md:p-4">
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#ff4f00] via-orange-400 to-amber-400" />
-          <div aria-hidden="true" className="animate-sheen-sweep pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-[linear-gradient(110deg,transparent,rgba(255,79,0,0.07),transparent)]" />
 
           <div className="mb-2.5 flex items-center justify-between gap-3">
             <p className="text-xs font-black text-[#0f172a] md:text-sm">Exclusive Analysis for Subscribers</p>
@@ -2045,20 +2015,16 @@ function MonthlyPickArtwork({ monthlyPick }: { monthlyPick: MonthlyPick }) {
           </div>
 
           <ul className="grid gap-2">
-            {bullets.map((item, index) => (
-              <li
-                key={item}
-                className="group/bullet flex items-start gap-2.5 text-xs font-bold leading-snug text-[#0f172a] transition-all duration-200 md:text-sm"
-                style={{ animation: `fadeIn 0.4s ease-out ${index * 0.08}s both` }}
-              >
-                <span aria-hidden="true" className="mt-1.5 flex h-2 w-2 shrink-0 items-center justify-center rounded-full bg-[#ff4f00] ring-2 ring-orange-100 transition-transform duration-200 group-hover/bullet:scale-125" />
+            {bullets.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-xs font-bold leading-snug text-[#0f172a] md:text-sm">
+                <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#ff4f00] ring-2 ring-orange-100" />
                 <span className="flex-1">{item}</span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-3 flex items-center justify-between border-t border-orange-100/70 pt-2">
-            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#9a3412]">StockyMonth Research</p>
+          <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-orange-700">StockyMonth Research</p>
             <p className="text-[9px] font-mono font-bold text-slate-400">v2.6 · {monthlyPick.month.split(" ")[0]}</p>
           </div>
         </div>
