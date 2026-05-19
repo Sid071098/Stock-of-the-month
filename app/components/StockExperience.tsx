@@ -705,22 +705,22 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       </header>
 
-      <section className="relative z-10 mx-auto grid w-full max-w-7xl gap-8 px-6 pb-12 pt-6 lg:grid-cols-[1fr_minmax(0,440px)] lg:items-start lg:pt-10">
+      <section className="relative z-10 mx-auto grid w-full max-w-7xl gap-5 px-6 pb-6 pt-3 lg:grid-cols-[1fr_minmax(0,420px)] lg:items-start lg:gap-6 lg:pt-4">
         {/* LEFT: hero content + trading animation (stacks BELOW login on mobile) */}
         <div className="order-2 lg:order-1">
           <div className="text-center lg:text-left">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#06b6d4] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
-              <BarChart3 className="h-9 w-9 text-white" aria-hidden="true" />
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#06b6d4] shadow-[0_14px_40px_-12px_rgba(255,79,0,0.5)]">
+              <BarChart3 className="h-7 w-7 text-white" aria-hidden="true" />
             </div>
 
             <h1
-              className="animate-title-glow mt-5 bg-gradient-to-r from-white via-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-4xl font-black leading-none tracking-tight text-transparent md:text-5xl lg:text-6xl"
+              className="animate-title-glow mt-3 bg-gradient-to-r from-white via-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-3xl font-black leading-none tracking-tight text-transparent md:text-4xl"
               style={{ letterSpacing: "-0.02em" }}
             >
               StockyMonth
             </h1>
 
-            <p className="mx-auto mt-4 max-w-xl text-sm font-bold text-white/65 md:text-base lg:mx-0">
+            <p className="mx-auto mt-2 max-w-xl text-xs font-bold text-white/65 md:text-sm lg:mx-0">
               High-conviction monthly picks. Live market data. A vault of every thesis we&apos;ve ever published.
             </p>
 
@@ -728,8 +728,8 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
             <HeroStats />
           </div>
 
-          {/* Stock trading animation under the hero on the left side */}
-          <div className="mt-10">
+          {/* Trading animation right below the stats (no big gap) */}
+          <div className="mt-4">
             <TradingAnimation />
           </div>
         </div>
@@ -948,25 +948,25 @@ function TradingAnimation() {
   ];
 
   return (
-    <div className="mt-14 w-full max-w-5xl">
-      <div className="mb-5 flex items-center justify-between text-white/80">
+    <div className="w-full">
+      <div className="mb-2.5 flex items-center justify-between text-white/80">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-glow" />
-          <span className="text-[11px] font-black uppercase tracking-[0.28em]">Live Market Pulse</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-glow" />
+          <span className="text-[10px] font-black uppercase tracking-[0.26em]">Live Market Pulse</span>
         </div>
-        <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em]">
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
           <span className="text-emerald-300">+24.6%</span>
           <span className="text-white/40">·</span>
           <span className="text-white/60">30D</span>
         </div>
       </div>
 
-      <div className="glass relative overflow-hidden rounded-2xl p-5 shadow-2xl md:p-7">
-        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-emerald-400/15 blur-3xl" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-[#ff4f00]/15 blur-3xl" />
+      <div className="glass relative overflow-hidden rounded-xl p-3 shadow-xl md:p-4">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-emerald-400/15 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-[#ff4f00]/15 blur-3xl" />
 
         {/* Chart area */}
-        <div className="relative h-[260px] w-full overflow-hidden rounded-xl bg-gradient-to-b from-white/[0.03] to-transparent">
+        <div className="relative h-[160px] w-full overflow-hidden rounded-lg bg-gradient-to-b from-white/[0.03] to-transparent">
           {/* horizontal grid lines */}
           <div aria-hidden="true" className="absolute inset-0 flex flex-col justify-between py-4">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -1051,16 +1051,16 @@ function TradingAnimation() {
         </div>
 
         {/* Stat strip below chart */}
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-3 grid grid-cols-4 gap-2">
           {[
             { label: "Open",   value: "$184.20", tone: "text-white" },
             { label: "High",   value: "$192.46", tone: "text-emerald-300" },
             { label: "Low",    value: "$181.10", tone: "text-rose-300" },
             { label: "Volume", value: "8.42M",   tone: "text-cyan-300" }
           ].map((s) => (
-            <div key={s.label} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2.5 backdrop-blur-md">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/50">{s.label}</p>
-              <p className={`mt-1 text-sm font-black ${s.tone}`}>{s.value}</p>
+            <div key={s.label} className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1.5 backdrop-blur-md">
+              <p className="text-[9px] font-black uppercase tracking-[0.16em] text-white/50">{s.label}</p>
+              <p className={`mt-0.5 text-[11px] font-black ${s.tone}`}>{s.value}</p>
             </div>
           ))}
         </div>
@@ -1095,30 +1095,24 @@ function HeroStats() {
   const buys = useCountUp(6);
 
   return (
-    <div className="mx-auto mt-7 grid w-full max-w-xl grid-cols-3 gap-2.5 sm:gap-4">
-      <div className="glass rounded-xl px-3 py-3 text-center sm:px-4 sm:py-4">
-        <p className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+    <div className="mx-auto mt-4 grid w-full max-w-md grid-cols-3 gap-2 lg:mx-0">
+      <div className="glass rounded-lg px-2.5 py-2 text-center">
+        <p className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-xl font-black tracking-tight text-transparent">
           {picks}
         </p>
-        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/55 sm:text-[10px]">
-          Monthly picks
-        </p>
+        <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-white/55">Monthly picks</p>
       </div>
-      <div className="glass rounded-xl px-3 py-3 text-center sm:px-4 sm:py-4">
-        <p className="bg-gradient-to-r from-emerald-300 to-emerald-400 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+      <div className="glass rounded-lg px-2.5 py-2 text-center">
+        <p className="bg-gradient-to-r from-emerald-300 to-emerald-400 bg-clip-text text-xl font-black tracking-tight text-transparent">
           +{best}%
         </p>
-        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/55 sm:text-[10px]">
-          Best winner
-        </p>
+        <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-white/55">Best winner</p>
       </div>
-      <div className="glass rounded-xl px-3 py-3 text-center sm:px-4 sm:py-4">
-        <p className="bg-gradient-to-r from-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+      <div className="glass rounded-lg px-2.5 py-2 text-center">
+        <p className="bg-gradient-to-r from-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-xl font-black tracking-tight text-transparent">
           {buys}
         </p>
-        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/55 sm:text-[10px]">
-          Active buys
-        </p>
+        <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-white/55">Active buys</p>
       </div>
     </div>
   );
