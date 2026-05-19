@@ -705,33 +705,37 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
         </div>
       </header>
 
-      <section className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-center px-6 pb-12 pt-4">
-        {/* MEGA hero title */}
-        <div className="text-center">
-          {/* Latest pick teaser chip */}
-          <LatestPickTeaser />
+      <section className="relative z-10 mx-auto grid w-full max-w-7xl gap-8 px-6 pb-12 pt-6 lg:grid-cols-[1fr_minmax(0,440px)] lg:items-start lg:pt-10">
+        {/* LEFT: hero content + trading animation (stacks BELOW login on mobile) */}
+        <div className="order-2 lg:order-1">
+          <div className="text-center lg:text-left">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#06b6d4] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
+              <BarChart3 className="h-9 w-9 text-white" aria-hidden="true" />
+            </div>
 
-          <div className="mt-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a3d] via-[#ff4f00] to-[#06b6d4] shadow-[0_18px_60px_-12px_rgba(255,79,0,0.55)]">
-            <BarChart3 className="h-9 w-9 text-white" aria-hidden="true" />
+            <h1
+              className="animate-title-glow mt-5 bg-gradient-to-r from-white via-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-4xl font-black leading-none tracking-tight text-transparent md:text-5xl lg:text-6xl"
+              style={{ letterSpacing: "-0.02em" }}
+            >
+              StockyMonth
+            </h1>
+
+            <p className="mx-auto mt-4 max-w-xl text-sm font-bold text-white/65 md:text-base lg:mx-0">
+              High-conviction monthly picks. Live market data. A vault of every thesis we&apos;ve ever published.
+            </p>
+
+            {/* Animated count-up stats */}
+            <HeroStats />
           </div>
 
-          <h1
-            className="animate-title-glow mt-5 bg-gradient-to-r from-white via-[#ffd4c2] to-[#ff8a3d] bg-clip-text text-4xl font-black leading-none tracking-tight text-transparent md:text-5xl lg:text-6xl"
-            style={{ letterSpacing: "-0.02em" }}
-          >
-            StockyMonth
-          </h1>
-
-          <p className="mx-auto mt-4 max-w-xl text-sm font-bold text-white/65 md:text-base">
-            High-conviction monthly picks. Live market data. A vault of every thesis we&apos;ve ever published.
-          </p>
-
-          {/* Animated count-up stats */}
-          <HeroStats />
+          {/* Stock trading animation under the hero on the left side */}
+          <div className="mt-10">
+            <TradingAnimation />
+          </div>
         </div>
 
-        {/* Glassmorphism login card */}
-        <div className="mt-8 w-full max-w-[460px]">
+        {/* RIGHT (top on mobile): glassmorphism login card */}
+        <aside className="order-1 w-full self-start lg:order-2 lg:sticky lg:top-24">
           <div className="glass relative overflow-hidden rounded-2xl p-6 shadow-2xl md:p-8">
             <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#ff4f00]/35 blur-3xl" />
             <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-[#06b6d4]/35 blur-3xl" />
@@ -914,10 +918,7 @@ function AuthLanding({ onAuthenticated }: { onAuthenticated: (user: RegisteredUs
 
           {/* Trust strip below the form */}
           <TrustStrip />
-        </div>
-
-        {/* Stock trading animation below the login card */}
-        <TradingAnimation />
+        </aside>
       </section>
 
       {googleChooserOpen && (
@@ -1068,22 +1069,6 @@ function TradingAnimation() {
   );
 }
 
-function LatestPickTeaser() {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-white/90 shadow-lg backdrop-blur-md md:text-[11px]">
-      <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-      </span>
-      <span className="text-emerald-300">May 2026</span>
-      <span className="opacity-30">·</span>
-      <span>EQT</span>
-      <span className="opacity-30">·</span>
-      <span className="text-white/70">Upstream Natural Gas</span>
-    </div>
-  );
-}
-
 function useCountUp(target: number, duration = 1400) {
   const [value, setValue] = useState(0);
 
@@ -1165,7 +1150,7 @@ function TrustStrip() {
 
 function LoginBackdrop() {
   const tickers = [
-    { sym: "EQT",  pct: "+12.4%", left: "6%",  top: "18%",  anim: "animate-float-slow",   color: "text-emerald-300" },
+    { sym: "AMZN", pct: "+2.8%",  left: "6%",  top: "18%",  anim: "animate-float-slow",   color: "text-emerald-300" },
     { sym: "NVDA", pct: "+8.1%",  left: "85%", top: "14%",  anim: "animate-float-medium", color: "text-emerald-300" },
     { sym: "CRWD", pct: "+18.6%", left: "10%", top: "72%",  anim: "animate-float-fast",   color: "text-emerald-300" },
     { sym: "FTAI", pct: "+187%",  left: "82%", top: "70%",  anim: "animate-float-slow",   color: "text-amber-300"   },
@@ -1262,7 +1247,7 @@ function LoginBackdrop() {
               <span>AAPL <span className="text-emerald-400">+2.31%</span></span>
               <span>TSLA <span className="text-emerald-400">+5.12%</span></span>
               <span>NVDA <span className="text-emerald-400">+1.84%</span></span>
-              <span>EQT  <span className="text-emerald-400">+12.40%</span></span>
+              <span>AMZN <span className="text-emerald-400">+2.78%</span></span>
               <span>FTAI <span className="text-emerald-400">+187%</span></span>
               <span>CRWD <span className="text-emerald-400">+18.60%</span></span>
               <span>HWM  <span className="text-emerald-400">+120%</span></span>
