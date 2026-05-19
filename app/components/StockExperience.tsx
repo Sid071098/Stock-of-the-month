@@ -1713,15 +1713,15 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
   const isUp = monthlyPick.change.startsWith("+");
 
   return (
-    <section id="stock-of-month" className="scroll-mt-24 bg-gradient-to-b from-[#f8fafc] via-orange-50/40 to-[#f8fafc] px-4 py-8 md:px-6 md:py-10">
-      <div className="mx-auto max-w-[1280px]">
+    <section id="stock-of-month" className="scroll-mt-24 bg-gradient-to-b from-[#f8fafc] via-orange-50/40 to-[#f8fafc] px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto max-w-[1080px]">
         {/* Section header */}
-        <Reveal className="mb-5">
-          <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#ff4f00] md:text-xs">
+        <Reveal className="mb-4">
+          <p className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#ff4f00] md:text-[11px]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#ff4f00] animate-pulse-soft" />
             Pick for this month
           </p>
-          <h2 className="mt-2 bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#ff4f00] bg-clip-text text-2xl font-black tracking-tight text-transparent md:text-3xl">
+          <h2 className="mt-1.5 bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#ff4f00] bg-clip-text text-xl font-black tracking-tight text-transparent md:text-2xl">
             {monthlyPick.month}
           </h2>
         </Reveal>
@@ -1729,40 +1729,36 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
         {/* Compact, light, editorial card */}
         <Reveal
           as="article"
-          className="group relative overflow-hidden rounded-2xl border border-orange-200/60 bg-gradient-to-br from-white via-[#fffbf4] to-[#fff5ea] p-2.5 shadow-[0_18px_50px_-25px_rgba(255,79,0,0.35)] md:p-3"
+          className="group relative overflow-hidden rounded-2xl border border-orange-200/60 bg-gradient-to-br from-white via-[#fffbf4] to-[#fff5ea] p-2 shadow-[0_14px_40px_-25px_rgba(255,79,0,0.35)] md:p-2.5"
         >
-          {/* Warm aurora orbs */}
-          <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -left-32 -top-32 h-[360px] w-[360px] rounded-full bg-orange-200/40 blur-3xl" />
-          <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -right-32 top-1/3 h-[360px] w-[360px] rounded-full bg-amber-200/40 blur-3xl" style={{ animationDelay: "3s" }} />
-          <div aria-hidden="true" className="animate-drift-wide pointer-events-none absolute -bottom-32 left-1/3 h-[300px] w-[300px] rounded-full bg-rose-200/25 blur-3xl" style={{ animationDelay: "6s" }} />
           {/* Top gradient hairline */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-[#ff4f00] via-orange-400 to-amber-400" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#ff4f00] via-orange-400 to-amber-400" />
 
-          <div className="relative grid gap-4 lg:grid-cols-[0.5fr_1fr] lg:items-stretch">
+          <div className="relative grid gap-3 lg:grid-cols-[0.48fr_1fr] lg:items-stretch">
             <MonthlyPickArtwork monthlyPick={monthlyPick} />
 
-            <div className="flex min-w-0 flex-col justify-start p-2 md:p-3">
-              <div className="flex flex-wrap items-center gap-3">
+            <div className="flex min-w-0 flex-col justify-start p-2 md:p-2.5">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <EQTLogo />
-                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-200">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-black text-emerald-700 ring-1 ring-emerald-200">
                   <LiveDot />
                   {monthlyPick.rating}
                 </span>
               </div>
 
-              <h3 className="mt-4 bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#ff4f00] bg-clip-text text-2xl font-black leading-tight text-transparent md:text-3xl">
+              <h3 className="mt-3 bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#ff4f00] bg-clip-text text-xl font-black leading-tight text-transparent md:text-2xl">
                 {monthlyPick.name} ({monthlyPick.ticker})
               </h3>
 
-              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-black text-slate-500 md:text-sm">
-                <span className="inline-flex items-center gap-2">
-                  <BriefcaseBusiness className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] font-black text-slate-500 md:text-xs">
+                <span className="inline-flex items-center gap-1.5">
+                  <BriefcaseBusiness className="h-3 w-3 text-slate-400" aria-hidden="true" />
                   {monthlyPick.sector}
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <Database className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <span className="inline-flex items-center gap-1.5">
+                  <Database className="h-3 w-3 text-slate-400" aria-hidden="true" />
                   <span className="font-mono text-[#0f172a]">{monthlyPick.price}</span>{" "}
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black ${
+                  <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-black ${
                     isUp ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-rose-50 text-rose-700 ring-1 ring-rose-200"
                   }`}>
                     {isUp ? "▲" : "▼"} {monthlyPick.change.replace(/^[+-]/, "")}
@@ -1770,19 +1766,19 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
                 </span>
               </div>
 
-              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-700">{monthlyPick.summary}</p>
+              <p className="mt-3 max-w-3xl text-xs leading-relaxed text-slate-700 md:text-sm">{monthlyPick.summary}</p>
 
-              <div className="mt-5 rounded-xl border border-orange-100/80 bg-white/60 p-3 backdrop-blur-sm md:p-4">
-                <div className="mb-3 flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-50 text-[#ff4f00] ring-1 ring-orange-200">
-                    <CircleDollarSign className="h-4 w-4" aria-hidden="true" />
+              <div className="mt-3 rounded-lg border border-orange-100/80 bg-white/60 p-2.5 backdrop-blur-sm md:p-3">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-50 text-[#ff4f00] ring-1 ring-orange-200">
+                    <CircleDollarSign className="h-3.5 w-3.5" aria-hidden="true" />
                   </span>
-                  <h4 className="text-xs font-black uppercase tracking-tight text-[#0f172a] md:text-sm">
+                  <h4 className="text-[11px] font-black uppercase tracking-tight text-[#0f172a] md:text-xs">
                     Why this is the best pick of the month
                   </h4>
                 </div>
 
-                <div className="grid gap-2.5">
+                <div className="grid gap-1.5">
                   {backingPoints.map((point, index) => (
                     <BackingPoint key={point.text} accent={index} icon={point.icon} text={point.text} />
                   ))}
@@ -1791,10 +1787,10 @@ function MonthlyPickSection({ hasPremiumAccess, monthlyPick }: { hasPremiumAcces
 
               <Link
                 href={`/analysis/${monthlyPick.ticker}`}
-                className="group/cta mt-5 inline-flex h-10 w-fit items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-5 text-xs font-black text-white shadow-lg shadow-orange-500/30 transition hover:shadow-xl hover:shadow-orange-400/40 md:text-sm"
+                className="group/cta mt-4 inline-flex h-9 w-fit items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#ff4f00] to-orange-500 px-4 text-xs font-black text-white shadow-md shadow-orange-500/30 transition hover:shadow-lg hover:shadow-orange-400/40"
               >
                 <span className="relative">Detailed analysis</span>
-                <LineChart className="h-4 w-4 transition-transform duration-200 group-hover/cta:translate-x-0.5" aria-hidden="true" />
+                <LineChart className="h-3.5 w-3.5 transition-transform duration-200 group-hover/cta:translate-x-0.5" aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -2064,12 +2060,12 @@ function BackingPoint({
   ];
 
   return (
-    <div className="group relative grid grid-cols-[36px_1fr] gap-3 rounded-xl border border-orange-100/70 bg-white/80 py-3 pl-3 pr-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-white hover:shadow-md hover:shadow-orange-100/60">
-      <span aria-hidden="true" className={`pointer-events-none absolute inset-y-2 left-0 w-[3px] rounded-r bg-gradient-to-b ${sideBar[accent]} opacity-0 transition-opacity duration-200 group-hover:opacity-100`} />
-      <span className={`flex h-8 w-8 items-center justify-center rounded-md ${iconBg[accent]} transition-transform duration-200 group-hover:scale-110`}>
+    <div className="group relative grid grid-cols-[26px_1fr] gap-2 rounded-lg border border-orange-100/70 bg-white/80 py-1.5 pl-2 pr-2.5 transition-all duration-200 hover:border-orange-200 hover:bg-white">
+      <span aria-hidden="true" className={`pointer-events-none absolute inset-y-1.5 left-0 w-[2px] rounded-r bg-gradient-to-b ${sideBar[accent]} opacity-0 transition-opacity duration-200 group-hover:opacity-100`} />
+      <span className={`flex h-6 w-6 items-center justify-center rounded ${iconBg[accent]}`}>
         {icon}
       </span>
-      <p className="text-sm font-medium leading-relaxed text-slate-700 md:text-base">{text}</p>
+      <p className="text-[11px] font-medium leading-snug text-slate-700 md:text-xs">{text}</p>
     </div>
   );
 }
