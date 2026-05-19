@@ -315,18 +315,18 @@ export default function StockExperience({
       {shouldShowSubscriptionFirst && (
         <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
       )}
-      {!shouldShowSubscriptionFirst && view === "monthly" && (
-        canAccessPremiumFeatures ? (
-          <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
-        ) : (
-          <PremiumGate lockedFeature="monthly" />
-        )
-      )}
       {!shouldShowSubscriptionFirst && view === "quality" && (
         canAccessPremiumFeatures ? <QualityPicksSection picks={qualityPicks} /> : <PremiumGate lockedFeature="quality" />
       )}
       {!shouldShowSubscriptionFirst && view === "all-picks" && (
-        canAccessPremiumFeatures ? <AllPicksSection picks={archivePicks} /> : <PremiumGate lockedFeature="all-picks" />
+        canAccessPremiumFeatures ? (
+          <>
+            <MonthlyPickSection hasPremiumAccess={canAccessPremiumFeatures} monthlyPick={monthlyPick} />
+            <AllPicksSection picks={archivePicks} />
+          </>
+        ) : (
+          <PremiumGate lockedFeature="all-picks" />
+        )
       )}
       {!shouldShowSubscriptionFirst && view === "subscription" && (
         <SubscriptionSection currentUser={currentUser} hasPremiumAccess={canAccessPremiumFeatures} lockedFeature={lockedFeature} />
@@ -1558,14 +1558,13 @@ function TopNav({
   hasPremiumAccess: boolean;
   onSignOut?: () => void;
 }) {
-  const monthlyHref = hasPremiumAccess ? "/stock-of-the-month" : "/subscription?feature=monthly";
   const qualityHref = hasPremiumAccess ? "/top-quality-stocks" : "/subscription?feature=quality";
   const allPicksHref = hasPremiumAccess ? "/all-picks" : "/subscription?feature=all-picks";
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/96 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-        <Link href={monthlyHref} className="group flex items-center gap-3">
+        <Link href={allPicksHref} className="group flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#ff4f00] text-white shadow-sm transition-transform duration-200 group-hover:scale-105">
             <BarChart3 className="h-6 w-6" aria-hidden="true" />
           </div>
@@ -1578,13 +1577,10 @@ function TopNav({
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
-          <Link href={monthlyHref} className={navLinkClass(currentView === "monthly")}>
-            Stock of the Month
-          </Link>
           <Link href={qualityHref} className={navLinkClass(currentView === "quality")}>
             Top High Quality Stocks
           </Link>
-          <Link href={allPicksHref} className={navLinkClass(currentView === "all-picks")}>
+          <Link href={allPicksHref} className={navLinkClass(currentView === "all-picks" || currentView === "monthly")}>
             All Picks
           </Link>
         </div>
@@ -1902,10 +1898,10 @@ function AllPicksSection({ picks }: { picks: ArchivePick[] }) {
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Historical Archive</p>
-            <h2 className="mt-3 text-3xl font-black text-[#0f172a]">All Picks</h2>
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-[#ff4f00]">Past Picks</p>
+            <h2 className="mt-3 text-3xl font-black text-[#0f172a]">Past Picks</h2>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
-              A complete archive of StockyMonth monthly selections with price movement, short summaries, and the three core reasons behind each pick.
+              Every previous monthly pick with price movement, the short thesis, and the three core reasons we chose it.
             </p>
           </div>
         </Reveal>
